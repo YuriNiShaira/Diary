@@ -1,0 +1,224 @@
+/* frontend/src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* Custom theme variables for Tailwind v4 */
+@theme {
+  /* Light Pink Romantic Palette */
+  --color-blush: #FFE4E1;
+  --color-misty-rose: #FFD1DC;
+  --color-baby-pink: #F4C2C2;
+  --color-cherry-blossom: #FFB7C5;
+  --color-cotton-candy: #FFB3C6;
+  --color-peach: #FFDAB9;
+  --color-cream: #FFFDD0;
+  --color-vanilla: #F3E5AB;
+  --color-soft-white: #FFFAFA;
+  --color-champagne: #F7E7CE;
+  --color-rosewater: #FFE4E1;
+  --color-pink-lace: #FFDFDD;
+  --color-love-red: #FF6B8B;
+  --color-romantic-red: #FF4B6E;
+  --color-deep-pink: #FF1493;
+  --color-soft-coral: #FF7F7F;
+  --color-pearl: #FDF5E6;
+  --color-lavender-blush: #FFF0F5;
+
+  /* Font families */
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Poppins", system-ui, sans-serif;
+  --font-script: "Dancing Script", cursive;
+
+  /* Custom animations */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-slow: float 8s ease-in-out infinite;
+  --animate-pulse-soft: pulseSoft 2s ease-in-out infinite;
+  --animate-heart-beat: heartBeat 1.5s ease-in-out infinite;
+  --animate-sparkle: sparkle 3s ease-in-out infinite;
+  --animate-fade-in: fadeIn 1s ease-out;
+  --animate-slide-up: slideUp 0.5s ease-out;
+  --animate-shimmer: shimmer 2s linear infinite;
+}
+
+/* Custom keyframes */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes slideUp {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Custom base styles */
+@layer base {
+  body {
+    background: linear-gradient(135deg, #FFE4E1 0%, #FFD1DC 50%, #FFB7C5 100%);
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 228, 225, 0.3);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #FFB7C5;
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #FF6B8B;
+  }
+}
+
+/* Custom component classes */
+@layer components {
+  /* Glass morphism effect */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px -5px rgba(255, 107, 139, 0.1);
+  }
+
+  .glass-card-dark {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 20px 40px -10px rgba(255, 107, 139, 0.15);
+  }
+
+  /* Romantic button styles */
+  .btn-romantic {
+    background: linear-gradient(to right, #FF6B8B, #FF4B6E);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    box-shadow: 0 10px 30px -5px rgba(255, 107, 139, 0.1);
+    transition: all 0.3s;
+  }
+
+  .btn-romantic:hover {
+    box-shadow: 0 20px 40px -10px rgba(255, 107, 139, 0.15);
+    transform: scale(1.05);
+  }
+
+  .btn-soft {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    color: #4B5563;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 30px -5px rgba(255, 107, 139, 0.1);
+    transition: all 0.3s;
+  }
+
+  .btn-soft:hover {
+    box-shadow: 0 20px 40px -10px rgba(255, 107, 139, 0.15);
+    background: rgba(255, 255, 255, 0.8);
+    transform: scale(1.05);
+  }
+
+  /* Romantic card styles */
+  .memory-card {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .memory-card:hover {
+    box-shadow: 0 0 20px rgba(255, 183, 197, 0.5);
+  }
+
+  /* Sparkle overlay effect */
+  .sparkle-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.8) 0%, transparent 70%);
+  }
+
+  /* Heartbeat animation */
+  .heartbeat {
+    animation: heartBeat 1.5s ease-in-out infinite;
+  }
+
+  /* Floating elements */
+  .floating {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .floating-slow {
+    animation: float 8s ease-in-out infinite;
+  }
+}
+
+/* Custom utility classes */
+@utility text-gradient-love {
+  background: linear-gradient(135deg, #FF6B8B 0%, #FF4B6E 50%, #FF1493 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility text-gradient-soft {
+  background: linear-gradient(135deg, #FFB7C5 0%, #FF6B8B 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Heart pattern background */
+.bg-hearts {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 15c-2-3-5-5-9-5-6 0-10 4-10 10 0 8 10 15 19 20 9-5 19-12 19-20 0-6-4-10-10-10-4 0-7 2-9 5z' fill='%23FFB7C5' fill-opacity='0.2'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap');
+
+.font-handwriting {
+  font-family: 'Caveat', cursive;
+}
