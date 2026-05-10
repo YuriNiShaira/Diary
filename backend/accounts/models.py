@@ -1,20 +1,28 @@
 from django.db import models
 from django.contrib.auth.models import User
-import uuid
+import random
+import string
 
-# Create your models here.
+def generate_invite_code():
+    """Generate a 6-character invite code"""
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(random.choices(chars, k=6))
+
 
 class Couple(models.Model):
     name = models.CharField(max_length=100)
-    invite_code = models.CharField(max_length=20, unique=True, default=uuid.uuid4)
+    invite_code = models.CharField(
+        max_length=6,
+        unique=True,
+        default=generate_invite_code 
+    )
+    anniversary_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
-
-    # Anniversary date for this couple
-    anniversary_date = models.DateField(default='2022-06-30')
-
+    
     def __str__(self):
         return self.name
-    
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='members', null=True)

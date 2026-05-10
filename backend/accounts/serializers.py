@@ -112,11 +112,10 @@ class RegisterSerializer(serializers.Serializer):
 
 
 class JoinCoupleSerializer(serializers.Serializer):
-    """Partner joins existing couple"""
     username = serializers.CharField(max_length=150)
     password = serializers.CharField(write_only=True, min_length=6)
     display_name = serializers.CharField(max_length=50)
-    invite_code = serializers.CharField(max_length=20)
+    invite_code = serializers.CharField(max_length=6)
     
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
