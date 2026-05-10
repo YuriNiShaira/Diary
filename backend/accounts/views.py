@@ -50,8 +50,10 @@ def register(request):
         'anniversary_date': couple.anniversary_date,
         'invite_code': couple.invite_code,
         'partner_name': 'Waiting for partner to join...',
-        'tokens': tokens,  # ✅ Send tokens
-        'note': f'Share this code with your partner: {couple.invite_code}'
+        'has_partner': False,
+        'tokens': tokens,
+        'note': f'Share this code with your partner: {couple.invite_code}',
+        'created_at': couple.created_at,
     }, status=status.HTTP_201_CREATED)
 
 
@@ -85,8 +87,8 @@ def login_view(request):
         'couple_id': couple.id,
         'anniversary_date': couple.anniversary_date,
         'partner_name': partner_name,
-        'has_partner': has_partner,        
-        'invite_code': invite_code,        
+        'has_partner': has_partner,
+        'invite_code': invite_code,
         'tokens': tokens,
     })
 
@@ -108,7 +110,6 @@ def join_couple(request):
     
     tokens = get_tokens_for_user(user)
     
-    # Get partner's name
     other_member = couple.members.exclude(user=user).first()
     partner_name = other_member.display_name if other_member else 'Your Partner'
     
@@ -120,6 +121,7 @@ def join_couple(request):
         'couple_id': couple.id,
         'anniversary_date': couple.anniversary_date,
         'partner_name': partner_name,
+        'has_partner': True,
         'tokens': tokens,
     })
 
