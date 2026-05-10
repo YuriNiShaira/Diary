@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework',
     'corsheaders',
-
+    'rest_framework_simplejwt.token_blacklist',
     'diary_project.apps.DiaryProjectConfig',
     'accounts.apps.AccountsConfig',
 ]
