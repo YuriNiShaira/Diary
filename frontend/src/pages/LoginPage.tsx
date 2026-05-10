@@ -42,7 +42,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-blush via-misty-rose to-cherry-blossom">
-      {/* Background hearts (same as before) */}
+      {/* Background hearts */}
       <div className="fixed inset-0 pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <motion.div
@@ -143,7 +143,7 @@ const LoginPage: React.FC = () => {
             </motion.button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-3">
             <p className="text-sm text-gray-500">
               Don't have an account?{' '}
               <button
@@ -153,6 +153,19 @@ const LoginPage: React.FC = () => {
                 Create one
               </button>
             </p>
+            
+            {/* MAKE THIS MORE PROMINENT */}
+            <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+              <p className="text-sm text-gray-700 mb-2">
+                💌 Your partner already created a diary?
+              </p>
+              <button
+                onClick={() => navigate('/join')}
+                className="text-purple-600 hover:underline font-semibold"
+              >
+                Join with invite code →
+              </button>
+            </div>
           </div>
 
           <div className="mt-6 text-center">

@@ -89,10 +89,12 @@ const Dashboard: React.FC = () => {
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
 
-  // Fetch invite code on mount
+  // Fetch invite code only if user exists and doesn't have a partner
   useEffect(() => {
-    fetchInviteCode();
-  }, []);
+    if (user && !user.has_partner) {
+      fetchInviteCode();
+    }
+  }, [user]);
 
   const fetchInviteCode = async () => {
     try {
@@ -132,8 +134,8 @@ const Dashboard: React.FC = () => {
               <span className="text-sm">Bucket List</span>
             </motion.button>
 
-            {/* Only show if partner hasn't joined */}
-            {user?.partner_name === 'Waiting for partner to join...' && (
+            {/* Only show if user exists and doesn't have a partner */}
+            {user && !user.has_partner && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
