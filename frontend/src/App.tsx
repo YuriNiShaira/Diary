@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';  // ✅ ADD
+import RegisterPage from './pages/RegisterPage';
+import JoinPage from './pages/JoinPage';  // ✅ ADD
 import Dashboard from './pages/Dashboard';
 import YearDetailPage from './pages/YearDetailPage';
 import BucketListPage from './pages/BucketListPage';
@@ -15,7 +16,7 @@ const queryClient = new QueryClient();
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;  // ✅ Changed to /login
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 
 function App() {
@@ -37,9 +38,10 @@ function App() {
                 }}
               />
               <Routes>
-                <Route path="/" element={<Navigate to="/login" />} />  {/* ✅ Redirect to login */}
+                <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />  {/* ✅ ADD */}
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/join" element={<JoinPage />} />  {/* ✅ ADD */}
                 <Route path="/dashboard" element={
                   <PrivateRoute>
                     <Dashboard />

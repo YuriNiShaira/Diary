@@ -3,7 +3,7 @@ from accounts.models import Couple
 from django.utils import timezone
 
 class Year(models.Model):
-    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='years')  # NEW
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='years') 
     year = models.IntegerField()
     cover_image = models.ImageField(upload_to='year_covers/', null=True, blank=True)
     description = models.TextField(blank=True)
@@ -58,6 +58,7 @@ class LoveLetter(models.Model):
     
     
 class AnimeRating(models.Model):
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='anime_ratings')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='anime_ratings')
     title = models.CharField(max_length=200)
     
@@ -118,6 +119,7 @@ class AnimeRating(models.Model):
 
 class AnimeCategory(models.Model):
     """Custom categories that can be added per year"""
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='anime_categories')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='anime_categories')
     name = models.CharField(max_length=50)  
     icon = models.CharField(max_length=50, default='Star')  
@@ -126,12 +128,13 @@ class AnimeCategory(models.Model):
     
     class Meta:
         ordering = ['order', 'name']
-        unique_together = ['year', 'name']
+        unique_together = ['couple', 'year', 'name']
     
     def __str__(self):
         return f"{self.name} - {self.year.year}"
 
 class YearFunFacts(models.Model):
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='year_fun_facts')  # CHANGED
     year = models.OneToOneField(Year, on_delete=models.CASCADE, related_name='fun_facts')
     favorite_food = models.CharField(max_length=100, blank=True)
     favorite_anime = models.CharField(max_length=200, blank=True)
@@ -147,6 +150,7 @@ class YearFunFacts(models.Model):
     
 
 class CoupleGameScore(models.Model):
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='game_scores')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='game_scores')
     game_name = models.CharField(max_length=60)
 
@@ -192,7 +196,7 @@ class QuizQuestion(models.Model):
         ('memories', 'Memories'),
         ('other', 'Other'),
     ]
-    
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='quiz_questions')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='quiz_questions')
     question = models.TextField()
     answer = models.CharField(max_length=500)
@@ -222,10 +226,11 @@ class QuizQuestion(models.Model):
     
 
 class QuizScore(models.Model):
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='quiz_scores')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='quiz_scores')
 
     my_score = models.IntegerField(default=0)
-    shaira_score = models.IntegerField(default = 0)
+    shaira_score = models.IntegerField(default=0)
 
     answered_questions = models.ManyToManyField(QuizQuestion, blank=True)
 
@@ -251,6 +256,7 @@ class QuizScore(models.Model):
 
 
 class SongRecommendation(models.Model):
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='song_recommendations')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='song_recommendations')
 
     title = models.CharField(max_length=100)
@@ -304,7 +310,8 @@ class BucketListItem(models.Model):
         ('planned', '📅 Planned'),
         ('completed', '✅ Completed'),
     ]
-
+    
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='bucket_list_items')  # CHANGED
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')

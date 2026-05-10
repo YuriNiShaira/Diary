@@ -26,21 +26,15 @@ const LoginPage: React.FC = () => {
     try {
       const response = await api.post('/auth/login/', formData);
       
-      // Store user data
-      login({
-        username: response.data.username,
-        display_name: response.data.display_name,
-        couple_name: response.data.couple_name,
-        couple_id: response.data.couple_id,
-        anniversary_date: response.data.anniversary_date,
-        partner_name: response.data.partner_name,
-      });
-
+      const { tokens, ...userData } = response.data;
+      
+      // Store user data AND tokens
+      login(userData, tokens.access, tokens.refresh);
+      
       toast.success(response.data.message || 'Welcome back! 💕');
       navigate('/dashboard');
     } catch (error: any) {
-      const errorData = error.response?.data;
-      toast.error(errorData?.details?.non_field_errors?.[0] || errorData?.error || 'Login failed');
+      toast.error(error.response?.data?.details?.non_field_errors?.[0] || 'Login failed');
     } finally {
       setLoading(false);
     }

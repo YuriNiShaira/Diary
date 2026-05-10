@@ -14,7 +14,6 @@ const RegisterPage: React.FC = () => {
     username: '',
     password: '',
     display_name: '',
-    partner_name: '',
     anniversary_date: '',
   });
 
@@ -22,25 +21,25 @@ const RegisterPage: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const response = await api.post('/auth/register/', formData);
-      
-      // Store user data in AuthContext
-      login({
-        username: response.data.username,
-        display_name: response.data.display_name,
-        couple_name: response.data.couple_name,
-        couple_id: response.data.couple_id,
-        anniversary_date: response.data.anniversary_date,
-        partner_name: response.data.partner_name,
-      });
-
-      toast.success(response.data.message || 'Welcome! 💕');
-      navigate('/dashboard');
+  try {
+    const response = await api.post('/auth/register/', formData);
+    
+    const { tokens, ...userData } = response.data;
+    
+    const fullUserData = {
+      ...userData,
+      invite_code: response.data.invite_code,
+      has_partner: false,
+    };
+    
+    login(fullUserData, tokens.access, tokens.refresh);
+    
+    toast.success(response.data.message || 'Welcome! 💕');
+    navigate('/dashboard');
     } catch (error: any) {
       const errorData = error.response?.data;
       if (errorData?.details) {
@@ -162,25 +161,6 @@ const RegisterPage: React.FC = () => {
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 border-2 border-white/50 rounded-xl focus:ring-2 focus:ring-love-red/30 focus:border-love-red bg-white/60 backdrop-blur-sm transition-all text-sm"
                   placeholder="Your first name"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Partner's Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Partner's Name
-              </label>
-              <div className="relative">
-                <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-pink-400 w-4 h-4" />
-                <input
-                  type="text"
-                  name="partner_name"
-                  value={formData.partner_name}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border-2 border-white/50 rounded-xl focus:ring-2 focus:ring-love-red/30 focus:border-love-red bg-white/60 backdrop-blur-sm transition-all text-sm"
-                  placeholder="Your partner's name"
                   required
                 />
               </div>

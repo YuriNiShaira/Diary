@@ -73,17 +73,42 @@ const Dashboard: React.FC = () => {
   };
 
   const handleLogout = async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
     try {
-      await api.post('/auth/logout/');
+      await api.post('/auth/logout/', { refresh: refreshToken });
     } catch (error) {
-      // Logout locally even if API call fails
+      // Still logout locally even if API fails
     }
-    logout();
+    logout(); // This clears localStorage
     toast.success('See you soon! 💕');
     navigate('/login');
   };
 
   const years = Array.isArray(yearsData) ? yearsData : [];
+
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+
+  // Fetch invite code on mount
+  useEffect(() => {
+    fetchInviteCode();
+  }, []);
+
+  const fetchInviteCode = async () => {
+    try {
+      const response = await api.get('/auth/invite-code/');
+      setInviteCode(response.data.invite_code);
+    } catch (error) {
+      console.error('Error fetching invite code:', error);
+    }
+  };
+
+  const copyInviteCode = () => {
+    if (inviteCode) {
+      navigator.clipboard.writeText(inviteCode);
+      toast.success('Invite code copied! Share it with your partner 💕');
+    }
+  };
 
   return (
     <div className="min-h-screen p-6 relative overflow-hidden">
@@ -107,15 +132,13 @@ const Dashboard: React.FC = () => {
               <span className="text-sm">Bucket List</span>
             </motion.button>
 
-            {/* Invite Code Button (show if partner hasn't joined) */}
-            {user?.partner_name === 'Waiting for partner...' && (
+            {/* Only show if partner hasn't joined */}
+            {user?.partner_name === 'Waiting for partner to join...' && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  toast.success('Share your invite code with your partner!', { duration: 5000 });
-                }}
-                className="btn-soft flex items-center gap-2 text-purple-600"
+                onClick={() => setShowInviteModal(true)}
+                className="btn-soft flex items-center gap-2 text-purple-600 border-purple-300"
               >
                 <Users className="w-4 h-4" />
                 <span className="text-sm">Invite Partner</span>
@@ -327,6 +350,60 @@ const Dashboard: React.FC = () => {
         isOpen={isCreateYearModalOpen}
         onClose={() => setIsCreateYearModalOpen(false)}
       />
+
+      {/* Invite Code Modal */}
+      {showInviteModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setShowInviteModal(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-6xl mb-4">💌</div>
+            <h3 className="text-2xl font-serif text-gray-800 mb-2">
+              Invite Your Partner
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Share this code with your partner so they can join your diary
+            </p>
+            
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 mb-6 border-2 border-dashed border-purple-300">
+              <p className="text-4xl font-mono font-bold text-purple-600 tracking-[0.3em] select-all">
+                {inviteCode || 'Loading...'}
+              </p>
+            </div>
+            
+            <div className="flex gap-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={copyInviteCode}
+                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold"
+              >
+                📋 Copy Code
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowInviteModal(false)}
+                className="flex-1 btn-soft py-3"
+              >
+                Close
+              </motion.button>
+            </div>
+            
+            <p className="text-xs text-gray-400 mt-4">
+              Your partner can join at <strong>/join</strong> with this code
+            </p>
+          </motion.div>
+        </motion.div>
+      )}
 
       <LoveLetterManager />
     </div>
