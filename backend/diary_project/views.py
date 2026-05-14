@@ -1,74 +1,61 @@
+# diary_project/views.py
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, action, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
-from datetime import datetime
 from .models import (
     Year, Memory, LoveLetter, AnimeRating, YearFunFacts, 
-    AnimeCategory, CoupleGameScore, QuizScore, QuizQuestion, SongRecommendation, 
-    BucketListItem
+    AnimeCategory, CoupleGameScore, QuizScore, QuizQuestion, 
+    SongRecommendation, BucketListItem
 )
 from .serializers import (
-    YearSerializer, MemorySerializer, 
-    LoveLetterSerializer, AnimeRatingSerializer, YearFunFactsSerializer, 
-    AnimeCategorySerializer, CoupleGameScoreSerializer,
-    QuizScoreSerializer, QuizQuestionSerializer, SongRecommendationSerializer, 
-    BucketListItemSerializer,
+    YearSerializer, MemorySerializer, LoveLetterSerializer, 
+    AnimeRatingSerializer, YearFunFactsSerializer, AnimeCategorySerializer, 
+    CoupleGameScoreSerializer, QuizScoreSerializer, QuizQuestionSerializer, 
+    SongRecommendationSerializer, BucketListItemSerializer,
 )
 from .permissions import IsCoupleMember
 from django.db.models import Avg
-from django.conf import settings
-
 
 
 # ============================================
-# HELPER FUNCTIONS
+# HELPER
 # ============================================
 
-def get_couple_from_request(request):
-    """Helper to get couple from authenticated user's profile"""
+def get_couple(request):
+    """Get couple from authenticated user's profile"""
     if request.user.is_authenticated and hasattr(request.user, 'profile'):
         return request.user.profile.couple
     return None
 
 
-# ❌ REMOVE: get_fallback_reply() function entirely (was ~100 lines)
-# ❌ REMOVE: ai_date_assistant() endpoint entirely
-# ❌ REMOVE: test_gemini_connection() endpoint entirely
-
-
 # ============================================
-# REUSABLE BASE CLASS
+# BASE VIEWSET (auto-filters by couple)
 # ============================================
 
 class CoupleFilteredViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsCoupleMember]
     
     def get_queryset(self):
-        couple = get_couple_from_request(self.request)
+        couple = get_couple(self.request)
         if couple:
             return self.queryset.filter(couple=couple)
         return self.queryset.none()
     
     def perform_create(self, serializer):
-        couple = get_couple_from_request(self.request)
+        couple = get_couple(self.request)
         if couple:
             serializer.save(couple=couple)
 
 
 # ============================================
-# VIEWSETS (everything else stays the same)
+# VIEWSETS
 # ============================================
 
 class YearViewSet(CoupleFilteredViewSet):
     queryset = Year.objects.all()
     serializer_class = YearSerializer
-    
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
     
     @action(detail=True, methods=['get'])
     def memories(self, request, pk=None):
@@ -99,16 +86,16 @@ class LoveLetterViewSet(CoupleFilteredViewSet):
         queryset = self.get_queryset()
 
         if not queryset.exists():
-            couple = get_couple_from_request(request)
-            partner1_name = request.user.profile.display_name if request.user.is_authenticated else "My Love"
+            couple = get_couple(request)
+            display_name = request.user.profile.display_name
             
             anniversary_date = "our special day"
             if couple and couple.anniversary_date:
                 anniversary_date = couple.anniversary_date.strftime('%B %d, %Y')
             
-            default_letter = LoveLetter.objects.create(
+            LoveLetter.objects.create(
                 couple=couple,
-                title=f"My Dearest {partner1_name} 💕",
+                title=f"My Dearest {display_name} 💕",
                 content=f"""My love,
 
 Every day with you feels like a beautiful dream come true. From the moment we met on {anniversary_date}, my life has been filled with more joy, laughter, and love than I ever thought possible.
@@ -138,7 +125,7 @@ Your Love 💕""",
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_stats(request):
-    couple = get_couple_from_request(request)
+    couple = get_couple(request)
     
     if not couple:
         return Response({
@@ -215,7 +202,7 @@ class CoupleGameScoreViewSet(CoupleFilteredViewSet):
         year_id = request.data.get('year_id')
         game_name = request.data.get('game_name')
         winner = request.data.get('winner')
-        couple = get_couple_from_request(request)
+        couple = get_couple(request)
 
         score, created = CoupleGameScore.objects.get_or_create(
             couple=couple,
@@ -290,7 +277,7 @@ class QuizScoreViewSet(CoupleFilteredViewSet):
         question_id = request.data.get('question_id')
         player = request.data.get('player')
         answer = request.data.get('answer', '').strip()
-        couple = get_couple_from_request(request)
+        couple = get_couple(request)
 
         question = QuizQuestion.objects.get(id=question_id)
         score, _ = QuizScore.objects.get_or_create(
@@ -304,7 +291,6 @@ class QuizScoreViewSet(CoupleFilteredViewSet):
         if is_correct:
             points = question.get_points()
             score.add_points(player, points, question)
-
             return Response({
                 'correct': True,
                 'points_earned': points,
@@ -327,11 +313,9 @@ class QuizScoreViewSet(CoupleFilteredViewSet):
             score.shaira_score = 0
             score.answered_questions.clear()
             score.save()
-
             QuizQuestion.objects.filter(year_id=year_id, couple=score.couple).update(
                 is_used=False, last_used=None
             )
-
         return Response({'message': 'Scores reset successfully'})
 
 
@@ -384,7 +368,6 @@ class BucketListViewSet(CoupleFilteredViewSet):
         item = self.get_object()
         completed_by = request.data.get('completed_by', 'both')
         notes = request.data.get('notes', '')
-
         item.complete(completed_by, notes)
 
         return Response({
