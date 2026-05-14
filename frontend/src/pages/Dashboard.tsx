@@ -1,3 +1,4 @@
+// frontend/src/pages/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -8,8 +9,6 @@ import {
   Image as ImageIcon,
   Star,
   Sparkles,
-  LogOut,
-  ListChecks,
   Users,
 } from 'lucide-react';
 import { api } from '../services/api';
@@ -20,7 +19,9 @@ import StatsCard from '../components/StatsCard';
 import CreateYearModal from '../components/CreateYearModal';
 import LoveLetterManager from '../components/LoveLetterManager';
 import RomanticBackground from '../components/RomanticBackground';
+import Navbar from '../components/Navbar';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import toast from 'react-hot-toast';
 
 interface Year {
@@ -41,7 +42,8 @@ interface Stats {
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const { theme } = useTheme(); // ✅ Dark mode
   const [isCreateYearModalOpen, setIsCreateYearModalOpen] = useState(false);
   const [stats, setStats] = useState<Stats>({
     total_years: 0,
@@ -50,11 +52,13 @@ const Dashboard: React.FC = () => {
     days_together: 0,
   });
 
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+
   const { data: yearsData, isLoading } = useQuery({
     queryKey: ['years'],
     queryFn: async () => {
       const response = await api.get('/years/');
-      console.log('Years API response:', response.data);
       return Array.isArray(response.data) ? response.data : response.data.results || [];
     },
   });
@@ -62,6 +66,12 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     fetchStats();
   }, []);
+
+  useEffect(() => {
+    if (user && !user.has_partner) {
+      fetchInviteCode();
+    }
+  }, [user]);
 
   const fetchStats = async () => {
     try {
@@ -71,30 +81,6 @@ const Dashboard: React.FC = () => {
       console.error('Error fetching stats:', error);
     }
   };
-
-  const handleLogout = async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    try {
-      await api.post('/auth/logout/', { refresh: refreshToken });
-    } catch (error) {
-      // Still logout locally even if API fails
-    }
-    logout(); // This clears localStorage
-    toast.success('See you soon! 💕');
-    navigate('/login');
-  };
-
-  const years = Array.isArray(yearsData) ? yearsData : [];
-
-  const [inviteCode, setInviteCode] = useState<string | null>(null);
-  const [showInviteModal, setShowInviteModal] = useState(false);
-
-  // Fetch invite code only if user exists and doesn't have a partner
-  useEffect(() => {
-    if (user && !user.has_partner) {
-      fetchInviteCode();
-    }
-  }, [user]);
 
   const fetchInviteCode = async () => {
     try {
@@ -112,30 +98,25 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen p-6 relative overflow-hidden">
-      <RomanticBackground />
+  const years = Array.isArray(yearsData) ? yearsData : [];
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        {/* Header */}
+  return (
+    <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${
+      theme === 'dark' ? 'bg-gray-950' : ''
+    }`}>
+      <RomanticBackground />
+      <Navbar />
+
+      <div className="max-w-7xl mx-auto relative z-10 px-6 py-6">
+        {/* Welcome Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-12 relative"
         >
-          <div className="absolute right-0 top-0 flex items-center gap-3">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/bucketlist')}
-              className="btn-soft flex items-center gap-2"
-            >
-              <ListChecks className="w-4 h-4" />
-              <span className="text-sm">Bucket List</span>
-            </motion.button>
-
-            {/* Only show if user exists and doesn't have a partner */}
-            {user && !user.has_partner && (
+          {/* Invite Partner Button */}
+          {user && !user.has_partner && (
+            <div className="absolute right-0 top-0">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -145,24 +126,16 @@ const Dashboard: React.FC = () => {
                 <Users className="w-4 h-4" />
                 <span className="text-sm">Invite Partner</span>
               </motion.button>
-            )}
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleLogout}
-              className="btn-soft flex items-center gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="text-sm">Leave</span>
-            </motion.button>
-          </div>
+            </div>
+          )}
 
           <div className="text-center">
-            {/* DYNAMIC NAME */}
-            <h1 className="text-5xl md:text-6xl font-serif mb-4">
+            {/* ✅ Dynamic name + dark mode */}
+            <h1 className={`text-5xl md:text-6xl font-serif mb-4 ${
+              theme === 'dark' ? 'text-purple-100' : 'text-gray-800'
+            }`}>
               <span className="text-gradient-love">
-                {user?.couple_name || 'Welcome'}
+                Welcome, {user?.display_name || 'Love'}
               </span>
               <motion.span
                 animate={{ scale: [1, 1.2, 1] }}
@@ -172,13 +145,21 @@ const Dashboard: React.FC = () => {
                 💕
               </motion.span>
             </h1>
-            <p className="text-xl text-gray-600 font-light italic">
+            <p className={`text-xl font-light italic ${
+              theme === 'dark' ? 'text-purple-200' : 'text-gray-600'
+            }`}>
               Every moment with you is a beautiful memory
             </p>
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: '180px' }}
+              transition={{ delay: 0.5, duration: 1 }}
+              className="h-0.5 bg-gradient-to-r from-transparent via-love-red to-transparent mx-auto mt-4"
+            />
           </div>
         </motion.div>
 
-        {/* DYNAMIC ANNIVERSARY */}
+        {/* Time Counter - ✅ Dynamic anniversary */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -221,7 +202,7 @@ const Dashboard: React.FC = () => {
           />
         </motion.div>
 
-        {/* Envelope Component */}
+        {/* Envelope */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -237,7 +218,9 @@ const Dashboard: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          <h2 className="text-4xl font-serif text-center mb-8">
+          <h2 className={`text-4xl font-serif text-center mb-8 ${
+            theme === 'dark' ? 'text-purple-100' : 'text-gray-800'
+          }`}>
             <span className="text-gradient-soft">Our Journey Through The Years</span>
             <motion.div
               initial={{ width: 0 }}
@@ -276,10 +259,14 @@ const Dashboard: React.FC = () => {
                 >
                   <Heart className="w-20 h-20 text-cherry-blossom/50 mx-auto mb-6" />
                 </motion.div>
-                <h3 className="text-2xl font-serif text-gray-600 mb-3">
+                <h3 className={`text-2xl font-serif mb-3 ${
+                  theme === 'dark' ? 'text-purple-200' : 'text-gray-600'
+                }`}>
                   Start Your Love Story
                 </h3>
-                <p className="text-gray-500 mb-8 font-light">
+                <p className={`mb-8 font-light ${
+                  theme === 'dark' ? 'text-purple-300' : 'text-gray-500'
+                }`}>
                   Create your first year to begin capturing beautiful memories together
                 </p>
                 <motion.button
@@ -294,7 +281,6 @@ const Dashboard: React.FC = () => {
             )}
           </div>
 
-          {/* Add Year Button */}
           {years.length > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -317,28 +303,24 @@ const Dashboard: React.FC = () => {
           )}
         </motion.div>
 
-        {/* Footer message */}
+        {/* Footer */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
           className="mt-16 text-center"
         >
-          <p className="text-gray-500 font-light italic text-sm">
+          <p className={`font-light italic text-sm ${
+            theme === 'dark' ? 'text-purple-300' : 'text-gray-500'
+          }`}>
             "Forever is composed of nows" — Emily Dickinson
           </p>
           <div className="flex justify-center gap-1 mt-2">
             {[...Array(3)].map((_, i) => (
               <motion.div
                 key={i}
-                animate={{
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  delay: i * 0.3,
-                }}
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.3 }}
               >
                 <Heart className="w-3 h-3 text-love-red/30 fill-current" />
               </motion.div>
@@ -347,11 +329,13 @@ const Dashboard: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Create Year Modal */}
+      {/* Modals */}
       <CreateYearModal
         isOpen={isCreateYearModalOpen}
         onClose={() => setIsCreateYearModalOpen(false)}
       />
+
+      <LoveLetterManager />
 
       {/* Invite Code Modal */}
       {showInviteModal && (
@@ -368,9 +352,7 @@ const Dashboard: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-6xl mb-4">💌</div>
-            <h3 className="text-2xl font-serif text-gray-800 mb-2">
-              Invite Your Partner
-            </h3>
+            <h3 className="text-2xl font-serif text-gray-800 mb-2">Invite Your Partner</h3>
             <p className="text-gray-600 mb-6">
               Share this code with your partner so they can join your diary
             </p>
@@ -406,8 +388,6 @@ const Dashboard: React.FC = () => {
           </motion.div>
         </motion.div>
       )}
-
-      <LoveLetterManager />
     </div>
   );
 };
