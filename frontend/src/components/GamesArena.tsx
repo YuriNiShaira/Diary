@@ -9,14 +9,15 @@ import {
   Grid3x3,
   Brain,
   User,
-  Image, // ✅ Use this for Memory Match instead of duplicate Grid3x3
+  Image as ImageIcon,
 } from 'lucide-react';
 import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext'; // ✅ ADD
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
 import QuizGame from './QuizGame';
 import MemoryMatchGame from './MemoryMatchGame';
-// ✅ Remove: import WouldYouRatherGame from './WouldYouRatherGame';
+
 
 interface GameScore {
   id: number;
@@ -38,12 +39,12 @@ interface GamesArenaProps {
   yearNumber: number;
 }
 
-// ✅ Remove 'wouldyourather' from type
 type GameType = 'tictactoe' | 'quiz' | 'memorymatch' | 'menu';
 
 const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
   const [activeGame, setActiveGame] = useState<GameType>('menu');
   const queryClient = useQueryClient();
+  const { user } = useAuth(); // ✅ Get user for dynamic names
 
   const { data: leaderboard } = useQuery<LeaderboardData>({
     queryKey: ['leaderboard', yearId],
@@ -73,7 +74,8 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
         });
         toast.success('You won! 🎉', { icon: '🏆' });
       } else {
-        toast.success('Shaira won! 💕', { icon: '👑' });
+        // ✅ Dynamic partner name
+        toast.success(`${user?.partner_name || 'Partner'} won! 💕`, { icon: '👑' });
       }
     },
   });
@@ -124,11 +126,10 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
     {
       id: 'memorymatch' as GameType,
       name: 'Memory Match',
-      icon: Image, // ✅ Different icon now
+      icon: ImageIcon,
       color: 'from-blue-400 to-cyan-400',
       description: 'Match your favorite photos! Test your memory with your special moments! 📸',
     },
-    // ✅ Removed wouldyourather game
   ];
 
   return (
@@ -142,11 +143,11 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
           <p className="text-gray-500 mt-1">Who's winning this year?</p>
         </div>
 
-        {/* Overall Scoreboard */}
+        {/* ✅ Dynamic names in scoreboard */}
         <div className="glass-card rounded-2xl px-6 py-3 flex items-center gap-6">
           <div className="text-center">
             <p className="text-sm text-gray-500 flex items-center gap-1">
-              <User className="w-3 h-3" /> Yuri
+              <User className="w-3 h-3" /> {user?.display_name || 'You'}
             </p>
             <p className="text-2xl font-bold text-love-red">{leaderboard?.my_total || 0}</p>
           </div>
@@ -160,7 +161,7 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
 
           <div className="text-center">
             <p className="text-sm text-gray-500 flex items-center gap-1">
-              <Heart className="w-3 h-3" /> Shaira
+              <Heart className="w-3 h-3" /> {user?.partner_name || 'Partner'}
             </p>
             <p className="text-2xl font-bold text-purple-500">
               {leaderboard?.shaira_total || 0}
@@ -226,6 +227,7 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
           }
           currentScore={leaderboard?.games?.find((g) => g.game_name === 'tictactoe')}
           onReset={() => resetGameMutation.mutate('tictactoe')}
+          user={user} // ✅ Pass user
         />
       ) : activeGame === 'quiz' ? (
         <QuizGame
@@ -251,12 +253,13 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
   );
 };
 
-// Tic Tac Toe Component
+// ✅ Updated TicTacToe Props
 interface TicTacToeProps {
   onBack: () => void;
   onWin: (winner: string) => void;
   currentScore?: GameScore;
   onReset: () => void;
+  user?: any; // ✅ Add user prop
 }
 
 const TicTacToeGame: React.FC<TicTacToeProps> = ({
@@ -264,6 +267,7 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({
   onWin,
   currentScore,
   onReset,
+  user, // ✅ Receive user
 }) => {
   const [board, setBoard] = useState<(string | null)[]>(Array(9).fill(null));
   const [isXNext, setIsXNext] = useState(true);
@@ -273,14 +277,9 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({
 
   const calculateWinner = (squares: (string | null)[]) => {
     const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6],
     ];
 
     for (let i = 0; i < lines.length; i++) {
@@ -290,7 +289,6 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({
         return squares[a];
       }
     }
-
     return null;
   };
 
@@ -341,8 +339,9 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({
         </button>
 
         <div className="flex items-center gap-4">
+          {/* ✅ Dynamic names */}
           <div className="text-center">
-            <p className="text-sm text-gray-500">Yuri ❤️</p>
+            <p className="text-sm text-gray-500">{user?.display_name || 'You'} ❤️</p>
             <p className="text-xl font-bold text-love-red">{currentScore?.my_score || 0}</p>
           </div>
 
@@ -355,7 +354,7 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({
           </button>
 
           <div className="text-center">
-            <p className="text-sm text-gray-500">Shaira ⭐</p>
+            <p className="text-sm text-gray-500">{user?.partner_name || 'Partner'} ⭐</p>
             <p className="text-xl font-bold text-purple-500">
               {currentScore?.shaira_score || 0}
             </p>
@@ -366,8 +365,8 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({
       <div className="text-center mb-6">
         <h3 className="text-2xl font-serif text-gray-800 mb-2">
           {winner
-            ? `${winner === '❤️' ? 'Yuri' : 'Shaira'} Won! 🎉`
-            : `Turn: ${isXNext ? 'Yuri' : "Shaira's"} turn ${isXNext ? '❤️' : '⭐'}`}
+            ? `${winner === '❤️' ? user?.display_name || 'You' : user?.partner_name || 'Partner'} Won! 🎉`
+            : `Turn: ${isXNext ? user?.display_name || 'You' : user?.partner_name || 'Partner'}'s turn ${isXNext ? '❤️' : '⭐'}`}
         </h3>
       </div>
 
