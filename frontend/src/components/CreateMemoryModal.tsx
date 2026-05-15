@@ -12,11 +12,12 @@ interface CreateMemoryModalProps {
 }
 
 const memoryTypes = [
-  { value: 'milestone', label: '💫 Milestone' },
-  { value: 'date', label: '💕 Date' },
-  { value: 'travel', label: '✈️ Travel' },
-  { value: 'everyday', label: '🌸 Everyday Magic' },
-  { value: 'special', label: '✨ Special Moment' },
+  { value: 'milestone', label: 'Milestone' },
+  { value: 'date', label: 'Date' },
+  { value: 'travel', label: 'Travel' },
+  { value: 'everyday', label: 'Everyday Magic' },
+  { value: 'special', label: 'Special Moment' },
+  { value: 'special', label: 'Sad Moment' },
 ];
 
 const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, yearId }) => {

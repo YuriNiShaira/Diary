@@ -23,6 +23,7 @@ class Memory(models.Model):
         ('travel', '✈️ Travel'),
         ('everyday', '🌸 Everyday Magic'),
         ('special', '✨ Special Moment'),
+        ('sad', '💙 Sad Moment'),
     ]
     
     couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='memories')  # NEW
