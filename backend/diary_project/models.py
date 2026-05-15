@@ -58,19 +58,23 @@ class LoveLetter(models.Model):
     
     
 class AnimeRating(models.Model):
+    MEDIA_TYPE_CHOICES = [
+        ('anime', '🎬 Anime'),
+        ('movie', '🎥 Movie'),
+        ('show', '📺 TV Show'),
+    ]
+    
     couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='anime_ratings')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='anime_ratings')
     title = models.CharField(max_length=200)
+    media_type = models.CharField(max_length=20, choices=MEDIA_TYPE_CHOICES, default='anime')
     
-    # Separate ratings for each person (stored as JSON)
-    my_ratings = models.JSONField(default=dict, blank=True)  # Your ratings per category
-    shaira_ratings = models.JSONField(default=dict, blank=True)  # Shaira's ratings per category
+    # Separate ratings for each person
+    my_ratings = models.JSONField(default=dict, blank=True)
+    shaira_ratings = models.JSONField(default=dict, blank=True)
     
-    # Overall ratings for each person
     my_overall = models.FloatField(default=0)
     shaira_overall = models.FloatField(default=0)
-    
-    # Combined average
     combined_overall = models.FloatField(default=0)
     
     # Additional info
@@ -89,10 +93,9 @@ class AnimeRating(models.Model):
         ordering = ['-combined_overall', 'title']
     
     def __str__(self):
-        return f"{self.title} - {self.year.year}"
+        return f"[{self.get_media_type_display()}] {self.title} - {self.year.year}"
     
     def calculate_overall(self, ratings_dict):
-        """Calculate overall rating from a ratings dictionary"""
         if not ratings_dict:
             return 0
         values = [v for v in ratings_dict.values() if isinstance(v, (int, float)) and v > 0]
@@ -101,11 +104,8 @@ class AnimeRating(models.Model):
         return round(sum(values) / len(values), 1)
     
     def save(self, *args, **kwargs):
-        # Calculate individual overalls
         self.my_overall = self.calculate_overall(self.my_ratings)
         self.shaira_overall = self.calculate_overall(self.shaira_ratings)
-        
-        # Calculate combined overall
         if self.my_overall > 0 and self.shaira_overall > 0:
             self.combined_overall = round((self.my_overall + self.shaira_overall) / 2, 1)
         elif self.my_overall > 0:
@@ -114,24 +114,24 @@ class AnimeRating(models.Model):
             self.combined_overall = self.shaira_overall
         else:
             self.combined_overall = 0
-            
         super().save(*args, **kwargs)
 
 class AnimeCategory(models.Model):
     """Custom categories that can be added per year"""
     couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='anime_categories')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='anime_categories')
-    name = models.CharField(max_length=50)  
-    icon = models.CharField(max_length=50, default='Star')  
-    color = models.CharField(max_length=50, default='from-blue-400 to-cyan-400')  
+    name = models.CharField(max_length=50)
+    icon = models.CharField(max_length=50, default='Star')
+    color = models.CharField(max_length=50, default='from-blue-400 to-cyan-400')
     order = models.IntegerField(default=0)
+    media_type = models.CharField(max_length=20, choices=AnimeRating.MEDIA_TYPE_CHOICES, default='anime')  
     
     class Meta:
         ordering = ['order', 'name']
-        unique_together = ['couple', 'year', 'name']
+        unique_together = ['year', 'name', 'media_type'] 
     
     def __str__(self):
-        return f"{self.name} - {self.year.year}"
+        return f"[{self.get_media_type_display()}] {self.name} - {self.year.year}"
 
 class YearFunFacts(models.Model):
     couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='year_fun_facts')  # CHANGED
@@ -258,35 +258,24 @@ class QuizScore(models.Model):
 class SongRecommendation(models.Model):
     couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='song_recommendations')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='song_recommendations')
-
-    title = models.CharField(max_length=100)
+    
+    title = models.CharField(max_length=200)
     artist = models.CharField(max_length=200)
-    album = models.CharField(max_length=200, blank=True)
-
-    recommended_by = models.CharField(max_length=20, choices=[('me', 'Me'), ('shaira', 'Shaira')])
-    recommended_to = models.CharField(max_length=20, choices=[('me', 'Me'), ('shaira', 'Shaira')])
-
+    
+    # Who recommended it to whom
+    recommended_by = models.CharField(max_length=20, choices=[('me', 'Yuri'), ('shaira', 'Shaira')])
+    recommended_to = models.CharField(max_length=20, choices=[('me', 'Yuri'), ('shaira', 'Shaira')])
+    
+    # Links
     youtube_link = models.URLField(blank=True)
     spotify_link = models.URLField(blank=True)
-    note = models.TextField(blank=True, help_text="Why you recommended this song...")
-
-    genre = models.CharField(max_length=100, blank=True)
-    mood = models.CharField(max_length=50, blank=True, choices=[
-        ('romantic', '💕 Romantic'),
-        ('happy', '😊 Happy'),
-        ('chill', '😌 Chill'),
-        ('energetic', '⚡ Energetic'),
-        ('nostalgic', '🥺 Nostalgic'),
-        ('sad', '😢 Sad'),
-        ('party', '🎉 Party'),
-    ])
-
+    
+    # Status
     is_listened = models.BooleanField(default=False)
-    listened_date = models.DateField(null=True, blank=True)
-    rating = models.IntegerField(default=0, choices=[(i, str(i)) for i in range(1, 6)])
-
+    rating = models.IntegerField(null=True, blank=True, choices=[(i, str(i)) for i in range(1, 6)])
+    
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
     class Meta:
         ordering = ['-created_at']
     
