@@ -18,4 +18,5 @@ router.register(r'bucketlist', views.BucketListViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('stats/', views.get_stats, name='stats'),
+    path('calendar/', views.calendar_memories, name='calendar-memories'),
 ]

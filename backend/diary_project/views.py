@@ -398,3 +398,40 @@ class BucketListViewSet(CoupleFilteredViewSet):
                 if queryset.count() > 0 else 0
             )
         })
+
+
+@api_view(['GET'])
+def calendar_memories(request):
+    year = request.query_params.get('year', None)
+    month = request.query_params.get('month', None)
+
+    queryset = Memory.objects.all()
+
+    if year:
+        queryset = queryset.filter(date__year=year)
+    if month:
+        queryset = queryset.filter(date__month=month)
+
+    from collections import defaultdict
+
+    memories_by_date = defaultdict(list)
+    for memory in queryset:
+        date_key = memory.date.isoformat()
+        
+        image_url = None
+        if memory.image:
+            image_url = request.build_absolute_uri(memory.image.url)
+        
+        memories_by_date[date_key].append({
+            'id': memory.id,
+            'title': memory.title,
+            'description': memory.description[:100],
+            'image': image_url, 
+            'memory_type': memory.memory_type,
+            'is_favorite': memory.is_favorite,
+            'location': memory.location,
+            'year_id': memory.year_id,
+            'year': memory.year.year if memory.year else None,
+        })
+
+    return Response({'memories': dict(memories_by_date),'total_dates': len(memories_by_date),'total_memories': queryset.count(),})
