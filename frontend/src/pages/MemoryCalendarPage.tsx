@@ -1,3 +1,4 @@
+// frontend/src/pages/MemoryCalendarPage.tsx
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 import BookModal from '../components/BookModal';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import RomanticBackground from '../components/RomanticBackground';
 import Navbar from '../components/Navbar';
 
@@ -39,6 +41,7 @@ interface CalendarData {
 const MemoryCalendarPage: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { user } = useAuth();
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -47,6 +50,11 @@ const MemoryCalendarPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'calendar' | 'timeline'>('calendar');
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [allMemoriesData, setAllMemoriesData] = useState<Record<string, CalendarMemory[]>>({});
+
+  // ✅ Dynamic start year from couple's anniversary
+  const startYear = user?.anniversary_date
+    ? new Date(user.anniversary_date).getFullYear()
+    : today.getFullYear() - 5;
 
   const { data: calendarData, isLoading } = useQuery<CalendarData>({
     queryKey: ['calendar', currentYear, currentMonth + 1],
@@ -65,9 +73,10 @@ const MemoryCalendarPage: React.FC = () => {
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
 
+  // ✅ Dynamic available years
   const availableYears = Array.from(
-    { length: today.getFullYear() - 2022 + 1 }, 
-    (_, i) => 2022 + i
+    { length: today.getFullYear() - startYear + 1 },
+    (_, i) => startYear + i
   );
 
   const jumpToYear = (year: number) => {
@@ -142,10 +151,9 @@ const MemoryCalendarPage: React.FC = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Romantic Background */}
       <RomanticBackground />
       <Navbar />
-      
+
       <div className="max-w-6xl mx-auto relative z-10 px-6 py-6">
         {/* Header */}
         <motion.div
@@ -187,7 +195,7 @@ const MemoryCalendarPage: React.FC = () => {
               }`}>
                 <button
                   onClick={() => {
-                    const newYear = Math.max(2022, currentYear - 1);
+                    const newYear = Math.max(startYear, currentYear - 1);
                     jumpToYear(newYear);
                   }}
                   className={`p-2 rounded-xl transition-colors ${
@@ -199,7 +207,7 @@ const MemoryCalendarPage: React.FC = () => {
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                
+
                 <select
                   value={currentYear}
                   onChange={(e) => jumpToYear(parseInt(e.target.value))}
@@ -219,7 +227,7 @@ const MemoryCalendarPage: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                
+
                 <button
                   onClick={() => {
                     const newYear = Math.min(today.getFullYear(), currentYear + 1);
@@ -246,7 +254,7 @@ const MemoryCalendarPage: React.FC = () => {
                   onClick={() => setViewMode('calendar')}
                   className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-1 ${
                     viewMode === 'calendar'
-                      ? 'bg-linear-to-r from-love-red to-romantic-red text-white shadow-md'
+                      ? 'bg-gradient-to-r from-love-red to-romantic-red text-white shadow-md'
                       : theme === 'dark'
                       ? 'text-purple-200 hover:bg-purple-900/40'
                       : 'text-gray-600 hover:bg-white/50'
@@ -259,7 +267,7 @@ const MemoryCalendarPage: React.FC = () => {
                   onClick={() => setViewMode('timeline')}
                   className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-1 ${
                     viewMode === 'timeline'
-                      ? 'bg-linear-to-r from-love-red to-romantic-red text-white shadow-md'
+                      ? 'bg-gradient-to-r from-love-red to-romantic-red text-white shadow-md'
                       : theme === 'dark'
                       ? 'text-purple-200 hover:bg-purple-900/40'
                       : 'text-gray-600 hover:bg-white/50'
@@ -285,7 +293,7 @@ const MemoryCalendarPage: React.FC = () => {
                 onClick={() => jumpToYear(year)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                   currentYear === year
-                    ? 'bg-linear-to-r from-love-red to-romantic-red text-white shadow-md'
+                    ? 'bg-gradient-to-r from-love-red to-romantic-red text-white shadow-md'
                     : theme === 'dark'
                     ? 'bg-purple-900/30 text-purple-200 hover:bg-purple-800/50 border border-purple-800/50'
                     : 'bg-white/40 text-gray-600 hover:bg-white/50'
@@ -294,7 +302,7 @@ const MemoryCalendarPage: React.FC = () => {
                 {year}
               </motion.button>
             ))}
-            {today.getFullYear() > 2022 && (
+            {today.getFullYear() > startYear && (
               <span className={`text-xs ml-1 ${
                 theme === 'dark' ? 'text-purple-300' : 'text-gray-500'
               }`}>
@@ -373,7 +381,6 @@ const MemoryCalendarPage: React.FC = () => {
                 : 'bg-white/40 border border-white/30'
             }`}
           >
-            {/* Month Navigation */}
             <div className="flex items-center justify-between mb-8">
               <button
                 onClick={prevMonth}
@@ -400,7 +407,6 @@ const MemoryCalendarPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Day Names */}
             <div className="grid grid-cols-7 gap-2 mb-4">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
                 <div
@@ -418,7 +424,6 @@ const MemoryCalendarPage: React.FC = () => {
               ))}
             </div>
 
-            {/* Calendar Grid */}
             <div className="grid grid-cols-7 gap-2">
               {Array.from({ length: firstDayOfMonth }).map((_, i) => (
                 <div key={`empty-${i}`} className="aspect-square" />

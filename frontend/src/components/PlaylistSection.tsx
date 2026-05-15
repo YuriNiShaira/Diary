@@ -1,39 +1,34 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Music,
-  Plus,
-  Edit,
-  Trash2,
-  X,
-  Play,
-  ExternalLink,
+import { 
+  Music, 
+  Plus, 
+  Edit, 
+  Trash2, 
+  X, 
   CheckCircle,
-  Circle,
   Star,
-  User,
   Heart,
   Volume2,
+  ExternalLink,
+  PlayCircle,
+  Play
 } from 'lucide-react';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface SongRecommendation {
   id: number;
   title: string;
   artist: string;
-  album: string;
   recommended_by: string;
   recommended_by_display: string;
   recommended_to: string;
   recommended_to_display: string;
   youtube_link: string;
   spotify_link: string;
-  note: string;
-  genre: string;
-  mood: string;
-  mood_display: string;
   is_listened: boolean;
   listened_date: string | null;
   rating: number;
@@ -48,7 +43,6 @@ interface PlaylistStats {
   shaira_recommendations: number;
   for_me: number;
   for_shaira: number;
-  average_rating: number;
 }
 
 interface PlaylistSectionProps {
@@ -57,23 +51,19 @@ interface PlaylistSectionProps {
 }
 
 const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber }) => {
+  const { theme } = useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSong, setEditingSong] = useState<SongRecommendation | null>(null);
   const [filterRecommendedBy, setFilterRecommendedBy] = useState<'all' | 'me' | 'shaira'>('all');
   const [filterListened, setFilterListened] = useState<'all' | 'listened' | 'unlistened'>('all');
-  const [expandedSong, setExpandedSong] = useState<number | null>(null);
-
+  
   const [formData, setFormData] = useState({
     title: '',
     artist: '',
-    album: '',
     recommended_by: 'me',
     recommended_to: 'shaira',
     youtube_link: '',
     spotify_link: '',
-    note: '',
-    genre: '',
-    mood: '',
     is_listened: false,
     rating: 0,
   });
@@ -84,15 +74,8 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
     queryKey: ['songRecommendations', yearId, filterRecommendedBy, filterListened],
     queryFn: async () => {
       let url = `/song-recommendations/?year=${yearId}`;
-
-      if (filterRecommendedBy !== 'all') {
-        url += `&recommended_by=${filterRecommendedBy}`;
-      }
-
-      if (filterListened !== 'all') {
-        url += `&is_listened=${filterListened === 'listened'}`;
-      }
-
+      if (filterRecommendedBy !== 'all') url += `&recommended_by=${filterRecommendedBy}`;
+      if (filterListened !== 'all') url += `&is_listened=${filterListened === 'listened'}`;
       const response = await api.get(url);
       return Array.isArray(response.data) ? response.data : response.data.results || [];
     },
@@ -107,30 +90,60 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      const response = await api.post('/song-recommendations/', { ...data, year: yearId });
+    mutationFn: async (data: any) => {
+      const payload = {
+        title: data.title,
+        artist: data.artist,
+        recommended_by: data.recommended_by,
+        recommended_to: data.recommended_to,
+        youtube_link: data.youtube_link || '',
+        spotify_link: data.spotify_link || '',
+        is_listened: false,
+        rating: null,
+        year: yearId,
+      };
+      const response = await api.post('/song-recommendations/', payload);
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['songRecommendations', yearId] });
       queryClient.invalidateQueries({ queryKey: ['playlistStats', yearId] });
-      toast.success('Song added to playlist! 🎵');
+      toast.success('Song added to our collection!');
       setIsModalOpen(false);
       resetForm();
+    },
+    onError: (error: any) => {
+      console.error('Create song error:', error);
+      toast.error('Failed to add song.');
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: typeof formData }) => {
-      const response = await api.put(`/song-recommendations/${id}/`, data);
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const payload: any = {
+        title: data.title,
+        artist: data.artist,
+        recommended_by: data.recommended_by,
+        recommended_to: data.recommended_to,
+        youtube_link: data.youtube_link || '',
+        spotify_link: data.spotify_link || '',
+        is_listened: data.is_listened,
+        year: yearId,
+      };
+      payload.rating = (data.rating >= 1 && data.rating <= 5) ? data.rating : null;
+      const response = await api.put(`/song-recommendations/${id}/`, payload);
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['songRecommendations', yearId] });
       queryClient.invalidateQueries({ queryKey: ['playlistStats', yearId] });
-      toast.success('Song updated! ✏️');
+      toast.success('Song updated!');
       setIsModalOpen(false);
       resetForm();
+    },
+    onError: (error: any) => {
+      console.error('Update error:', error);
+      toast.error('Failed to update song.');
     },
   });
 
@@ -143,22 +156,21 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
       queryClient.invalidateQueries({ queryKey: ['playlistStats', yearId] });
       toast.success('Song removed');
     },
+    onError: () => toast.error('Failed to remove song'),
   });
 
   const toggleListenedMutation = useMutation({
     mutationFn: async ({ id, is_listened }: { id: number; is_listened: boolean }) => {
-      const response = await api.patch(`/song-recommendations/${id}/`, {
+      const response = await api.patch(`/song-recommendations/${id}/`, { 
         is_listened,
-        listened_date: is_listened ? new Date().toISOString().split('T')[0] : null,
+        listened_date: is_listened ? new Date().toISOString().split('T')[0] : null
       });
       return response.data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['songRecommendations', yearId] });
       queryClient.invalidateQueries({ queryKey: ['playlistStats', yearId] });
-      toast.success(
-        variables.is_listened ? 'Marked as listened! 🎧' : 'Marked as unlistened'
-      );
+      toast.success(variables.is_listened ? 'Marked as listened!' : 'Marked as unlistened');
     },
   });
 
@@ -167,14 +179,10 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
     setFormData({
       title: song.title,
       artist: song.artist,
-      album: song.album || '',
       recommended_by: song.recommended_by,
       recommended_to: song.recommended_to,
       youtube_link: song.youtube_link || '',
       spotify_link: song.spotify_link || '',
-      note: song.note || '',
-      genre: song.genre || '',
-      mood: song.mood || '',
       is_listened: song.is_listened,
       rating: song.rating || 0,
     });
@@ -186,510 +194,352 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
     setFormData({
       title: '',
       artist: '',
-      album: '',
       recommended_by: 'me',
       recommended_to: 'shaira',
       youtube_link: '',
       spotify_link: '',
-      note: '',
-      genre: '',
-      mood: '',
       is_listened: false,
       rating: 0,
     });
   };
 
-  const moods = [
-    { value: 'romantic', label: '💕 Romantic' },
-    { value: 'happy', label: '😊 Happy' },
-    { value: 'chill', label: '😌 Chill' },
-    { value: 'energetic', label: '⚡ Energetic' },
-    { value: 'nostalgic', label: '🥺 Nostalgic' },
-    { value: 'sad', label: '😢 Sad' },
-    { value: 'party', label: '🎉 Party' },
-  ];
+  const getYouTubeEmbedUrl = (url: string) => {
+    if (!url) return null;
+    const patterns = [/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/, /youtube\.com\/embed\/([^&\n?#]+)/];
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) return `https://www.youtube.com/embed/${match[1]}`;
+    }
+    return url;
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    resetForm();
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      {/* Header Section */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-white/10">
         <div>
-          <h2 className="text-3xl font-serif text-gray-800">
-            Our Playlist {yearNumber} 🎵
-          </h2>
-          <p className="text-gray-500 mt-1">
-            Songs we recommended to each other
+          <div className="flex items-center gap-3 mb-2">
+            <div className={`p-2 rounded-xl ${theme === 'dark' ? 'bg-purple-500/20 text-purple-300' : 'bg-pink-100 text-love-red'}`}>
+              <Music className="w-6 h-6" />
+            </div>
+            <h2 className={`text-3xl md:text-4xl font-serif font-bold ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
+              The Soundtrack of {yearNumber}
+            </h2>
+          </div>
+          <p className={`text-lg ${theme === 'dark' ? 'text-purple-300/80' : 'text-gray-500'}`}>
+            Every melody tells a piece of our story.
           </p>
         </div>
-
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            resetForm();
-            setIsModalOpen(true);
-          }}
-          className="btn-romantic flex items-center gap-2"
+          whileHover={{ scale: 1.02, translateY: -2 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => { resetForm(); setIsModalOpen(true); }}
+          className="btn-romantic flex items-center justify-center gap-2 px-6 py-3 shadow-lg shadow-love-red/20"
         >
           <Plus className="w-5 h-5" />
-          Add Song
+          Recommend a Song
         </motion.button>
-      </div>
+      </header>
 
-      {/* Stats Cards */}
+      {/* Stats Dashboard */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="glass-card rounded-xl p-4 text-center">
-            <Music className="w-5 h-5 text-love-red mx-auto mb-1" />
-            <p className="text-2xl font-bold text-gray-800">{stats.total_songs}</p>
-            <p className="text-xs text-gray-500">Total Songs</p>
-          </div>
-
-          <div className="glass-card rounded-xl p-4 text-center">
-            <Volume2 className="w-5 h-5 text-green-500 mx-auto mb-1" />
-            <p className="text-2xl font-bold text-gray-800">{stats.listened_count}</p>
-            <p className="text-xs text-gray-500">Listened</p>
-          </div>
-
-          <div className="glass-card rounded-xl p-4 text-center">
-            <User className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-            <p className="text-2xl font-bold text-gray-800">{stats.my_recommendations}</p>
-            <p className="text-xs text-gray-500">From You</p>
-          </div>
-
-          <div className="glass-card rounded-xl p-4 text-center">
-            <Heart className="w-5 h-5 text-purple-500 mx-auto mb-1" />
-            <p className="text-2xl font-bold text-gray-800">{stats.shaira_recommendations}</p>
-            <p className="text-xs text-gray-500">From Shaira</p>
-          </div>
-        </div>
-      )}
-
-      {/* Filters */}
-      <div className="flex gap-3">
-        <select
-          value={filterRecommendedBy}
-          onChange={(e) => setFilterRecommendedBy(e.target.value as 'all' | 'me' | 'shaira')}
-          className="px-3 py-2 border border-pink-200 rounded-lg text-sm bg-white/60"
-        >
-          <option value="all">All Recommendations</option>
-          <option value="me">From You ❤️</option>
-          <option value="shaira">From Shaira ⭐</option>
-        </select>
-
-        <select
-          value={filterListened}
-          onChange={(e) => setFilterListened(e.target.value as 'all' | 'listened' | 'unlistened')}
-          className="px-3 py-2 border border-pink-200 rounded-lg text-sm bg-white/60"
-        >
-          <option value="all">All Songs</option>
-          <option value="listened">Listened ✓</option>
-          <option value="unlistened">Not Listened Yet</option>
-        </select>
-      </div>
-
-      {/* Songs List */}
-      {isLoading ? (
-        <div className="space-y-3">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="glass-card rounded-2xl p-4 animate-pulse">
-              <div className="h-5 bg-gray-200 rounded w-1/3 mb-2" />
-              <div className="h-4 bg-gray-200 rounded w-1/2" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'Total Tracks', value: stats.total_songs, icon: Music, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+            { label: 'Finished', value: stats.listened_count, icon: CheckCircle, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+            { label: 'From Yuri', value: stats.my_recommendations, icon: Heart, color: 'text-love-red', bg: 'bg-pink-500/10' },
+            { label: 'From Shaira', value: stats.shaira_recommendations, icon: Star, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+          ].map((stat, i) => (
+            <div key={i} className={`group relative overflow-hidden rounded-2xl p-5 transition-all hover:shadow-md ${theme === 'dark' ? 'glass-card-dark border-purple-500/10' : 'glass-card border-pink-100'}`}>
+              <div className={`${stat.bg} ${stat.color} w-10 h-10 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+                <stat.icon className="w-5 h-5" />
+              </div>
+              <p className={`text-3xl font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>{stat.value}</p>
+              <p className={`text-sm font-medium ${theme === 'dark' ? 'text-purple-300/60' : 'text-gray-400'}`}>{stat.label}</p>
             </div>
           ))}
         </div>
+      )}
+
+      {/* Control Bar */}
+      <div className="flex flex-wrap items-center gap-4 p-2 bg-black/5 rounded-2xl">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/50 dark:bg-purple-900/40 border border-white/20">
+          <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-purple-400">By:</span>
+          <select
+            value={filterRecommendedBy}
+            onChange={(e) => setFilterRecommendedBy(e.target.value as any)}
+            className="bg-transparent text-sm font-medium focus:outline-none cursor-pointer dark:text-purple-100"
+          >
+            <option value="all">Everyone</option>
+            <option value="me">Yuri</option>
+            <option value="shaira">Shaira</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/50 dark:bg-purple-900/40 border border-white/20">
+          <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-purple-400">Status:</span>
+          <select
+            value={filterListened}
+            onChange={(e) => setFilterListened(e.target.value as any)}
+            className="bg-transparent text-sm font-medium focus:outline-none cursor-pointer dark:text-purple-100"
+          >
+            <option value="all">All Tracks</option>
+            <option value="listened">Heard It</option>
+            <option value="unlistened">New to Me</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Song Grid/List */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className={`h-32 rounded-3xl animate-pulse ${theme === 'dark' ? 'bg-purple-900/20' : 'bg-gray-100'}`} />
+          ))}
+        </div>
       ) : songs?.length === 0 ? (
-        <div className="text-center py-12">
-          <Music className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h4 className="text-lg font-semibold text-gray-700 mb-2">
-            No songs yet
-          </h4>
-          <p className="text-gray-500">
-            Start recommending songs to each other! 🎵
-          </p>
+        <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-60">
+          <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-purple-900/30 flex items-center justify-center">
+            <Volume2 className="w-10 h-10" />
+          </div>
+          <div>
+            <h4 className="text-xl font-medium">Your playlist is waiting...</h4>
+            <p>Add a song that reminds you of us.</p>
+          </div>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           {songs?.map((song) => (
             <motion.div
               key={song.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`glass-card rounded-2xl p-4 transition-all ${
-                song.is_listened ? 'opacity-75' : ''
-              }`}
+              layout
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className={`group relative flex items-center gap-4 p-4 rounded-3xl transition-all duration-300 hover:shadow-xl ${
+                song.is_listened ? 'opacity-90' : 'ring-1 ring-love-red/10'
+              } ${theme === 'dark' ? 'glass-card-dark border-purple-500/10 hover:bg-purple-800/40' : 'glass-card border-pink-100 hover:bg-white'}`}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1">
-                    <button
-                      onClick={() =>
-                        toggleListenedMutation.mutate({
-                          id: song.id,
-                          is_listened: !song.is_listened,
-                        })
-                      }
-                      className="text-gray-400 hover:text-green-500 transition-colors"
-                    >
-                      {song.is_listened ? (
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                      ) : (
-                        <Circle className="w-5 h-5" />
-                      )}
-                    </button>
-
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {song.title}
-                    </h3>
-
-                    {song.rating > 0 && (
-                      <div className="flex items-center gap-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3 h-3 ${
-                              i < song.rating
-                                ? 'text-yellow-500 fill-current'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <p className="text-gray-600 ml-8">
-                    {song.artist}
-                    {song.album && <span className="text-gray-400"> • {song.album}</span>}
-                  </p>
-
-                  <div className="flex items-center gap-4 ml-8 mt-2 flex-wrap">
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${
-                        song.recommended_by === 'me'
-                          ? 'bg-love-red/10 text-love-red'
-                          : 'bg-purple-500/10 text-purple-500'
-                      }`}
-                    >
-                      {song.recommended_by === 'me' ? 'From You ❤️' : 'From Shaira ⭐'} →{' '}
-                      {song.recommended_to === 'me' ? 'You' : 'Shaira'}
-                    </span>
-
-                    {song.mood && (
-                      <span className="text-xs text-gray-500">{song.mood_display}</span>
-                    )}
-
-                    {song.genre && (
-                      <span className="text-xs text-gray-500">{song.genre}</span>
-                    )}
-                  </div>
+              {/* Play/Listen Status Circle */}
+              <button
+                onClick={() => toggleListenedMutation.mutate({ id: song.id, is_listened: !song.is_listened })}
+                className="relative flex-shrink-0 shrink-0 group/check"
+              >
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
+                  song.is_listened 
+                  ? 'bg-emerald-500/10 text-emerald-500' 
+                  : (theme === 'dark' ? 'bg-purple-700/30 text-purple-400' : 'bg-gray-100 text-gray-400')
+                }`}>
+                  {song.is_listened ? <CheckCircle className="w-7 h-7" /> : <Play className="w-6 h-6 fill-current" />}
                 </div>
+              </button>
 
-                <div className="flex items-center gap-1">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className={`text-lg font-bold truncate leading-tight ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                    {song.title}
+                  </h3>
+                  {song.rating > 0 && (
+                    <div className="flex bg-amber-500/10 px-2 py-0.5 rounded-full">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-3 h-3 ${i < song.rating ? 'text-amber-500 fill-current' : 'text-gray-300 dark:text-purple-900'}`} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className={`text-sm font-medium mb-2 ${theme === 'dark' ? 'text-purple-300' : 'text-gray-600'}`}>{song.artist}</p>
+                
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
+                    song.recommended_by === 'me' ? 'bg-love-red text-white' : 'bg-purple-500 text-white'
+                  }`}>
+                    {song.recommended_by === 'me' ? 'Yuri' : 'Shaira'}'s Pick
+                  </span>
+
                   {song.youtube_link && (
-                    <a
-                      href={song.youtube_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                      title="Listen on YouTube"
-                    >
-                      <Play className="w-4 h-4" />
+                    <a href={getYouTubeEmbedUrl(song.youtube_link) || '#'} target="_blank" rel="noreferrer" 
+                       className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors">
+                      <PlayCircle className="w-4 h-4" />
                     </a>
                   )}
-
                   {song.spotify_link && (
-                    <a
-                      href={song.spotify_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 text-gray-400 hover:text-green-500 transition-colors"
-                      title="Listen on Spotify"
-                    >
+                    <a href={song.spotify_link} target="_blank" rel="noreferrer"
+                       className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-colors">
                       <Music className="w-4 h-4" />
                     </a>
                   )}
-
-                  <button
-                    onClick={() => setExpandedSong(expandedSong === song.id ? null : song.id)}
-                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                    title="Show Note"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </button>
-
-                  <button
-                    onClick={() => handleEdit(song)}
-                    className="p-2 text-gray-400 hover:text-love-red transition-colors"
-                    title="Edit"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-
-                  <button
-                    onClick={() => deleteMutation.mutate(song.id)}
-                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                 </div>
               </div>
 
-              {/* Expanded Note */}
-              <AnimatePresence>
-                {expandedSong === song.id && song.note && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="ml-8 mt-3 p-3 bg-pink-50 rounded-xl">
-                      <p className="text-sm text-gray-600 italic">"{song.note}"</p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Actions */}
+              <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => handleEdit(song)} className="p-2 rounded-xl hover:bg-blue-500/10 text-blue-400 transition-colors">
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button onClick={() => deleteMutation.mutate(song.id)} className="p-2 rounded-xl hover:bg-red-500/10 text-red-400 transition-colors">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </motion.div>
           ))}
         </div>
       )}
 
-      {/* Add/Edit Modal */}
+      {/* Add/Edit Modal - Fixed X button */}
       <AnimatePresence>
         {isModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            onClick={() => setIsModalOpen(false)}
-          >
+          <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={closeModal}
+              className="absolute inset-0 bg-black/60 backdrop-blur-md" 
+            />
             <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="bg-white rounded-3xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.9, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              className={`relative w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl overflow-hidden ${
+                theme === 'dark' ? 'bg-purple-950 border border-white/10' : 'bg-white border border-pink-100'
+              }`}
             >
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-serif text-gray-800">
-                  {editingSong ? 'Edit Song' : 'Recommend a Song'} 🎵
-                </h2>
+              {/* Decorative background element */}
+              <div className="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-love-red/10 rounded-full blur-3xl" />
 
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-gray-400 hover:text-gray-600"
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h2 className={`text-2xl font-serif font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                    {editingSong ? 'Edit Track' : 'New Recommendation'}
+                  </h2>
+                  <p className="text-sm text-gray-500">Share the music in your heart.</p>
+                </div>
+                <button 
+                  onClick={closeModal} 
+                  className="p-2 rounded-full hover:bg-black/5 transition-colors"
+                  type="button"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-6 h-6 text-gray-400" />
                 </button>
               </div>
 
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (editingSong) {
-                    updateMutation.mutate({ id: editingSong.id, data: formData });
-                  } else {
-                    createMutation.mutate(formData);
-                  }
-                }}
-                className="space-y-4"
-              >
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Song Title *
-                    </label>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                editingSong ? updateMutation.mutate({ id: editingSong.id, data: formData }) : createMutation.mutate(formData);
+              }} className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-widest text-gray-400 ml-1">Song Title</label>
                     <input
-                      type="text"
-                      value={formData.title}
+                      type="text" required value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full px-4 py-2 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red"
-                      required
+                      className={`w-full px-5 py-3 rounded-2xl border-2 focus:ring-0 transition-all ${
+                        theme === 'dark' ? 'bg-purple-900/40 border-purple-800 focus:border-purple-400 text-white' : 'bg-gray-50 border-gray-100 focus:border-love-red'
+                      }`}
+                      placeholder=""
                     />
                   </div>
-
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Artist *
-                    </label>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-widest text-gray-400 ml-1">Artist</label>
                     <input
-                      type="text"
-                      value={formData.artist}
+                      type="text" required value={formData.artist}
                       onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
-                      className="w-full px-4 py-2 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red"
-                      required
+                      className={`w-full px-5 py-3 rounded-2xl border-2 focus:ring-0 transition-all ${
+                        theme === 'dark' ? 'bg-purple-900/40 border-purple-800 focus:border-purple-400 text-white' : 'bg-gray-50 border-gray-100 focus:border-love-red'
+                      }`}
+                      placeholder=""
                     />
                   </div>
+                </div>
 
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Album (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.album}
-                      onChange={(e) => setFormData({ ...formData, album: e.target.value })}
-                      className="w-full px-4 py-2 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      From
-                    </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-widest text-gray-400 ml-1">From</label>
                     <select
                       value={formData.recommended_by}
-                      onChange={(e) =>
-                        setFormData({ ...formData, recommended_by: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-pink-200 rounded-lg"
+                      onChange={(e) => setFormData({ ...formData, recommended_by: e.target.value })}
+                      className={`w-full px-4 py-3 rounded-2xl border-2 ${theme === 'dark' ? 'bg-purple-900/40 border-purple-800 text-white' : 'bg-gray-50 border-gray-100'}`}
                     >
-                      <option value="me">Me ❤️</option>
-                      <option value="shaira">Shaira ⭐</option>
+                      <option value="me">Yuri</option>
+                      <option value="shaira">Shaira</option>
                     </select>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      To
-                    </label>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-widest text-gray-400 ml-1">To</label>
                     <select
                       value={formData.recommended_to}
-                      onChange={(e) =>
-                        setFormData({ ...formData, recommended_to: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-pink-200 rounded-lg"
+                      onChange={(e) => setFormData({ ...formData, recommended_to: e.target.value })}
+                      className={`w-full px-4 py-3 rounded-2xl border-2 ${theme === 'dark' ? 'bg-purple-900/40 border-purple-800 text-white' : 'bg-gray-50 border-gray-100'}`}
                     >
-                      <option value="shaira">Shaira 💕</option>
-                      <option value="me">Me 💕</option>
+                      <option value="shaira">Shaira</option>
+                      <option value="me">Yuri</option>
                     </select>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Genre
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.genre}
-                      onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-                      className="w-full px-3 py-2 border border-pink-200 rounded-lg"
-                      placeholder="Pop, Rock, etc."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Mood
-                    </label>
-                    <select
-                      value={formData.mood}
-                      onChange={(e) => setFormData({ ...formData, mood: e.target.value })}
-                      className="w-full px-3 py-2 border border-pink-200 rounded-lg"
-                    >
-                      <option value="">Select mood...</option>
-                      {moods.map((m) => (
-                        <option key={m.value} value={m.value}>
-                          {m.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    YouTube Link (Optional)
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-2">
+                    <PlayCircle className="w-3 h-3" /> YouTube Link
                   </label>
                   <input
-                    type="url"
-                    value={formData.youtube_link}
-                    onChange={(e) =>
-                      setFormData({ ...formData, youtube_link: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red"
-                    placeholder="https://youtube.com/..."
+                    type="url" value={formData.youtube_link}
+                    onChange={(e) => setFormData({ ...formData, youtube_link: e.target.value })}
+                    className={`w-full px-5 py-3 rounded-2xl border-2 ${theme === 'dark' ? 'bg-purple-900/40 border-purple-800 text-white' : 'bg-gray-50 border-gray-100'}`}
+                    placeholder="Paste link here..."
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Spotify Link (Optional)
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-widest text-gray-400 ml-1 flex items-center gap-2">
+                    <ExternalLink className="w-3 h-3" /> Spotify Link
                   </label>
                   <input
-                    type="url"
-                    value={formData.spotify_link}
-                    onChange={(e) =>
-                      setFormData({ ...formData, spotify_link: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red"
-                    placeholder="https://open.spotify.com/..."
+                    type="url" value={formData.spotify_link}
+                    onChange={(e) => setFormData({ ...formData, spotify_link: e.target.value })}
+                    className={`w-full px-5 py-3 rounded-2xl border-2 ${theme === 'dark' ? 'bg-purple-900/40 border-purple-800 text-white' : 'bg-gray-50 border-gray-100'}`}
+                    placeholder="Paste link here..."
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Why this song? (Optional)
-                  </label>
-                  <textarea
-                    value={formData.note}
-                    onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red resize-none"
-                    placeholder="This song reminds me of you because..."
-                  />
-                </div>
-
-                <div className="flex items-center gap-4 flex-wrap">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_listened}
-                      onChange={(e) =>
-                        setFormData({ ...formData, is_listened: e.target.checked })
-                      }
-                      className="rounded text-love-red"
-                    />
-                    <span className="text-sm text-gray-700">Already listened</span>
-                  </label>
-
-                  {formData.is_listened && (
-                    <div className="flex items-center gap-2">
-                      <label className="text-sm text-gray-700">Rating:</label>
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map((r) => (
-                          <button
-                            key={r}
-                            type="button"
-                            onClick={() => setFormData({ ...formData, rating: r })}
-                            className={`p-1 rounded transition-colors ${
-                              formData.rating >= r ? 'text-yellow-500' : 'text-gray-300'
-                            }`}
-                          >
-                            <Star className="w-5 h-5 fill-current" />
-                          </button>
-                        ))}
+                {editingSong && (
+                  <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 space-y-4">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <div className={`w-6 h-6 rounded flex items-center justify-center border-2 transition-colors ${
+                        formData.is_listened ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300'
+                      }`}>
+                        {formData.is_listened && <CheckCircle className="w-4 h-4 text-white" />}
                       </div>
-                    </div>
-                  )}
-                </div>
+                      <input
+                        type="checkbox" className="hidden"
+                        checked={formData.is_listened}
+                        onChange={(e) => setFormData({ ...formData, is_listened: e.target.checked })}
+                      />
+                      <span className={`text-sm font-bold ${theme === 'dark' ? 'text-purple-200' : 'text-gray-700'}`}>We've listened to this!</span>
+                    </label>
+                    
+                    {formData.is_listened && (
+                      <div className="flex items-center gap-4 pt-2 border-t border-black/10 dark:border-white/10">
+                        <span className="text-sm font-medium">Our Rating:</span>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map((r) => (
+                            <button key={r} type="button" onClick={() => setFormData({ ...formData, rating: r })} className="transition-transform hover:scale-125">
+                              <Star className={`w-6 h-6 ${formData.rating >= r ? 'text-amber-500 fill-current' : 'text-gray-300'}`} />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="submit"
-                  className="w-full btn-romantic"
+                  whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
+                  type="submit" className="w-full btn-romantic py-4 text-lg font-bold shadow-xl shadow-love-red/20"
                 >
-                  {editingSong ? 'Update Song' : 'Add to Playlist'} 🎵
+                  {editingSong ? 'Save Changes' : 'Add to our Playlist'}
                 </motion.button>
               </form>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
