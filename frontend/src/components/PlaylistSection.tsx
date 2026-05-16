@@ -206,7 +206,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
             </h2>
           </div>
           <p className={`text-lg ${theme === 'dark' ? 'text-purple-300/80' : 'text-gray-500'}`}>
-            Every melody tells a piece of our story.
+            Discover and recommend songs for each other.
           </p>
         </div>
         <motion.button

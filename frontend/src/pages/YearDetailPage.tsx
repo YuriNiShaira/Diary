@@ -477,7 +477,7 @@ const YearDetailPage: React.FC = () => {
   const tabs = [
     { id: 'memories' as TabType, label: 'Memories', icon: Camera, color: 'from-pink-500 to-rose-500' },
     { id: 'funfacts' as TabType, label: 'Fun Facts', icon: Coffee, color: 'from-orange-500 to-amber-500' },
-    { id: 'anime' as TabType, label: 'Anime', icon: Star, color: 'from-purple-500 to-pink-500' },
+    { id: 'anime' as TabType, label: 'Watchlist', icon: Star, color: 'from-purple-500 to-pink-500' },
     { id: 'playlist' as TabType, label: 'Playlist', icon: Music, color: 'from-green-500 to-emerald-500' },
     { id: 'games' as TabType, label: 'Mini Games', icon: Gamepad2, color: 'from-blue-500 to-cyan-500' },
   ];

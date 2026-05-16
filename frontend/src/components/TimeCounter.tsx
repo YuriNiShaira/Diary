@@ -185,7 +185,7 @@ const TimeCounter: React.FC<TimeCounterProps> = ({ anniversaryDate }) => {
           <p className={`mt-3 text-sm md:text-lg font-medium ${
             theme === 'dark' ? 'text-purple-300' : 'text-gray-500'
           }`}>
-            Every second with you is part of our story
+            Our story grows every second.
           </p>
         </div>
 

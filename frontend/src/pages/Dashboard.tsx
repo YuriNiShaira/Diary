@@ -1,4 +1,3 @@
-// frontend/src/pages/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -148,7 +147,7 @@ const Dashboard: React.FC = () => {
             <p className={`text-xl font-light italic ${
               theme === 'dark' ? 'text-purple-200' : 'text-gray-600'
             }`}>
-              Every moment with you is a beautiful memory
+              Turn moments into memories. One entry at a time
             </p>
             <motion.div
               initial={{ width: 0 }}
