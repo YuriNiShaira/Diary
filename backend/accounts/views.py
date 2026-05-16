@@ -189,3 +189,31 @@ def get_invite_code(request):
         'members': couple.members.count(),
         'message': f'Share this code with your partner: {couple.invite_code}'
     })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def contact(request):
+    name = request.data.get('name', 'Anonymous')
+    email = request.data.get('email', '')
+    message = request.data.get('message', '')
+
+    if not message:
+        return Response({'error': 'Message is required'}, status=400)
+    
+    try:
+        from django.core.mail import send_mail
+        send_mail(
+            f'[LogOfUs] Message from {name}',
+            f'From: {name} ({email})\n\n{message}',
+            email or 'noreply@logofus.com',
+            ['yurimauricio0404@gmail.com'],
+            fail_silently=True,
+        )
+    except Exception:
+        pass
+
+    return Response({
+        'success': True,
+        'message': f'Thanks {name}! Your message has been sent. We\'ll get back to you soon! 💕'
+    })
