@@ -1,17 +1,32 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Heart, User, Key } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, Sparkles, BookHeart, LockKeyhole, User, Key } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 
+const FloatingHeart = ({ delay = 0, x = "50%" }) => (
+  <motion.div
+    initial={{ y: "110vh", opacity: 0, scale: 0 }}
+    animate={{ 
+      y: "-10vh", 
+      opacity: [0, 0.4, 0],
+      scale: [0.5, 1, 0.7],
+      x: ["-20px", "20px", "-20px"] 
+    }}
+    transition={{ duration: 15, repeat: Infinity, delay, ease: "linear" }}
+    className="absolute text-pink-300/40 pointer-events-none"
+    style={{ left: x }}
+  >
+    <Heart fill="currentColor" size={24} />
+  </motion.div>
+);
+
 const LoginPage: React.FC = () => {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -25,164 +40,214 @@ const LoginPage: React.FC = () => {
 
     try {
       const response = await api.post('/auth/login/', formData);
-      
       const { tokens, ...userData } = response.data;
-      
-      // Store user data AND tokens
       login(userData, tokens.access, tokens.refresh);
       
       toast.success(response.data.message || 'Welcome back! 💕');
-      navigate('/dashboard');
+      setIsOpening(true);
+      setTimeout(() => { navigate('/dashboard'); }, 1800);
     } catch (error: any) {
-      toast.error(error.response?.data?.details?.non_field_errors?.[0] || 'Login failed');
-    } finally {
+      const errorData = error.response?.data;
+      toast.error(
+        errorData?.details?.non_field_errors?.[0] || 
+        errorData?.error || 
+        'Invalid credentials. Try again 💕'
+      );
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-blush via-misty-rose to-cherry-blossom">
-      {/* Background hearts */}
-      <div className="fixed inset-0 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute text-love-red/20"
-            initial={{ y: '100vh', x: `${Math.random() * 100}vw` }}
-            animate={{ y: '-10vh', rotate: 360 }}
-            transition={{ duration: 20 + Math.random() * 15, repeat: Infinity, delay: Math.random() * 10 }}
-          >
-            <Heart className="w-12 h-12 fill-current" />
-          </motion.div>
-        ))}
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-[#fff0f5]">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-pink-100/60 rounded-full blur-[110px] pointer-events-none z-0" />
+
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <FloatingHeart x="10%" delay={0} />
+        <FloatingHeart x="30%" delay={2} />
+        <FloatingHeart x="60%" delay={5} />
+        <FloatingHeart x="85%" delay={1} />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="max-w-md w-full relative z-10"
-      >
-        <div className="glass-card-dark rounded-3xl p-10 shadow-2xl border border-white/30">
-          <div className="text-center mb-8">
+      {/* --- THE BOOK CONTAINER --- */}
+      <div className="relative z-10 perspective-[2000px]">
+        
+        <div className="relative w-[340px] sm:w-[400px] h-[580px] sm:h-[640px] preserve-3d">
+          
+          {/* Rear paper stack */}
+          <div className="absolute inset-0 bg-[#f9f9f9] rounded-r-[2.25rem] rounded-l-md shadow-xl translate-z-[-10px] border-r-[6px] border-b-[6px] border-gray-200/50 overflow-hidden">
+            <div className="absolute inset-0 opacity-20 bg-page-lines" />
+          </div>
+
+          {/* Inside pages */}
+          <div className="absolute inset-0 bg-[#fffefc] rounded-r-[2.25rem] rounded-l-md border border-gray-100 flex flex-col items-center justify-center p-8 pl-14 z-0 overflow-hidden shadow-inner">
+            <div className="absolute right-4 top-3 bottom-3 w-4 border-r-2 border-gray-100/80" />
+            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-pink-50 to-transparent pointer-events-none" />
+
             <motion.div
-              animate={{ scale: [1, 1.15, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="inline-block"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={isOpening ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+              transition={{ delay: 0.9, duration: 0.5, type: "spring", stiffness: 100 }}
+              className="text-center relative z-10"
             >
-              <Heart className="w-20 h-20 text-love-red mx-auto fill-current" />
+              <BookHeart className="w-16 h-16 text-pink-400 mx-auto mb-4 opacity-60" />
+              <h2 className="text-2xl font-serif text-gray-700 mb-2 tracking-wide">Chapter 1</h2>
+              <p className="text-pink-600/90 text-md font-light italic">Opening your memories...</p>
             </motion.div>
-            
-            <h1 className="text-4xl font-serif mt-4">
-              <span className="text-gradient-love">Our Love Story</span>
-            </h1>
-            <p className="text-gray-600 mt-2 font-light italic">
-              Sign in to continue your journey
-            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Username */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Username
-              </label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-love-red/50 w-5 h-5" />
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-4 border-2 border-white/50 rounded-2xl focus:ring-4 focus:ring-love-red/30 focus:border-love-red bg-white/60 backdrop-blur-sm transition-all font-medium"
-                  placeholder="yourusername"
-                  required
-                />
-              </div>
-            </div>
+          {/* Front cover */}
+          <motion.div
+            className="absolute inset-0 origin-left preserve-3d z-10 cursor-default rounded-r-[2.25rem] rounded-l-md"
+            animate={{ rotateY: isOpening ? -165 : 0 }}
+            transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {/* Inside of cover */}
+            <div className="absolute inset-0 bg-[#ffe4e6] rounded-l-[2.25rem] rounded-r-md backface-hidden [transform:rotateY(180deg)] border-l-8 border-[#ec4899] shadow-inner" />
 
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Key className="absolute left-4 top-1/2 transform -translate-y-1/2 text-love-red/50 w-5 h-5" />
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-4 border-2 border-white/50 rounded-2xl focus:ring-4 focus:ring-love-red/30 focus:border-love-red bg-white/60 backdrop-blur-sm transition-all font-medium"
-                  placeholder="Your password"
-                  required
-                />
-              </div>
-            </div>
+            {/* Outside of cover */}
+            <div className="absolute inset-0 rounded-r-[2.25rem] rounded-l-md backface-hidden flex flex-col items-center p-6 pl-10 overflow-hidden border-l-4 border-rose-950/40 bg-gradient-leather bg-[#831843] shadow-[10px_0_30px_rgba(0,0,0,0.4)]">
+              
+              <div className="absolute inset-4 rounded-r-[1.5rem] rounded-l-sm border-2 border-dashed border-rose-400/20 pointer-events-none" />
+              <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-black/50 via-black/10 to-transparent pointer-events-none" />
+              <div className="absolute left-8 top-0 bottom-0 w-[1px] bg-white/10" />
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-love-red via-romantic-red to-love-red text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 relative overflow-hidden group"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                {loading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Signing in...
-                  </>
-                ) : (
-                  <>
-                    Open Our Diary
-                    <Heart className="w-4 h-4 fill-current" />
-                  </>
+              {/* Cover Art - Dynamic title */}
+              <div className="mt-4 mb-3 flex flex-col items-center text-center relative z-20">
+                <Heart className="w-12 h-12 text-rose-200 fill-rose-200/20 mb-3 drop-shadow-md" />
+                <h1 className="text-4xl font-serif text-gradient-gold font-bold tracking-wider">LogOfUs</h1>
+                <div className="w-16 h-[1px] bg-rose-300/40 my-2" />
+                <p className="text-gradient-gold text-xs italic tracking-widest uppercase opacity-90">Our Story</p>
+              </div>
+              <br></br>
+              {/* Login Form - Added flex-1 to push bottom content down */}
+              <AnimatePresence>
+                {!isOpening && (
+                  <motion.form 
+                    initial={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onSubmit={handleSubmit} 
+                    className="w-full flex flex-col flex-1 mt-1 relative z-20"
+                  >
+                    {/* Top Group: Login Inputs & Main Button */}
+                    <div className="space-y-3">
+                      {/* Username */}
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold text-rose-100 uppercase tracking-widest ml-1">Username</label>
+                        <div className="relative">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400 w-4 h-4" />
+                          <input
+                            type="text"
+                            name="username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            className="w-full pl-11 pr-4 py-2.5 bg-white/95 text-gray-800 border-none rounded-xl focus:ring-4 focus:ring-rose-400/50 font-medium shadow-inner transition-all text-sm"
+                            placeholder="Username"
+                            required
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Password */}
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold text-rose-100 uppercase tracking-widest ml-1">Password</label>
+                        <div className="relative">
+                          <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400 w-4 h-4" />
+                          <input
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            className="w-full pl-11 pr-4 py-2.5 bg-white/95 text-gray-800 border-none rounded-xl focus:ring-4 focus:ring-rose-400/50 font-medium shadow-inner transition-all text-sm"
+                            placeholder="••••••••"
+                            required
+                          />
+                        </div>
+                      </div>
+                        <br></br>
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-gradient-to-r from-rose-50 to-rose-100 text-rose-800 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 mt-4"
+                      >
+                        {loading ? (
+                          <div className="w-5 h-5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <><span>Unlock Our Pages</span><Sparkles size={16} /></>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Bottom Group: Action Buttons - mt-auto pushes this to the very bottom */}
+                    <div className="mt-auto pb-4 space-y-2.5">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="flex-1 h-px bg-rose-300/20" />
+                        <span className="text-[9px] text-rose-200/60 uppercase tracking-widest font-semibold">Or</span>
+                        <div className="flex-1 h-px bg-rose-300/20" />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => navigate('/register')}
+                        className="w-full bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/30 text-rose-50 py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm shadow-sm backdrop-blur-sm"
+                      >
+                        <Heart className="w-4 h-4 fill-current opacity-80" />
+                        Create New Diary
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => navigate('/join')}
+                        className="w-full bg-black/10 hover:bg-black/20 border border-rose-400/20 text-rose-200 py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm shadow-sm"
+                      >
+                        <svg className="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                          <circle cx="9" cy="7" r="4" />
+                          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                        Join Partner's Diary
+                      </button>
+                    </div>
+
+                  </motion.form>
                 )}
-              </span>
-            </motion.button>
-          </form>
+              </AnimatePresence>
 
-          <div className="mt-6 text-center space-y-3">
-            <p className="text-sm text-gray-500">
-              Don't have an account?{' '}
-              <button
-                onClick={() => navigate('/register')}
-                className="text-love-red hover:underline font-medium"
-              >
-                Create one
-              </button>
-            </p>
-            
-            {/* MAKE THIS MORE PROMINENT */}
-            <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
-              <p className="text-sm text-gray-700 mb-2">
-                💌 Your partner already created a diary?
-              </p>
-              <button
-                onClick={() => navigate('/join')}
-                className="text-purple-600 hover:underline font-semibold"
-              >
-                Join with invite code →
-              </button>
-            </div>
-          </div>
+              {/* Clasp */}
+              <div className="absolute top-[45%] -right-[12px] w-[40px] h-[80px] bg-gradient-to-r from-rose-200 to-rose-300 rounded-lg border border-rose-400/50 shadow-md flex flex-col items-center justify-center pt-2">
+                <div className="w-4 h-6 bg-black/80 rounded-full flex items-center justify-center shadow-inner">
+                  <LockKeyhole size={10} className="text-rose-100/50" />
+                </div>
+              </div>
 
-          <div className="mt-6 text-center">
-            <div className="flex justify-center gap-2">
-              {[...Array(5)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
-                >
-                  <Heart className="w-4 h-4 text-love-red/40 fill-current" />
-                </motion.div>
-              ))}
             </div>
-          </div>
+          </motion.div>
         </div>
-      </motion.div>
+      </div>
+
+      <style dangerouslySetInnerHTML={{__html: `
+        .perspective-[2000px] { perspective: 2000px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .translate-z-[-10px] { transform: translateZ(-10px); }
+        
+        .bg-page-lines {
+          background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
+          background-size: 100% 3px;
+        }
+
+        .text-gradient-gold {
+          background: linear-gradient(135deg, #e7c688 0%, #fdfdcb 50%, #b8935c 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .bg-gradient-leather {
+          background-image: 
+            radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.05), transparent 30%),
+            linear-gradient(to bottom right, #a02052, #831843, #651034);
+        }
+      `}} />
     </div>
   );
 };
