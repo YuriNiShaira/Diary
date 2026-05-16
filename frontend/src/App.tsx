@@ -8,10 +8,12 @@ import JoinPage from './pages/JoinPage';
 import Dashboard from './pages/Dashboard';
 import YearDetailPage from './pages/YearDetailPage';
 import BucketListPage from './pages/BucketListPage';
-import MemoryCalendarPage from './pages/MemoryCalendarPage'; // If you have this
+import MemoryCalendarPage from './pages/MemoryCalendarPage';
+import ContactPage from './pages/ContactPage'; // ✅ ADD THIS IMPORT
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext'; // ✅ ADD THIS
+import { ThemeProvider } from './contexts/ThemeContext';
 import RomanticBackground from './components/RomanticBackground';
+import SupportButton from './components/SupportButton';
 import './index.css';
 
 const queryClient = new QueryClient();
@@ -45,6 +47,7 @@ function App() {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/join" element={<JoinPage />} />
+                  <Route path="/contact" element={<ContactPage />} /> {/* ✅ ADD THIS ROUTE */}
                   <Route path="/dashboard" element={
                     <PrivateRoute>
                       <Dashboard />
@@ -66,6 +69,7 @@ function App() {
                     </PrivateRoute>
                   } />
                 </Routes>
+                <SupportButton />
               </div>
             </div>
           </Router>
