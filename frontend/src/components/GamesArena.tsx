@@ -1,4 +1,3 @@
-// frontend/src/components/GamesArena.tsx
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -7,15 +6,13 @@ import {
   RotateCcw,
   Crown,
   Grid3x3,
-  Brain,
   User,
   Image as ImageIcon,
 } from 'lucide-react';
 import { api } from '../services/api';
-import { useAuth } from '../contexts/AuthContext'; // ✅ ADD
+import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
-import QuizGame from './QuizGame';
 import MemoryMatchGame from './MemoryMatchGame';
 
 
@@ -39,12 +36,12 @@ interface GamesArenaProps {
   yearNumber: number;
 }
 
-type GameType = 'tictactoe' | 'quiz' | 'memorymatch' | 'menu';
+type GameType = 'tictactoe' | 'memorymatch' | 'menu';
 
 const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
   const [activeGame, setActiveGame] = useState<GameType>('menu');
   const queryClient = useQueryClient();
-  const { user } = useAuth(); // ✅ Get user for dynamic names
+  const { user } = useAuth();
 
   const { data: leaderboard } = useQuery<LeaderboardData>({
     queryKey: ['leaderboard', yearId],
@@ -74,7 +71,6 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
         });
         toast.success('You won! 🎉', { icon: '🏆' });
       } else {
-        // ✅ Dynamic partner name
         toast.success(`${user?.partner_name || 'Partner'} won! 💕`, { icon: '👑' });
       }
     },
@@ -117,13 +113,6 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
       description: "Classic game of X's and O's... but make it romantic! 💕",
     },
     {
-      id: 'quiz' as GameType,
-      name: "Couple's Quiz",
-      icon: Brain,
-      color: 'from-purple-400 to-indigo-400',
-      description: 'Test how well you know each other! Answer questions to earn points! 💑',
-    },
-    {
       id: 'memorymatch' as GameType,
       name: 'Memory Match',
       icon: ImageIcon,
@@ -140,10 +129,10 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
           <h2 className="text-3xl font-serif text-gray-800">
             Games Arena {yearNumber} 🎮
           </h2>
-          <p className="text-gray-500 mt-1">Who's winning this year?</p>
+          <p className="text-gray-500 mt-1">Simple games to play if you're together</p>
         </div>
 
-        {/* ✅ Dynamic names in scoreboard */}
+        {/* Dynamic names in scoreboard */}
         <div className="glass-card rounded-2xl px-6 py-3 flex items-center gap-6">
           <div className="text-center">
             <p className="text-sm text-gray-500 flex items-center gap-1">
@@ -179,7 +168,7 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
           {games.map((game) => {
             const Icon = game.icon;
@@ -227,15 +216,7 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
           }
           currentScore={leaderboard?.games?.find((g) => g.game_name === 'tictactoe')}
           onReset={() => resetGameMutation.mutate('tictactoe')}
-          user={user} // ✅ Pass user
-        />
-      ) : activeGame === 'quiz' ? (
-        <QuizGame
-          yearId={yearId}
-          yearNumber={yearNumber}
-          onBack={() => setActiveGame('menu')}
-          currentScore={leaderboard?.games?.find((g) => g.game_name === 'quiz')}
-          onReset={() => resetGameMutation.mutate('quiz')}
+          user={user}
         />
       ) : activeGame === 'memorymatch' ? (
         <MemoryMatchGame
@@ -253,13 +234,13 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
   );
 };
 
-// ✅ Updated TicTacToe Props
+// Updated TicTacToe Props
 interface TicTacToeProps {
   onBack: () => void;
   onWin: (winner: string) => void;
   currentScore?: GameScore;
   onReset: () => void;
-  user?: any; // ✅ Add user prop
+  user?: any;
 }
 
 const TicTacToeGame: React.FC<TicTacToeProps> = ({
@@ -267,7 +248,7 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({
   onWin,
   currentScore,
   onReset,
-  user, // ✅ Receive user
+  user,
 }) => {
   const [board, setBoard] = useState<(string | null)[]>(Array(9).fill(null));
   const [isXNext, setIsXNext] = useState(true);
@@ -339,7 +320,7 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({
         </button>
 
         <div className="flex items-center gap-4">
-          {/* ✅ Dynamic names */}
+          {/* Dynamic names */}
           <div className="text-center">
             <p className="text-sm text-gray-500">{user?.display_name || 'You'} ❤️</p>
             <p className="text-xl font-bold text-love-red">{currentScore?.my_score || 0}</p>
