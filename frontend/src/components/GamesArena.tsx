@@ -157,7 +157,7 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
             return (
               <motion.div key={game.id} whileHover={{ scale: 1.02 }} className="glass-card rounded-2xl p-8 cursor-pointer" onClick={() => setActiveGame(game.id)}>
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`p-4 rounded-2xl bg-gradient-to-r ${game.color}`}><Icon className="w-8 h-8 text-white" /></div>
+                  <div className={`p-4 rounded-2xl bg-linear-to-r ${game.color}`}><Icon className="w-8 h-8 text-white" /></div>
                   {score && (
                     <div className="text-right">
                       <p className="text-xs text-gray-500">Current Score</p>
@@ -297,7 +297,7 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({ onBack, onWin, currentScore, 
             whileTap={!cell && !winner ? { scale: 0.95 } : {}}
             onClick={() => handleClick(index)}
             className={`w-24 h-24 rounded-2xl text-4xl flex items-center justify-center transition-all duration-200 ${
-              winningLine?.includes(index) ? 'bg-gradient-to-r from-yellow-400 to-amber-400 shadow-lg' : 'bg-white/60 backdrop-blur-sm hover:bg-white/80'
+              winningLine?.includes(index) ? 'bg-linear-to-r from-yellow-400 to-amber-400 shadow-lg' : 'bg-white/60 backdrop-blur-sm hover:bg-white/80'
             } ${!cell && !winner ? 'cursor-pointer' : 'cursor-default'} border border-pink-100`}>
             {cell}
           </motion.button>
