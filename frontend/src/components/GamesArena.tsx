@@ -1,3 +1,4 @@
+// frontend/src/components/GamesArena.tsx
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -14,6 +15,7 @@ import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
 import MemoryMatchGame from './MemoryMatchGame';
+import DeleteConfirmModal from './DeleteConfirmModal';
 
 
 interface GameScore {
@@ -40,6 +42,7 @@ type GameType = 'tictactoe' | 'memorymatch' | 'menu';
 
 const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
   const [activeGame, setActiveGame] = useState<GameType>('menu');
+  const [resetTarget, setResetTarget] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -64,11 +67,7 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
       queryClient.invalidateQueries({ queryKey: ['leaderboard', yearId] });
 
       if (variables.winner === 'me') {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
         toast.success('You won! 🎉', { icon: '🏆' });
       } else {
         toast.success(`${user?.partner_name || 'Partner'} won! 💕`, { icon: '👑' });
@@ -79,21 +78,14 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
   const resetGameMutation = useMutation({
     mutationFn: async (gameName: string) => {
       const existingScore = leaderboard?.games?.find((g) => g.game_name === gameName);
-
       if (existingScore) {
         const response = await api.put(`/game-scores/${existingScore.id}/`, {
-          year: yearId,
-          game_name: gameName,
-          my_score: 0,
-          shaira_score: 0,
+          year: yearId, game_name: gameName, my_score: 0, shaira_score: 0,
         });
         return response.data;
       } else {
         const response = await api.post('/game-scores/', {
-          year: yearId,
-          game_name: gameName,
-          my_score: 0,
-          shaira_score: 0,
+          year: yearId, game_name: gameName, my_score: 0, shaira_score: 0,
         });
         return response.data;
       }
@@ -101,8 +93,13 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leaderboard', yearId] });
       toast.success('Score reset! 🔄');
+      setResetTarget(null);
     },
   });
+
+  const handleResetScore = (gameName: string) => {
+    setResetTarget(gameName);
+  };
 
   const games = [
     {
@@ -126,13 +123,10 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
       {/* Header with Scoreboard */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-3xl font-serif text-gray-800">
-            Games Arena {yearNumber} 🎮
-          </h2>
+          <h2 className="text-3xl font-serif text-gray-800">Games Arena {yearNumber} 🎮</h2>
           <p className="text-gray-500 mt-1">Simple games to play if you're together</p>
         </div>
 
-        {/* Dynamic names in scoreboard */}
         <div className="glass-card rounded-2xl px-6 py-3 flex items-center gap-6">
           <div className="text-center">
             <p className="text-sm text-gray-500 flex items-center gap-1">
@@ -140,52 +134,30 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
             </p>
             <p className="text-2xl font-bold text-love-red">{leaderboard?.my_total || 0}</p>
           </div>
-
           <div className="text-center">
             <p className="text-xs text-gray-400">VS</p>
-            {leaderboard?.leader === 'me' && (
-              <Crown className="w-4 h-4 text-yellow-500 mx-auto" />
-            )}
+            {leaderboard?.leader === 'me' && <Crown className="w-4 h-4 text-yellow-500 mx-auto" />}
           </div>
-
           <div className="text-center">
             <p className="text-sm text-gray-500 flex items-center gap-1">
               <Heart className="w-3 h-3" /> {user?.partner_name || 'Partner'}
             </p>
-            <p className="text-2xl font-bold text-purple-500">
-              {leaderboard?.shaira_total || 0}
-            </p>
+            <p className="text-2xl font-bold text-purple-500">{leaderboard?.shaira_total || 0}</p>
           </div>
-
-          {leaderboard?.leader === 'shaira' && (
-            <Crown className="w-5 h-5 text-yellow-500" />
-          )}
+          {leaderboard?.leader === 'shaira' && <Crown className="w-5 h-5 text-yellow-500" />}
         </div>
       </div>
 
-      {/* Game Menu or Active Game */}
+      {/* Game Menu */}
       {activeGame === 'menu' ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {games.map((game) => {
             const Icon = game.icon;
             const score = leaderboard?.games?.find((g) => g.game_name === game.id);
-
             return (
-              <motion.div
-                key={game.id}
-                whileHover={{ scale: 1.02 }}
-                className="glass-card rounded-2xl p-8 cursor-pointer"
-                onClick={() => setActiveGame(game.id)}
-              >
+              <motion.div key={game.id} whileHover={{ scale: 1.02 }} className="glass-card rounded-2xl p-8 cursor-pointer" onClick={() => setActiveGame(game.id)}>
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`p-4 rounded-2xl bg-gradient-to-r ${game.color}`}>
-                    <Icon className="w-8 h-8 text-white" />
-                  </div>
-
+                  <div className={`p-4 rounded-2xl bg-gradient-to-r ${game.color}`}><Icon className="w-8 h-8 text-white" /></div>
                   {score && (
                     <div className="text-right">
                       <p className="text-xs text-gray-500">Current Score</p>
@@ -197,13 +169,9 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
                     </div>
                   )}
                 </div>
-
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">{game.name}</h3>
                 <p className="text-gray-500 text-sm mb-4">{game.description}</p>
-
-                <div className="flex items-center text-love-red text-sm font-medium">
-                  Play Now →
-                </div>
+                <div className="flex items-center text-love-red text-sm font-medium">Play Now →</div>
               </motion.div>
             );
           })}
@@ -211,11 +179,9 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
       ) : activeGame === 'tictactoe' ? (
         <TicTacToeGame
           onBack={() => setActiveGame('menu')}
-          onWin={(winner) =>
-            recordWinMutation.mutate({ gameName: 'tictactoe', winner })
-          }
+          onWin={(winner) => recordWinMutation.mutate({ gameName: 'tictactoe', winner })}
           currentScore={leaderboard?.games?.find((g) => g.game_name === 'tictactoe')}
-          onReset={() => resetGameMutation.mutate('tictactoe')}
+          onReset={() => handleResetScore('tictactoe')}
           user={user}
         />
       ) : activeGame === 'memorymatch' ? (
@@ -223,18 +189,28 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
           yearId={yearId}
           yearNumber={yearNumber}
           onBack={() => setActiveGame('menu')}
-          onWin={(winner) =>
-            recordWinMutation.mutate({ gameName: 'memorymatch', winner })
-          }
+          onWin={(winner) => recordWinMutation.mutate({ gameName: 'memorymatch', winner })}
           currentScore={leaderboard?.games?.find((g) => g.game_name === 'memorymatch')}
-          onReset={() => resetGameMutation.mutate('memorymatch')}
+          onReset={() => handleResetScore('memorymatch')}
         />
       ) : null}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={!!resetTarget}
+        onClose={() => setResetTarget(null)}
+        onConfirm={() => {
+          if (resetTarget) resetGameMutation.mutate(resetTarget);
+        }}
+        title="Reset Score"
+        message="This will reset the score to 0-0. This action cannot be undone."
+        loading={resetGameMutation.isPending}
+      />
     </div>
   );
 };
 
-// Updated TicTacToe Props
+// TicTacToe
 interface TicTacToeProps {
   onBack: () => void;
   onWin: (winner: string) => void;
@@ -243,26 +219,16 @@ interface TicTacToeProps {
   user?: any;
 }
 
-const TicTacToeGame: React.FC<TicTacToeProps> = ({
-  onBack,
-  onWin,
-  currentScore,
-  onReset,
-  user,
-}) => {
+const TicTacToeGame: React.FC<TicTacToeProps> = ({ onBack, onWin, currentScore, onReset, user }) => {
   const [board, setBoard] = useState<(string | null)[]>(Array(9).fill(null));
   const [isXNext, setIsXNext] = useState(true);
   const [winner, setWinner] = useState<string | null>(null);
   const [winningLine, setWinningLine] = useState<number[] | null>(null);
   const [hasRecordedWin, setHasRecordedWin] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
   const calculateWinner = (squares: (string | null)[]) => {
-    const lines = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8],
-      [0, 3, 6], [1, 4, 7], [2, 5, 8],
-      [0, 4, 8], [2, 4, 6],
-    ];
-
+    const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
       if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
@@ -275,22 +241,17 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({
 
   const handleClick = (index: number) => {
     if (board[index] || winner) return;
-
     const newBoard = [...board];
     newBoard[index] = isXNext ? '❤️' : '⭐';
     setBoard(newBoard);
-
     const gameWinner = calculateWinner(newBoard);
-
     if (gameWinner && !hasRecordedWin) {
       setWinner(gameWinner);
       setHasRecordedWin(true);
-      const winnerName = gameWinner === '❤️' ? 'me' : 'shaira';
-      onWin(winnerName);
+      onWin(gameWinner === '❤️' ? 'me' : 'shaira');
     } else if (!newBoard.includes(null) && !gameWinner) {
       toast("It's a tie! 🤝");
     }
-
     setIsXNext(!isXNext);
   };
 
@@ -302,43 +263,21 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({
     setHasRecordedWin(false);
   };
 
-  const handleResetScore = () => {
-    if (window.confirm('Reset the score to 0-0?')) {
-      onReset();
-    }
-  };
-
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="glass-card rounded-2xl p-8"
-    >
+    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card rounded-2xl p-8">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-        <button onClick={onBack} className="text-gray-500 hover:text-gray-700">
-          ← Back to Games
-        </button>
-
+        <button onClick={onBack} className="text-gray-500 hover:text-gray-700">← Back to Games</button>
         <div className="flex items-center gap-4">
-          {/* Dynamic names */}
           <div className="text-center">
             <p className="text-sm text-gray-500">{user?.display_name || 'You'} ❤️</p>
             <p className="text-xl font-bold text-love-red">{currentScore?.my_score || 0}</p>
           </div>
-
-          <button
-            onClick={handleResetScore}
-            className="p-2 text-gray-400 hover:text-gray-600"
-            title="Reset Score"
-          >
+          <button onClick={() => setShowResetModal(true)} className="p-2 text-gray-400 hover:text-gray-600" title="Reset Score">
             <RotateCcw className="w-4 h-4" />
           </button>
-
           <div className="text-center">
             <p className="text-sm text-gray-500">{user?.partner_name || 'Partner'} ⭐</p>
-            <p className="text-xl font-bold text-purple-500">
-              {currentScore?.shaira_score || 0}
-            </p>
+            <p className="text-xl font-bold text-purple-500">{currentScore?.shaira_score || 0}</p>
           </div>
         </div>
       </div>
@@ -353,38 +292,32 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({
 
       <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto mb-6">
         {board.map((cell, index) => (
-          <motion.button
-            key={index}
+          <motion.button key={index}
             whileHover={!cell && !winner ? { scale: 1.05 } : {}}
             whileTap={!cell && !winner ? { scale: 0.95 } : {}}
             onClick={() => handleClick(index)}
-            className={`
-              w-24 h-24 rounded-2xl text-4xl flex items-center justify-center
-              transition-all duration-200
-              ${
-                winningLine?.includes(index)
-                  ? 'bg-gradient-to-r from-yellow-400 to-amber-400 shadow-lg'
-                  : 'bg-white/60 backdrop-blur-sm hover:bg-white/80'
-              }
-              ${!cell && !winner ? 'cursor-pointer' : 'cursor-default'}
-              border border-pink-100
-            `}
-          >
+            className={`w-24 h-24 rounded-2xl text-4xl flex items-center justify-center transition-all duration-200 ${
+              winningLine?.includes(index) ? 'bg-gradient-to-r from-yellow-400 to-amber-400 shadow-lg' : 'bg-white/60 backdrop-blur-sm hover:bg-white/80'
+            } ${!cell && !winner ? 'cursor-pointer' : 'cursor-default'} border border-pink-100`}>
             {cell}
           </motion.button>
         ))}
       </div>
 
       <div className="text-center">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={resetGame}
-          className="btn-soft"
-        >
+        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={resetGame} className="btn-soft">
           New Game
         </motion.button>
       </div>
+
+      {/* TicTacToe Reset Modal */}
+      <DeleteConfirmModal
+        isOpen={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        onConfirm={() => { onReset(); setShowResetModal(false); }}
+        title="Reset Score"
+        message="This will reset the Tic Tac Toe score to 0-0."
+      />
     </motion.div>
   );
 };

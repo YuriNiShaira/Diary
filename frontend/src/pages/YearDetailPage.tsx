@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
   Heart,
@@ -17,6 +17,7 @@ import {
   Calendar,
   Clock,
   ChevronDown,
+  Trash2,
 } from 'lucide-react';
 import { api } from '../services/api';
 import CreateMemoryModal from '../components/CreateMemoryModal';
@@ -27,6 +28,8 @@ import GamesArena from '../components/GamesArena';
 import PlaylistSection from '../components/PlaylistSection';
 import MemoryDetailModal from '../components/MemoryDetailModal';
 import RomanticBackground from '../components/RomanticBackground';
+import DeleteConfirmModal from '../components/DeleteConfirmModal';
+import toast from 'react-hot-toast';
 
 interface Memory {
   id: number;
@@ -137,7 +140,7 @@ const formatDate = (dateString: string) => {
 };
 
 // Scattered Polaroid Card
-const ScatteredPolaroidCard = ({ memory, index, onView, onEdit }: { memory: Memory; index: number; onView: () => void; onEdit: () => void }) => {
+const ScatteredPolaroidCard = ({ memory, index, onView, onEdit, onDelete }: { memory: Memory; index: number; onView: () => void; onEdit: () => void; onDelete: () => void }) => {
   const memoryIcon = getMemoryTypeIcon(memory.memory_type);
   const formattedDate = formatDate(memory.date);
   
@@ -212,7 +215,7 @@ const ScatteredPolaroidCard = ({ memory, index, onView, onEdit }: { memory: Memo
           </div>
         </div>
         
-        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-2">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -224,6 +227,14 @@ const ScatteredPolaroidCard = ({ memory, index, onView, onEdit }: { memory: Memo
               <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
             </svg>
           </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="bg-white/90 backdrop-blur rounded-full p-2 shadow-md hover:shadow-lg transition-all"
+          >
+            <Trash2 className="w-4 h-4 text-gray-600 hover:text-red-500" />
+          </motion.button>
         </div>
         
         {index % 3 === 0 && <div className="absolute -top-1 left-4 w-12 h-6 bg-amber-200/40 rotate-[-15deg] rounded-sm blur-[1px]" />}
@@ -234,7 +245,7 @@ const ScatteredPolaroidCard = ({ memory, index, onView, onEdit }: { memory: Memo
 };
 
 // Masonry Card
-const MasonryCard = ({ memory, index, onView, onEdit }: { memory: Memory; index: number; onView: () => void; onEdit: () => void }) => {
+const MasonryCard = ({ memory, index, onView, onEdit, onDelete }: { memory: Memory; index: number; onView: () => void; onEdit: () => void; onDelete: () => void }) => {
   const memoryIcon = getMemoryTypeIcon(memory.memory_type);
   const formattedDate = formatDate(memory.date);
   const heights = ['h-80', 'h-96', 'h-72', 'h-88', 'h-64', 'h-104'];
@@ -267,6 +278,7 @@ const MasonryCard = ({ memory, index, onView, onEdit }: { memory: Memory; index:
           <div className="flex gap-2 mt-3">
             <button className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-white text-xs">Read more →</button>
             <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-white text-xs">Edit</button>
+            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="px-3 py-1 bg-red-500/30 backdrop-blur rounded-full text-white text-xs">Delete</button>
           </div>
         </div>
         
@@ -292,7 +304,7 @@ const MasonryCard = ({ memory, index, onView, onEdit }: { memory: Memory; index:
 };
 
 // Romantic Timeline Component
-const TimelineMemory = ({ memory, index, isEven, onView, onEdit }: { memory: Memory; index: number; isEven: boolean; onView: () => void; onEdit: () => void }) => {
+const TimelineMemory = ({ memory, index, isEven, onView, onEdit, onDelete }: { memory: Memory; index: number; isEven: boolean; onView: () => void; onEdit: () => void; onDelete: () => void }) => {
   const memoryIcon = getMemoryTypeIcon(memory.memory_type);
   const formattedDate = formatDate(memory.date);
   const fullDate = new Date(memory.date);
@@ -396,6 +408,14 @@ const TimelineMemory = ({ memory, index, isEven, onView, onEdit }: { memory: Mem
               >
                 Edit Memory
               </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onDelete}
+                className="px-6 py-2.5 rounded-full bg-red-50 text-red-600 font-medium shadow-md hover:shadow-lg transition-all border border-red-200"
+              >
+                Delete
+              </motion.button>
             </div>
           </div>
         </div>
@@ -437,6 +457,7 @@ const YearDetailPage: React.FC = () => {
   const { yearId } = useParams();
   const navigate = useNavigate();
   const timelineRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<TabType>('memories');
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
@@ -446,6 +467,7 @@ const YearDetailPage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMemoryForView, setSelectedMemoryForView] = useState<Memory | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
 
   const { data: year, isLoading: yearLoading } = useQuery<Year>({
     queryKey: ['year', yearId],
@@ -463,6 +485,20 @@ const YearDetailPage: React.FC = () => {
       return Array.isArray(response.data) ? response.data : response.data.results || [];
     },
     enabled: !!yearId && activeTab === 'memories',
+  });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (memoryId: number) => {
+      await api.delete(`/memories/${memoryId}/`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['memories', yearId] });
+      toast.success('Memory deleted successfully');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Failed to delete memory');
+    },
   });
 
   const memories = useMemo(() => {
@@ -731,6 +767,7 @@ const YearDetailPage: React.FC = () => {
                               setSelectedMemory(memory);
                               setIsEditModalOpen(true);
                             }}
+                            onDelete={() => setDeleteTarget({ id: memory.id, name: memory.title })}
                           />
                         ))}
                         
@@ -773,6 +810,7 @@ const YearDetailPage: React.FC = () => {
                               setSelectedMemory(memory);
                               setIsEditModalOpen(true);
                             }}
+                            onDelete={() => setDeleteTarget({ id: memory.id, name: memory.title })}
                           />
                         ))}
                       </div>
@@ -795,6 +833,7 @@ const YearDetailPage: React.FC = () => {
                             setSelectedMemory(memory);
                             setIsEditModalOpen(true);
                           }}
+                          onDelete={() => setDeleteTarget({ id: memory.id, name: memory.title })}
                         />
                       ))}
                     </div>
@@ -889,6 +928,22 @@ const YearDetailPage: React.FC = () => {
           setSelectedMemory(memory);
           setIsEditModalOpen(true);
         }}
+      />
+
+      {/* Delete Confirm Modal */}
+      <DeleteConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) {
+            deleteMutation.mutate(deleteTarget.id);
+            setDeleteTarget(null);
+          }
+        }}
+        title="Delete Memory"
+        itemName={deleteTarget?.name}
+        message="This action cannot be undone. All data will be permanently removed."
+        loading={deleteMutation.isPending}
       />
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -29,6 +28,7 @@ import confetti from 'canvas-confetti';
 import { useTheme } from '../contexts/ThemeContext';
 import RomanticBackground from '../components/RomanticBackground';
 import Navbar from '../components/Navbar';
+import DeleteConfirmModal from '../components/DeleteConfirmModal';
 
 interface BucketListItem {
   id: number;
@@ -86,6 +86,7 @@ const BucketListPage: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedItem, setSelectedItem] = useState<BucketListItem | null>(null);
   const [completionNotes, setCompletionNotes] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -158,6 +159,9 @@ const BucketListPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['bucketlistStats'] });
       toast.success('Item removed');
     },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to delete dream.');
+    },
   });
 
   const completeMutation = useMutation({
@@ -217,6 +221,10 @@ const BucketListPage: React.FC = () => {
       target_date: item.target_date || '',
     });
     setIsModalOpen(true);
+  };
+
+  const handleDeleteClick = (item: BucketListItem) => {
+    setDeleteTarget({ id: item.id, name: item.title });
   };
 
   const filteredItems = items?.filter((item) => {
@@ -431,7 +439,7 @@ const BucketListPage: React.FC = () => {
                     index={index}
                     theme={theme}
                     onEdit={handleEdit}
-                    onDelete={(id) => deleteMutation.mutate(id)}
+                    onDelete={handleDeleteClick}
                     onComplete={(item) => setSelectedItem(item)}
                   />
                 ))}
@@ -464,7 +472,7 @@ const BucketListPage: React.FC = () => {
                     index={index}
                     theme={theme}
                     onEdit={handleEdit}
-                    onDelete={(id) => deleteMutation.mutate(id)}
+                    onDelete={handleDeleteClick}
                     onComplete={(item) => setSelectedItem(item)}
                   />
                 ))}
@@ -497,7 +505,7 @@ const BucketListPage: React.FC = () => {
                     index={index}
                     theme={theme}
                     onEdit={handleEdit}
-                    onDelete={(id) => deleteMutation.mutate(id)}
+                    onDelete={handleDeleteClick}
                     onComplete={(item) => setSelectedItem(item)}
                   />
                 ))}
@@ -768,6 +776,22 @@ const BucketListPage: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Delete Confirm Modal */}
+      <DeleteConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) {
+            deleteMutation.mutate(deleteTarget.id);
+            setDeleteTarget(null);
+          }
+        }}
+        title="Delete Dream"
+        itemName={deleteTarget?.name}
+        message="This action cannot be undone. This dream will be permanently removed from your bucket list."
+        loading={deleteMutation.isPending}
+      />
     </div>
   );
 };
@@ -778,7 +802,7 @@ interface BucketListCardProps {
   index: number;
   theme: string | null;
   onEdit: (item: BucketListItem) => void;
-  onDelete: (id: number) => void;
+  onDelete: (item: BucketListItem) => void;
   onComplete: (item: BucketListItem) => void;
 }
 
@@ -863,7 +887,7 @@ const BucketListCard: React.FC<BucketListCardProps> = ({
             <Edit className="w-4 h-4" />
           </button>
           <button
-            onClick={() => onDelete(item.id)}
+            onClick={() => onDelete(item)}
             className={`p-1.5 rounded-lg transition-colors ${
               theme === 'dark'
                 ? 'text-purple-400 hover:text-red-400 hover:bg-purple-700'
