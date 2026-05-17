@@ -9,12 +9,13 @@ import Dashboard from './pages/Dashboard';
 import YearDetailPage from './pages/YearDetailPage';
 import BucketListPage from './pages/BucketListPage';
 import MemoryCalendarPage from './pages/MemoryCalendarPage';
-import ContactPage from './pages/ContactPage'; // ✅ ADD THIS IMPORT
+import ContactPage from './pages/ContactPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import RomanticBackground from './components/RomanticBackground';
 import SupportButton from './components/SupportButton';
 import './index.css';
+import NotFoundPage from './pages/NotFoundPage';
 
 const queryClient = new QueryClient();
 
@@ -47,7 +48,7 @@ function App() {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/join" element={<JoinPage />} />
-                  <Route path="/contact" element={<ContactPage />} /> {/* ✅ ADD THIS ROUTE */}
+                  <Route path="/contact" element={<ContactPage />} />
                   <Route path="/dashboard" element={
                     <PrivateRoute>
                       <Dashboard />
@@ -68,6 +69,7 @@ function App() {
                       <MemoryCalendarPage />
                     </PrivateRoute>
                   } />
+                  <Route path="*" element={<NotFoundPage />} />
                 </Routes>
                 <SupportButton />
               </div>
