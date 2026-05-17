@@ -162,15 +162,25 @@ const RegisterPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Anniversary */}
+                {/* Anniversary - UPDATED with proper date limits */}
                 <div className="space-y-1">
                   <label className="block text-[10px] font-bold text-rose-800/60 uppercase tracking-widest ml-1">Anniversary Date</label>
                   <div className="relative">
                     <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400 w-4 h-4" />
-                    <input type="date" name="anniversary_date" value={formData.anniversary_date} onChange={handleChange}
-                      max={new Date().toISOString().split('T')[0]}
-                      className="w-full pl-11 pr-4 py-3 bg-white/80 text-gray-800 border border-rose-100 rounded-xl focus:ring-4 focus:ring-rose-400/20 focus:border-rose-300 font-medium shadow-inner transition-all text-sm text-rose-900/70" required />
+                    <input 
+                      type="date" 
+                      name="anniversary_date" 
+                      value={formData.anniversary_date} 
+                      onChange={handleChange}
+                      min="1950-01-01"              
+                      max={new Date().toISOString().split('T')[0]} 
+                      className="w-full pl-11 pr-4 py-3 bg-white/80 text-gray-800 border border-rose-100 rounded-xl focus:ring-4 focus:ring-rose-400/20 focus:border-rose-300 font-medium shadow-inner transition-all text-sm text-rose-900/70" 
+                      required 
+                    />
                   </div>
+                  <p className="text-[10px] text-rose-400/70 ml-1 mt-1">
+                    When did your love story begin?
+                  </p>
                 </div>
 
                 <div className="pt-2">
