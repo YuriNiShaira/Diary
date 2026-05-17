@@ -73,7 +73,7 @@ const Navbar: React.FC = () => {
             <h1 className={`text-xl font-serif font-bold leading-none ${
               theme === 'dark' ? 'text-purple-200' : 'text-gray-800'
             }`}>
-              OurLoveStory
+              LogOfUs
             </h1>
             {/* ✅ DYNAMIC: Shows couple name instead of hardcoded "Shaira & Yuri" */}
             <p className={`text-[10px] leading-none mt-0.5 ${
