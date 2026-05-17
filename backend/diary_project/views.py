@@ -401,11 +401,18 @@ class BucketListViewSet(CoupleFilteredViewSet):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def calendar_memories(request):
+    """Get memories grouped by date - FILTERED BY COUPLE"""
+    couple = get_couple(request)
+    
+    if not couple:
+        return Response({'memories': {}, 'total_dates': 0, 'total_memories': 0})
+    
     year = request.query_params.get('year', None)
     month = request.query_params.get('month', None)
 
-    queryset = Memory.objects.all()
+    queryset = Memory.objects.filter(couple=couple)
 
     if year:
         queryset = queryset.filter(date__year=year)
@@ -426,7 +433,7 @@ def calendar_memories(request):
             'id': memory.id,
             'title': memory.title,
             'description': memory.description[:100],
-            'image': image_url, 
+            'image': image_url,
             'memory_type': memory.memory_type,
             'is_favorite': memory.is_favorite,
             'location': memory.location,
