@@ -77,8 +77,16 @@ class RegisterSerializer(serializers.Serializer):
     
     def validate_anniversary_date(self, value):
         from django.utils import timezone
+
         if value > timezone.now().date():
             raise serializers.ValidationError("Anniversary date cannot be in the future!")
+    
+        if value.year < 1950:
+            raise serializers.ValidationError("Please enter a valid anniversary date (1950 or later).")
+        
+        if value.year < 1900:
+            raise serializers.ValidationError("Please enter a realistic anniversary date.")
+        
         return value
     
     def create(self, validated_data):
@@ -87,7 +95,7 @@ class RegisterSerializer(serializers.Serializer):
         
         # Create couple with placeholder partner name
         couple = Couple.objects.create(
-            name=f"{display_name} & Partner",  # Placeholder until partner joins
+            name=f"{display_name} & Partner",  
             anniversary_date=anniversary_date
         )
         
