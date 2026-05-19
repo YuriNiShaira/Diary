@@ -4,6 +4,7 @@ import { X, Calendar, Upload } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 interface CreateYearModalProps {
   isOpen: boolean;
@@ -11,12 +12,18 @@ interface CreateYearModalProps {
 }
 
 const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) => {
+  const { user } = useAuth();
   const [year, setYear] = useState(new Date().getFullYear());
   const [description, setDescription] = useState('');
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>('');
 
   const queryClient = useQueryClient();
+
+  // Get anniversary year from user data
+  const anniversaryYear = user?.anniversary_date 
+    ? new Date(user.anniversary_date).getFullYear() 
+    : null;
 
   const createYearMutation = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -68,6 +75,8 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
     setPreview('');
   };
 
+  const today = new Date();
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -82,7 +91,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
             initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
-            className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+            className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
@@ -98,23 +107,42 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Year Input */}
+              {/* Year Input with Warning */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Year
+                  Year *
                 </label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="number"
                     value={year}
-                    onChange={(e) => setYear(parseInt(e.target.value))}
-                    min="2000"
-                    max="2100"
+                    onChange={(e) => setYear(parseInt(e.target.value) || '' as any)}
+                    min={1950}
+                    max={today.getFullYear()}
                     className="w-full pl-10 pr-4 py-2 border border-soft-rose rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
+                    placeholder="e.g., 2024"
                     required
                   />
                 </div>
+                
+                {anniversaryYear && year && year < anniversaryYear && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2"
+                  >
+                    <span className="text-lg">📖</span>
+                    <div>
+                      <p className="text-sm font-medium text-amber-800">
+                        This is before your official anniversary ({anniversaryYear})
+                      </p>
+                      <p className="text-xs text-amber-600 mt-0.5">
+                        You started dating in {anniversaryYear}. This year will be marked as "The Prequel" - your love story before it officially began! 💕
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
               </div>
 
               {/* Description Input */}
@@ -176,7 +204,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={createYearMutation.isPending}
-                className="w-full bg-gradient-to-r from-love-red to-soft-rose text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
               >
                 {createYearMutation.isPending ? (
                   <div className="flex items-center justify-center">
