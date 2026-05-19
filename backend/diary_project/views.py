@@ -77,6 +77,24 @@ class MemoryViewSet(CoupleFilteredViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    def perform_create(self, serializer):
+        couple = get_couple(self.request)
+        year_id = self.request.data.get('year')
+        memory_date = serializer.validated_data.get('date')
+
+        if year_id and memory_date:
+            try:
+                year = Year.objects.get(id=year_id, couple=couple)
+                if memory_date.year != year.year:
+                    from rest_framework import serializers as drf_serializers
+                    raise drf_serializers.ValidationError({
+                        'date': f'This memory is from {memory_date.year}, but this year is {year.year}. Please add it to the {memory_date.year} year instead.'
+                    })
+            except Year.DoesNotExist:
+                pass
+        
+        serializer.save(couple=couple)
+
 
 class LoveLetterViewSet(CoupleFilteredViewSet):
     queryset = LoveLetter.objects.filter(is_active=True)
