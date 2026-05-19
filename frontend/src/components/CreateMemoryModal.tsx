@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, MapPin, Heart, Upload, Quote } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
 
@@ -11,13 +11,18 @@ interface CreateMemoryModalProps {
   yearId: number;
 }
 
+interface YearData {
+  id: number;
+  year: number;
+  description?: string;
+}
+
 const memoryTypes = [
   { value: 'milestone', label: 'Milestone' },
   { value: 'date', label: 'Date' },
   { value: 'travel', label: 'Travel' },
   { value: 'everyday', label: 'Everyday Magic' },
   { value: 'special', label: 'Special Moment' },
-  { value: 'special', label: 'Sad Moment' },
 ];
 
 const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, yearId }) => {
@@ -32,6 +37,16 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
   const [preview, setPreview] = useState<string>('');
 
   const queryClient = useQueryClient();
+
+  // Get the year object to check
+  const { data: yearData } = useQuery<YearData>({
+    queryKey: ['year', yearId],
+    queryFn: async () => {
+      const response = await api.get(`/years/${yearId}/`);
+      return response.data;
+    },
+    enabled: !!yearId && isOpen,
+  });
 
   const createMemoryMutation = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -50,8 +65,9 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
       onClose();
       resetForm();
     },
-    onError: () => {
-      toast.error('Failed to save memory. Please try again.');
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.date?.[0] || 'Failed to save memory. Please try again.';
+      toast.error(errorMessage);
     },
   });
 
@@ -72,6 +88,13 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
     
     if (!title || !date || !description) {
       toast.error('Please fill in the required fields 💝');
+      return;
+    }
+
+    // Check if date year matches the year page
+    const selectedYear = new Date(date).getFullYear();
+    if (yearData && selectedYear !== yearData.year) {
+      toast.error(`Please select a date in ${yearData.year}. The memory year must match the year page.`);
       return;
     }
 
@@ -102,6 +125,14 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
     setImage(null);
     setPreview('');
   };
+
+  // Get min and max dates based on the year
+  const minDate = yearData ? `${yearData.year}-01-01` : '1950-01-01';
+  const maxDate = yearData ? `${yearData.year}-12-31` : '2099-12-31';
+  
+  // Check if selected date matches the year
+  const selectedYear = date ? new Date(date).getFullYear() : null;
+  const isYearMismatch = !!(selectedYear && yearData && selectedYear !== yearData.year);
 
   return (
     <AnimatePresence>
@@ -148,7 +179,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                 />
               </div>
 
-              {/* Date Input */}
+              {/* Date Input with Year Validation */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Date *
@@ -159,10 +190,23 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
+                    min={minDate}
+                    max={maxDate}
                     className="w-full pl-10 pr-4 py-2 border border-soft-rose rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
                     required
                   />
                 </div>
+                
+                {/* Warning if date doesn't match year */}
+                {isYearMismatch && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700"
+                  >
+                    The selected date is outside {yearData?.year}. To keep memories organized by year, please choose a date within {yearData?.year}.
+                  </motion.div>
+                )}
               </div>
 
               {/* Memory Type */}
@@ -277,7 +321,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                     onChange={(e) => setIsFavorite(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-love-red/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-love-red"></div>
+                  <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-love-red/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-love-red"></div>
                   <span className="ms-3 text-sm font-medium text-gray-700 flex items-center">
                     Mark as Favorite
                     <Heart className="w-4 h-4 ml-1 text-love-red fill-current" />
@@ -290,8 +334,12 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                disabled={createMemoryMutation.isPending}
-                className="w-full bg-gradient-to-r from-love-red to-soft-rose text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+                disabled={createMemoryMutation.isPending || isYearMismatch}
+                className={`w-full py-3 rounded-xl font-semibold shadow-lg transition-all duration-300 ${
+                  isYearMismatch
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-linear-to-r from-rose-500 to-pink-500 hover:shadow-xl'
+                } text-white`}
               >
                 {createMemoryMutation.isPending ? (
                   <div className="flex items-center justify-center">
