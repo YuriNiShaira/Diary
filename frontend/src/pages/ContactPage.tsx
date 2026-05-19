@@ -4,8 +4,11 @@ import { MessageCircle, User, Mail, Send, ArrowLeft, Heart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
+import { useTheme } from '../contexts/ThemeContext';
+import RomanticBackground from '../components/RomanticBackground';
 
 const ContactPage: React.FC = () => {
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [loading, setLoading] = useState(false);
@@ -30,30 +33,23 @@ const ContactPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#fff5f5] via-[#ffe8eb] to-[#ffd9e2]">
-      {/* Floating hearts */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ y: "110vh", x: `${10 + i * 15}%`, opacity: 0 }}
-            animate={{ y: "-10vh", opacity: [0, 0.3, 0] }}
-            transition={{ duration: 12 + i * 2, repeat: Infinity, delay: i * 1.5 }}
-            className="absolute"
-          >
-            <Heart className="w-4 h-4 text-pink-300/40 fill-current" />
-          </motion.div>
-        ))}
-      </div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      <RomanticBackground />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 max-w-lg w-full shadow-xl border border-white/50"
+        className={`relative z-10 rounded-3xl p-8 max-w-lg w-full shadow-xl border ${
+          theme === 'dark'
+            ? 'bg-purple-900/90 backdrop-blur-sm border-purple-700/50'
+            : 'bg-white/90 backdrop-blur-sm border-white/50'
+        }`}
       >
         <button 
           onClick={() => navigate(-1)} 
-          className="flex items-center text-gray-400 hover:text-gray-600 mb-6 text-sm transition-colors"
+          className={`flex items-center text-sm transition-colors ${
+            theme === 'dark' ? 'text-purple-400 hover:text-purple-200' : 'text-gray-400 hover:text-gray-600'
+          } mb-6`}
         >
           <ArrowLeft className="w-4 h-4 mr-1" /> Back
         </button>
@@ -65,11 +61,19 @@ const ContactPage: React.FC = () => {
             className="text-center py-8"
           >
             <div className="text-6xl mb-4">💌</div>
-            <h2 className="text-2xl font-serif text-gray-800 mb-2">Message Sent!</h2>
-            <p className="text-gray-500 mb-6">We'll get back to you soon!</p>
+            <h2 className={`text-2xl font-serif mb-2 ${
+              theme === 'dark' ? 'text-purple-200' : 'text-gray-800'
+            }`}>
+              Message Sent!
+            </h2>
+            <p className={`mb-6 ${theme === 'dark' ? 'text-purple-300' : 'text-gray-500'}`}>
+              We'll get back to you soon!
+            </p>
             <button
               onClick={() => { setSent(false); setForm({ name: '', email: '', message: '' }); }}
-              className="text-rose-500 hover:underline text-sm"
+              className={`text-sm ${
+                theme === 'dark' ? 'text-purple-300 hover:text-purple-100' : 'text-rose-500 hover:underline'
+              }`}
             >
               Send another message
             </button>
@@ -81,48 +85,84 @@ const ContactPage: React.FC = () => {
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <MessageCircle className="w-12 h-12 text-rose-400 mx-auto mb-3" />
+                <MessageCircle className={`w-12 h-12 mx-auto mb-3 ${
+                  theme === 'dark' ? 'text-purple-400' : 'text-rose-400'
+                }`} />
               </motion.div>
-              <h1 className="text-2xl font-serif text-gray-800">Get in Touch</h1>
-              <p className="text-gray-500 text-sm mt-1">Have a question or feedback? We'd love to hear from you!</p>
+              <h1 className={`text-2xl font-serif ${
+                theme === 'dark' ? 'text-purple-200' : 'text-gray-800'
+              }`}>
+                Get in Touch
+              </h1>
+              <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-purple-300' : 'text-gray-500'}`}>
+                Have a question or feedback? We'd love to hear from you!
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">Name</label>
+                <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ml-1 ${
+                  theme === 'dark' ? 'text-purple-400' : 'text-gray-400'
+                }`}>
+                  Name
+                </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 w-4 h-4" />
+                  <User className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                    theme === 'dark' ? 'text-purple-500' : 'text-gray-300'
+                  }`} />
                   <input
                     type="text"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-300 focus:bg-white text-sm transition-all"
+                    className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 transition-all text-sm ${
+                      theme === 'dark'
+                        ? 'bg-purple-800/50 border-purple-700 text-purple-200 placeholder-purple-400 focus:ring-purple-500 focus:bg-purple-800'
+                        : 'bg-gray-50 border-gray-200 text-gray-700 placeholder-gray-400 focus:ring-rose-300 focus:bg-white'
+                    }`}
                     placeholder="Your name (optional)"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">Email</label>
+                <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ml-1 ${
+                  theme === 'dark' ? 'text-purple-400' : 'text-gray-400'
+                }`}>
+                  Email
+                </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 w-4 h-4" />
+                  <Mail className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                    theme === 'dark' ? 'text-purple-500' : 'text-gray-300'
+                  }`} />
                   <input
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-300 focus:bg-white text-sm transition-all"
+                    className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 transition-all text-sm ${
+                      theme === 'dark'
+                        ? 'bg-purple-800/50 border-purple-700 text-purple-200 placeholder-purple-400 focus:ring-purple-500 focus:bg-purple-800'
+                        : 'bg-gray-50 border-gray-200 text-gray-700 placeholder-gray-400 focus:ring-rose-300 focus:bg-white'
+                    }`}
                     placeholder="your@email.com (optional)"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">Message *</label>
+                <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ml-1 ${
+                  theme === 'dark' ? 'text-purple-400' : 'text-gray-400'
+                }`}>
+                  Message *
+                </label>
                 <textarea
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   rows={4}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-300 focus:bg-white text-sm transition-all resize-none"
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all text-sm resize-none ${
+                    theme === 'dark'
+                      ? 'bg-purple-800/50 border-purple-700 text-purple-200 placeholder-purple-400 focus:ring-purple-500 focus:bg-purple-800'
+                      : 'bg-gray-50 border-gray-200 text-gray-700 placeholder-gray-400 focus:ring-rose-300 focus:bg-white'
+                  }`}
                   placeholder="Tell us what's on your mind..."
                   required
                 />
@@ -133,7 +173,11 @@ const ContactPage: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-rose-400 to-pink-500 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className={`w-full py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${
+                  theme === 'dark'
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white'
+                    : 'bg-gradient-to-r from-rose-400 to-pink-500 text-white'
+                }`}
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -146,9 +190,13 @@ const ContactPage: React.FC = () => {
               </motion.button>
             </form>
 
-            <p className="text-center text-xs text-gray-400 mt-4">
+            <p className={`text-center text-xs mt-4 ${
+              theme === 'dark' ? 'text-purple-400' : 'text-gray-400'
+            }`}>
               Or email us directly at{' '}
-              <a href="mailto:yurimauricio0404@gmail.com" className="text-rose-500 hover:underline">
+              <a href="mailto:yurimauricio0404@gmail.com" className={`${
+                theme === 'dark' ? 'text-purple-300 hover:text-purple-100' : 'text-rose-500 hover:underline'
+              }`}>
                 yurimauricio0404@gmail.com
               </a>
             </p>

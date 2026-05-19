@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Sparkles, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface LoveLetter {
   id: number;
@@ -21,6 +22,7 @@ const floatingHearts = [
 ];
 
 const Envelope: React.FC = () => {
+  const { theme } = useTheme();
   const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false);
   const [showLetterPreview, setShowLetterPreview] = useState(false);
   const [showMagic, setShowMagic] = useState(false);
@@ -106,7 +108,7 @@ const Envelope: React.FC = () => {
             }
             className="relative h-full w-full"
           >
-            {/* Background glow */}
+            {/* Background glow - unchanged */}
             <motion.div
               animate={
                 isEnvelopeOpen
@@ -121,7 +123,7 @@ const Envelope: React.FC = () => {
               className="absolute inset-0 rounded-[32px] bg-pink-400/20 blur-2xl"
             />
 
-            {/* Floating hearts / sparkles */}
+            {/* Floating hearts / sparkles - unchanged */}
             <AnimatePresence>
               {showMagic && (
                 <>
@@ -174,7 +176,7 @@ const Envelope: React.FC = () => {
               )}
             </AnimatePresence>
 
-            {/* Letter preview */}
+            {/* Letter preview - ONLY THIS CHANGES for dark mode */}
             <AnimatePresence>
               {showLetterPreview && currentLetter && (
                 <motion.div
@@ -206,21 +208,35 @@ const Envelope: React.FC = () => {
                       repeat: Infinity,
                       ease: "easeInOut",
                     }}
-                    className="rounded-[22px] border border-rose-100 bg-gradient-to-b from-white to-rose-50 px-5 py-6 shadow-[0_24px_50px_rgba(15,23,42,0.16)]"
+                    className={`rounded-[22px] border shadow-[0_24px_50px_rgba(15,23,42,0.16)] ${
+                      theme === 'dark'
+                        ? 'border-purple-500/30 bg-gradient-to-b from-purple-900/90 to-purple-800/90'
+                        : 'border-rose-100 bg-gradient-to-b from-white to-rose-50'
+                    } px-5 py-6`}
                   >
                     <div className="mb-3 flex items-center justify-center">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 shadow-sm">
-                        <Heart className="h-5 w-5 fill-current text-pink-500" />
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-full shadow-sm ${
+                        theme === 'dark' ? 'bg-purple-700' : 'bg-pink-100'
+                      }`}>
+                        <Heart className={`h-5 w-5 fill-current ${
+                          theme === 'dark' ? 'text-purple-300' : 'text-pink-500'
+                        }`} />
                       </div>
                     </div>
 
-                    <h3 className="line-clamp-1 text-center text-lg font-bold text-rose-950">
+                    <h3 className={`line-clamp-1 text-center text-lg font-bold ${
+                      theme === 'dark' ? 'text-purple-100' : 'text-rose-950'
+                    }`}>
                       {currentLetter.title}
                     </h3>
 
-                    <div className="mx-auto mt-3 h-px w-16 bg-gradient-to-r from-transparent via-pink-300 to-transparent" />
+                    <div className={`mx-auto mt-3 h-px w-16 bg-gradient-to-r from-transparent via-pink-300 to-transparent ${
+                      theme === 'dark' && 'via-purple-500/50'
+                    }`} />
 
-                    <p className="mt-3 line-clamp-3 text-center text-sm leading-6 text-gray-500">
+                    <p className={`mt-3 line-clamp-3 text-center text-sm leading-6 ${
+                      theme === 'dark' ? 'text-purple-300' : 'text-gray-500'
+                    }`}>
                       {currentLetter.content}
                     </p>
                   </motion.div>
@@ -228,13 +244,13 @@ const Envelope: React.FC = () => {
               )}
             </AnimatePresence>
 
-            {/* Main envelope body */}
+            {/* Main envelope body - UNCHANGED */}
             <div className="absolute inset-0 rounded-[30px] bg-gradient-to-br from-rose-300 via-pink-300 to-fuchsia-400 shadow-[0_28px_70px_rgba(236,72,153,0.24)]" />
 
-            {/* Inner highlight */}
+            {/* Inner highlight - UNCHANGED */}
             <div className="absolute inset-[2px] rounded-[28px] bg-gradient-to-b from-white/20 to-transparent" />
 
-            {/* Top flap */}
+            {/* Top flap - UNCHANGED */}
             <motion.div
               initial={false}
               animate={
@@ -268,10 +284,10 @@ const Envelope: React.FC = () => {
               />
             </motion.div>
 
-            {/* Front pocket */}
+            {/* Front pocket - UNCHANGED */}
             <div className="absolute bottom-0 left-0 z-20 h-[138px] w-full rounded-b-[30px] bg-gradient-to-br from-rose-100 via-pink-100 to-pink-200" />
 
-            {/* Left fold */}
+            {/* Left fold - UNCHANGED */}
             <div
               className="absolute bottom-0 left-0 z-30 h-[138px] w-1/2"
               style={{
@@ -282,7 +298,7 @@ const Envelope: React.FC = () => {
               }}
             />
 
-            {/* Right fold */}
+            {/* Right fold - UNCHANGED */}
             <div
               className="absolute bottom-0 right-0 z-30 h-[138px] w-1/2"
               style={{
@@ -293,7 +309,7 @@ const Envelope: React.FC = () => {
               }}
             />
 
-            {/* Bottom center fold */}
+            {/* Bottom center fold - UNCHANGED */}
             <div
               className="absolute bottom-0 left-1/2 z-30 h-[92px] w-[190px] -translate-x-1/2"
               style={{
@@ -302,10 +318,10 @@ const Envelope: React.FC = () => {
               }}
             />
 
-            {/* Shine */}
+            {/* Shine - UNCHANGED */}
             <div className="absolute left-5 top-4 z-10 h-20 w-28 rounded-full bg-white/18 blur-xl" />
 
-            {/* Text content */}
+            {/* Text content - UNCHANGED */}
             <motion.div
               animate={
                 isEnvelopeOpen
@@ -351,6 +367,7 @@ const Envelope: React.FC = () => {
         </motion.button>
       </div>
 
+      {/* Modal - ONLY THIS CHANGES for dark mode */}
       <AnimatePresence>
         {showModal && currentLetter && (
           <motion.div
@@ -366,41 +383,63 @@ const Envelope: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               exit={{ opacity: 0, y: 18, scale: 0.97 }}
               transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
-              className="relative w-full max-w-2xl rounded-[30px] border border-white/40 bg-white p-6 shadow-[0_30px_90px_rgba(15,23,42,0.28)]"
+              className={`relative w-full max-w-2xl rounded-[30px] border shadow-[0_30px_90px_rgba(15,23,42,0.28)] ${
+                theme === 'dark'
+                  ? 'border-purple-500/30 bg-gradient-to-br from-purple-900 to-purple-800'
+                  : 'border-white/40 bg-white'
+              } p-6`}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="absolute inset-x-0 top-0 h-24 rounded-t-[30px] bg-gradient-to-r from-rose-100 via-pink-50 to-rose-100" />
+              <div className={`absolute inset-x-0 top-0 h-24 rounded-t-[30px] bg-gradient-to-r ${
+                theme === 'dark'
+                  ? 'from-purple-800 via-purple-700 to-purple-800'
+                  : 'from-rose-100 via-pink-50 to-rose-100'
+              }`} />
 
               <button
                 type="button"
                 onClick={handleClose}
-                className="absolute right-4 top-4 z-10 rounded-full p-2 text-gray-400 transition hover:bg-pink-50 hover:text-pink-500"
+                className={`absolute right-4 top-4 z-10 rounded-full p-2 transition ${
+                  theme === 'dark'
+                    ? 'text-purple-400 hover:bg-purple-800 hover:text-purple-200'
+                    : 'text-gray-400 hover:bg-pink-50 hover:text-pink-500'
+                }`}
               >
                 <X className="h-5 w-5" />
               </button>
 
               <div className="relative mb-5 flex flex-col items-center text-center">
-                <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-pink-100 shadow-sm">
-                  <Heart className="h-8 w-8 fill-current text-pink-500" />
+                <div className={`mb-3 flex h-16 w-16 items-center justify-center rounded-full shadow-sm ${
+                  theme === 'dark' ? 'bg-purple-700' : 'bg-pink-100'
+                }`}>
+                  <Heart className={`h-8 w-8 fill-current ${
+                    theme === 'dark' ? 'text-purple-300' : 'text-pink-500'
+                  }`} />
                 </div>
 
-                <h2 className="text-3xl font-bold text-rose-950">
+                <h2 className={`text-3xl font-bold ${
+                  theme === 'dark' ? 'text-purple-100' : 'text-rose-950'
+                }`}>
                   {currentLetter.title}
                 </h2>
-
-                <p className="mt-1 text-sm text-gray-400">
-                  {new Date(currentLetter.created_at).toLocaleDateString()}
-                </p>
               </div>
 
-              <div className="max-h-[55vh] overflow-y-auto rounded-2xl border border-rose-100 bg-rose-50/80 p-6 shadow-inner">
-                <p className="whitespace-pre-line text-[15px] leading-8 text-gray-700">
+              <div className={`max-h-[55vh] overflow-y-auto rounded-2xl border p-6 shadow-inner ${
+                theme === 'dark'
+                  ? 'border-purple-700/50 bg-purple-800/40'
+                  : 'border-rose-100 bg-rose-50/80'
+              }`}>
+                <p className={`whitespace-pre-line text-[15px] leading-8 ${
+                  theme === 'dark' ? 'text-purple-200' : 'text-gray-700'
+                }`}>
                   {currentLetter.content}
                 </p>
               </div>
 
               <div className="mt-5 text-center">
-                <p className="text-sm font-medium text-pink-500">
+                <p className={`text-sm font-medium ${
+                  theme === 'dark' ? 'text-purple-300' : 'text-pink-500'
+                }`}>
                   With love, always ♡
                 </p>
               </div>

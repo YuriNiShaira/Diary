@@ -5,6 +5,7 @@ import { Heart, Sparkles, BookHeart, LockKeyhole, User, Key } from 'lucide-react
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import RomanticBackground from '../components/RomanticBackground';
 
 const FloatingHeart = ({ delay = 0, x = "50%" }) => (
   <motion.div
@@ -59,6 +60,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-[#fff0f5]">
+      <RomanticBackground />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-pink-100/60 rounded-full blur-[110px] pointer-events-none z-0" />
 
       <div className="fixed inset-0 z-0 overflow-hidden">
