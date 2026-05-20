@@ -118,7 +118,7 @@ const LoginPage: React.FC = () => {
                 <Heart className="w-12 h-12 text-rose-200 fill-rose-200/20 mb-3 drop-shadow-md" />
                 <h1 className="text-4xl font-serif text-gradient-gold font-bold tracking-wider">LogOfUs</h1>
                 <div className="w-16 h-[1px] bg-rose-300/40 my-2" />
-                <p className="text-gradient-gold text-xs italic tracking-widest uppercase opacity-90">Our Story</p>
+                <p className="text-gradient-gold text-xs italic tracking-widest uppercase opacity-90">Your Love Story Diary</p>
               </div>
               <br></br>
               {/* Login Form - Added flex-1 to push bottom content down */}
