@@ -3,9 +3,6 @@ from dotenv import load_dotenv
 from pathlib import Path
 from datetime import timedelta
 import dj_database_url
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -17,12 +14,14 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,diary-backend-pcy8.onrender.com').split(',')
 
 INSTALLED_APPS = [
+    'cloudinary_storage', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary',  
     'rest_framework_simplejwt',
     'rest_framework',
     'corsheaders',
@@ -88,7 +87,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -139,16 +137,11 @@ EMAIL_HOST_USER = 'yurimauricio0404@gmail.com'
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = 'yurimauricio0404@gmail.com'
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'diary'),
-    'API_KEY': os.getenv('CLOUDINARY_API_KEY', '722198569887999'),
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET', 'Gr-IjKxs2Wg7hxzgPTdby2kkwpQ'),
-}
 
-cloudinary.config(
-    cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
-    api_key=CLOUDINARY_STORAGE['API_KEY'],
-    api_secret=CLOUDINARY_STORAGE['API_SECRET'],
-)
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'diary',
+    'API_KEY': '722198569887999',
+    'API_SECRET': 'Gr-IjKxs2Wg7hxzgPTdby2kkwpQ',
+}
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
