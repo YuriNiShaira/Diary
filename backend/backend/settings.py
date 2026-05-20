@@ -63,7 +63,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# Database - Auto-detects SQLite (local) or PostgreSQL (production)
 DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///db.sqlite3',
@@ -93,11 +92,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://logofus.vercel.app', 
+    'https://logofus.vercel.app',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -141,13 +139,16 @@ EMAIL_HOST_USER = 'yurimauricio0404@gmail.com'
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = 'yurimauricio0404@gmail.com'
 
-# Cloudinary - Media Storage
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'diary'),
     'API_KEY': os.getenv('CLOUDINARY_API_KEY', '722198569887999'),
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET', 'Gr-IjKxs2Wg7hxzgPTdby2kkwpQ'),
 }
 
-# Use Cloudinary for media files in production
-if not DEBUG:
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+cloudinary.config(
+    cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
+    api_key=CLOUDINARY_STORAGE['API_KEY'],
+    api_secret=CLOUDINARY_STORAGE['API_SECRET'],
+)
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
