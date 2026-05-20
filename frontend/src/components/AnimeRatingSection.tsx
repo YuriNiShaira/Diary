@@ -1,10 +1,9 @@
-// frontend/src/components/AnimeRatingSection.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Star, Plus, Edit, Trash2, X, Trophy, Settings, User, Heart, 
-  ChevronDown, ChevronUp, Sparkles, Film, Check, Tv, Clapperboard
+  ChevronDown, ChevronUp, Film, Check, Tv, Clapperboard
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -197,7 +196,6 @@ const AnimeRatingSection: React.FC<AnimeRatingSectionProps> = ({ yearId, yearNum
   };
 
   // ✅ Theme-aware styles
-  const bgColor = theme === 'dark' ? 'bg-purple-900/60' : 'bg-white';
   const textColor = theme === 'dark' ? 'text-purple-100' : 'text-gray-800';
   const subTextColor = theme === 'dark' ? 'text-purple-300' : 'text-gray-500';
   const cardBg = theme === 'dark' ? 'bg-purple-800/40 border-purple-700/50' : 'bg-white/80 border-rose-50';

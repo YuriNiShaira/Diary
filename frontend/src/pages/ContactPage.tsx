@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, User, Mail, Send, ArrowLeft, Heart } from 'lucide-react';
+import { MessageCircle, User, Mail, Send, ArrowLeft, } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';

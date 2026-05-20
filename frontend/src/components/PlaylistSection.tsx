@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Music, Plus, Edit, Trash2, X, CheckCircle,
-  Star, Heart, Volume2, PlayCircle, Play
+  Star, Heart, Volume2, Play
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -180,16 +180,6 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
   const closeModal = () => {
     setIsModalOpen(false);
     resetForm();
-  };
-
-  const getYouTubeEmbedUrl = (url: string) => {
-    if (!url) return null;
-    const patterns = [/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/, /youtube\.com\/embed\/([^&\n?#]+)/];
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match && match[1]) return `https://www.youtube.com/embed/${match[1]}`;
-    }
-    return url;
   };
 
   return (

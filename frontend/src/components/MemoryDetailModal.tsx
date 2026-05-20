@@ -7,7 +7,6 @@ import {
   Heart,
   Quote,
   Edit2,
-  Sparkles,
 } from 'lucide-react';
 
 interface Memory {
