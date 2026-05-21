@@ -16,33 +16,39 @@ from .serializers import (
 )
 from .permissions import IsCoupleMember
 from django.db.models import Avg
-from supabase import create_client, Client
 import os
 import uuid
-
-supabase_url = os.getenv('SUPABASE_URL')
-supabase_key = os.getenv('SUPABASE_ANON_KEY')
-supabase: Client = create_client(supabase_url, supabase_key) if supabase_url and supabase_key else None
+import requests
 
 
 def upload_to_supabase(file, folder="memories"):
     """Upload file to Supabase Storage and return public URL"""
-    if not supabase or not file:
+    supabase_url = os.getenv('SUPABASE_URL')
+    supabase_key = os.getenv('SUPABASE_ANON_KEY')
+    
+    if not supabase_url or not supabase_key or not file:
         return None
     
     file_ext = file.name.split('.')[-1] if '.' in file.name else 'jpg'
     file_name = f"{folder}/{uuid.uuid4()}.{file_ext}"
     
     try:
-        supabase.storage.from_('memories').upload(
-            file_name,
-            file.read(),
-            {"content-type": file.content_type or "image/jpeg"}
+        response = requests.post(
+            f"{supabase_url}/storage/v1/object/{file_name}",
+            headers={
+                "Authorization": f"Bearer {supabase_key}",
+                "Content-Type": file.content_type or "image/jpeg",
+            },
+            data=file.read(),
         )
-        url = supabase.storage.from_('memories').get_public_url(file_name)
-        return url
+        
+        if response.status_code == 200:
+            return f"{supabase_url}/storage/v1/object/public/{file_name}"
+        else:
+            print(f"Upload failed: {response.status_code}")
+            return None
     except Exception as e:
-        print(f"Supabase upload error: {e}")
+        print(f"Upload error: {e}")
         return None
 
 
