@@ -5,15 +5,9 @@ from datetime import timedelta
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Load env FIRST (important fix)
 load_dotenv(BASE_DIR / '.env')
 
-# ============================================
-# SECURITY
-# ============================================
-
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
@@ -21,10 +15,6 @@ ALLOWED_HOSTS = os.getenv(
     'ALLOWED_HOSTS',
     'localhost,127.0.0.1,diary-backend-pcy8.onrender.com'
 ).split(',')
-
-# ============================================
-# INSTALLED APPS
-# ============================================
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -34,48 +24,28 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Cloudinary (FIXED)
-    'cloudinary',
-    'cloudinary_storage',
-
-    # DRF
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-
-    # CORS
     'corsheaders',
 
-    # Apps
     'diary_project.apps.DiaryProjectConfig',
     'accounts.apps.AccountsConfig',
 ]
 
-# ============================================
-# MIDDLEWARE
-# ============================================
-
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
-
-# ============================================
-# TEMPLATES
-# ============================================
 
 TEMPLATES = [
     {
@@ -95,10 +65,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# ============================================
-# DATABASE
-# ============================================
-
 DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///db.sqlite3',
@@ -107,10 +73,6 @@ DATABASES = {
     )
 }
 
-# ============================================
-# PASSWORD VALIDATION
-# ============================================
-
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -118,65 +80,28 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# ============================================
-# INTERNATIONALIZATION
-# ============================================
-
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Manila'
 USE_I18N = True
 USE_TZ = True
 
-# ============================================
-# STATIC FILES
-# ============================================
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# ============================================
-# MEDIA (CLOUDINARY FIX)
-# ============================================
-
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
-}
-
 MEDIA_URL = '/media/'
-
-# ============================================
-# CORS
-# ============================================
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:3000',
     'https://logofus.vercel.app',
 ]
-
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
 CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
+    'accept', 'accept-encoding', 'authorization', 'content-type',
+    'dnt', 'origin', 'user-agent', 'x-csrftoken', 'x-requested-with',
 ]
-
-# ============================================
-# REST FRAMEWORK
-# ============================================
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
@@ -194,10 +119,6 @@ REST_FRAMEWORK = {
     }
 }
 
-# ============================================
-# JWT
-# ============================================
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -207,22 +128,12 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
-# ============================================
-# EMAIL
-# ============================================
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-# ============================================
-# DEFAULT AUTO FIELD
-# ============================================
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
