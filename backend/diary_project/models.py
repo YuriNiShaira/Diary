@@ -1,13 +1,11 @@
 from django.db import models
 from accounts.models import Couple
 from django.utils import timezone
-from cloudinary.models import CloudinaryField
-
 
 class Year(models.Model):
     couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='years') 
     year = models.IntegerField()
-    cover_image = CloudinaryField('image', folder='year_covers/', null=True, blank=True)
+    cover_image = models.ImageField(upload_to='year_covers/', null=True, blank=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -17,7 +15,6 @@ class Year(models.Model):
     
     def __str__(self):
         return f"{self.couple.name} - {self.year}"
-
 
 class Memory(models.Model):
     MEMORY_TYPES = [
@@ -29,12 +26,12 @@ class Memory(models.Model):
         ('sad', '💙 Sad Moment'),
     ]
     
-    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='memories')
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='memories')  # NEW
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='memories')
     title = models.CharField(max_length=200)
     date = models.DateField()
     description = models.TextField()
-    image = CloudinaryField('image', folder='memories/', null=True, blank=True)
+    image = models.ImageField(upload_to='memories/', null=True, blank=True)
     location = models.CharField(max_length=200, blank=True)
     favorite_quote = models.TextField(blank=True)
     memory_type = models.CharField(max_length=20, choices=MEMORY_TYPES, default='special')
@@ -68,11 +65,12 @@ class AnimeRating(models.Model):
         ('show', '📺 TV Show'),
     ]
     
-    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='anime_ratings')
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='anime_ratings')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='anime_ratings')
     title = models.CharField(max_length=200)
     media_type = models.CharField(max_length=20, choices=MEDIA_TYPE_CHOICES, default='anime')
     
+    # Separate ratings for each person
     my_ratings = models.JSONField(default=dict, blank=True)
     shaira_ratings = models.JSONField(default=dict, blank=True)
     
@@ -80,6 +78,7 @@ class AnimeRating(models.Model):
     shaira_overall = models.FloatField(default=0)
     combined_overall = models.FloatField(default=0)
     
+    # Additional info
     genre = models.CharField(max_length=100, blank=True)
     watched_together = models.BooleanField(default=True)
     my_favorite_character = models.CharField(max_length=100, blank=True)
@@ -118,11 +117,13 @@ class AnimeRating(models.Model):
             self.combined_overall = 0
         super().save(*args, **kwargs)
 
-
 class AnimeCategory(models.Model):
-    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='anime_categories')
+    """Custom categories that can be added per year"""
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='anime_categories')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='anime_categories')
     name = models.CharField(max_length=50)
+    icon = models.CharField(max_length=50, default='Star')
+    color = models.CharField(max_length=50, default='from-blue-400 to-cyan-400')
     order = models.IntegerField(default=0)
     media_type = models.CharField(max_length=20, choices=AnimeRating.MEDIA_TYPE_CHOICES, default='anime')  
     
@@ -133,9 +134,8 @@ class AnimeCategory(models.Model):
     def __str__(self):
         return f"[{self.get_media_type_display()}] {self.name} - {self.year.year}"
 
-
 class YearFunFacts(models.Model):
-    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='year_fun_facts')
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='year_fun_facts')  # CHANGED
     year = models.OneToOneField(Year, on_delete=models.CASCADE, related_name='fun_facts')
     favorite_food = models.CharField(max_length=100, blank=True)
     favorite_anime = models.CharField(max_length=200, blank=True)
@@ -151,12 +151,15 @@ class YearFunFacts(models.Model):
     
 
 class CoupleGameScore(models.Model):
-    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='game_scores')
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='game_scores')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='game_scores')
     game_name = models.CharField(max_length=60)
+
     my_score = models.IntegerField(default=0)
     shaira_score = models.IntegerField(default=0)
+
     game_history = models.JSONField(default=list, blank=True)
+
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -165,7 +168,7 @@ class CoupleGameScore(models.Model):
     def __str__(self):
         return f"{self.game_name} - {self.year.year}: Me {self.my_score} vs Shaira {self.shaira_score}"
     
-    def add_win(self, winner: str):
+    def add_win(self, winner:str):
         if winner == 'me':
             self.my_score += 1
         elif winner == 'shaira':
@@ -178,7 +181,6 @@ class CoupleGameScore(models.Model):
         elif self.shaira_score > self.my_score:
             return 'shaira'
         return 'tie'
-
 
 class QuizQuestion(models.Model):
     DIFFICULTY_CHOICES = [
@@ -195,16 +197,22 @@ class QuizQuestion(models.Model):
         ('memories', 'Memories'),
         ('other', 'Other'),
     ]
-    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='quiz_questions')
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='quiz_questions')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='quiz_questions')
     question = models.TextField()
     answer = models.CharField(max_length=500)
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, default='easy')
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
+    
+    # Who created this question
     created_by = models.CharField(max_length=20, choices=[('me', 'Me'), ('shaira', 'Shaira')], default='me')
+
     hint = models.TextField(blank=True)
+    
+    # Track if question has been used/answered
     is_used = models.BooleanField(default=False)
     last_used = models.DateTimeField(null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -219,11 +227,14 @@ class QuizQuestion(models.Model):
     
 
 class QuizScore(models.Model):
-    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='quiz_scores')
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='quiz_scores')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='quiz_scores')
+
     my_score = models.IntegerField(default=0)
     shaira_score = models.IntegerField(default=0)
+
     answered_questions = models.ManyToManyField(QuizQuestion, blank=True)
+
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -237,6 +248,7 @@ class QuizScore(models.Model):
             self.my_score += points
         elif player == "shaira":
             self.shaira_score += points
+
         self.answered_questions.add(question)
         question.is_used = True
         question.last_used = timezone.now()
@@ -245,23 +257,31 @@ class QuizScore(models.Model):
 
 
 class SongRecommendation(models.Model):
-    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='song_recommendations')
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='song_recommendations')  # CHANGED
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='song_recommendations')
+    
     title = models.CharField(max_length=200)
     artist = models.CharField(max_length=200)
-    recommended_by = models.CharField(max_length=20, choices=[('me', 'Me'), ('shaira', 'Shaira')])
-    recommended_to = models.CharField(max_length=20, choices=[('me', 'Me'), ('shaira', 'Shaira')])
+    
+    # Who recommended it to whom
+    recommended_by = models.CharField(max_length=20, choices=[('me', 'Yuri'), ('shaira', 'Shaira')])
+    recommended_to = models.CharField(max_length=20, choices=[('me', 'Yuri'), ('shaira', 'Shaira')])
+    
+    # Links
     youtube_link = models.URLField(blank=True)
     spotify_link = models.URLField(blank=True)
+    
+    # Status
     is_listened = models.BooleanField(default=False)
     rating = models.IntegerField(null=True, blank=True, choices=[(i, str(i)) for i in range(1, 6)])
+    
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"{self.title} - {self.artist}"
+        return f"{self.title} - {self.artist} (from {self.get_recommended_by_display()} to {self.get_recommended_to_display()})"
 
 
 class BucketListItem(models.Model):
@@ -281,18 +301,29 @@ class BucketListItem(models.Model):
         ('completed', '✅ Completed'),
     ]
     
-    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='bucket_list_items')
+    couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='bucket_list_items')  # CHANGED
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
+    
+    # Who added it
     added_by = models.CharField(max_length=20, choices=[('me', 'Me'), ('shaira', 'Shaira')], default='me')
+    
+    # Status tracking
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     priority = models.IntegerField(default=1, choices=[(1, '⭐ Low'), (2, '⭐⭐ Medium'), (3, '⭐⭐⭐ High')])
+    
+    # Completion details
     completed_at = models.DateTimeField(null=True, blank=True)
     completed_by = models.CharField(max_length=20, choices=[('me', 'Me'), ('shaira', 'Shaira'), ('both', 'Both')], null=True, blank=True)
     completion_notes = models.TextField(blank=True)
-    image = CloudinaryField('image', folder='bucketlist/', null=True, blank=True)
+    
+    # Attachments
+    image = models.ImageField(upload_to='bucketlist/', null=True, blank=True)
+    
+    # Target timeline
     target_date = models.DateField(null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

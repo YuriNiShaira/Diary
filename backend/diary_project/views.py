@@ -16,6 +16,34 @@ from .serializers import (
 )
 from .permissions import IsCoupleMember
 from django.db.models import Avg
+from supabase import create_client, Client
+import os
+import uuid
+
+supabase_url = os.getenv('SUPABASE_URL')
+supabase_key = os.getenv('SUPABASE_ANON_KEY')
+supabase: Client = create_client(supabase_url, supabase_key) if supabase_url and supabase_key else None
+
+
+def upload_to_supabase(file, folder="memories"):
+    """Upload file to Supabase Storage and return public URL"""
+    if not supabase or not file:
+        return None
+    
+    file_ext = file.name.split('.')[-1] if '.' in file.name else 'jpg'
+    file_name = f"{folder}/{uuid.uuid4()}.{file_ext}"
+    
+    try:
+        supabase.storage.from_('memories').upload(
+            file_name,
+            file.read(),
+            {"content-type": file.content_type or "image/jpeg"}
+        )
+        url = supabase.storage.from_('memories').get_public_url(file_name)
+        return url
+    except Exception as e:
+        print(f"Supabase upload error: {e}")
+        return None
 
 
 # ============================================
@@ -80,19 +108,30 @@ class MemoryViewSet(CoupleFilteredViewSet):
         couple = get_couple(self.request)
         year_id = self.request.data.get('year')
         memory_date = serializer.validated_data.get('date')
+        image_file = self.request.FILES.get('image')
 
+        # Validate date matches year
         if year_id and memory_date:
             try:
                 year = Year.objects.get(id=year_id, couple=couple)
                 if memory_date.year != year.year:
                     from rest_framework import serializers as drf_serializers
                     raise drf_serializers.ValidationError({
-                        'date': f'This memory is from {memory_date.year}, but this year is {year.year}. Please add it to the {memory_date.year} year instead.'
+                        'date': f'This memory is from {memory_date.year}, but this year is {year.year}.'
                     })
             except Year.DoesNotExist:
                 pass
-        
-        serializer.save(couple=couple)
+
+        # Upload to Supabase
+        image_url = None
+        if image_file:
+            image_url = upload_to_supabase(image_file)
+
+        # Save
+        memory = serializer.save(couple=couple)
+        if image_url:
+            memory.image = image_url
+            memory.save(update_fields=['image'])
 
 
 class LoveLetterViewSet(CoupleFilteredViewSet):
