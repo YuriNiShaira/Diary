@@ -382,7 +382,7 @@ const Dashboard: React.FC = () => {
             </div>
             
             <p className="text-xs text-gray-400 mt-4">
-              Your partner can join at <strong>/join</strong> with this code
+              Share this code to your partner to connect 
             </p>
           </motion.div>
         </motion.div>
