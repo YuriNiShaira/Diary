@@ -125,10 +125,6 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
     setImage(null);
     setPreview('');
   };
-
-  // Get min and max dates based on the year
-  const minDate = yearData ? `${yearData.year}-01-01` : '1950-01-01';
-  const maxDate = yearData ? `${yearData.year}-12-31` : '2099-12-31';
   
   // Check if selected date matches the year
   const selectedYear = date ? new Date(date).getFullYear() : null;
