@@ -508,9 +508,7 @@ def calendar_memories(request):
     for memory in queryset:
         date_key = memory.date.isoformat()
         
-        image_url = None
-        if memory.image:
-            image_url = request.build_absolute_uri(memory.image.url)
+        image_url = memory.image if memory.image else None
         
         memories_by_date[date_key].append({
             'id': memory.id,
