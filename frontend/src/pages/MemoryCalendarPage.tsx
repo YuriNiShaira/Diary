@@ -592,8 +592,9 @@ const MemoryCalendarPage: React.FC = () => {
         onNavigate={(yearId) => navigate(`/year/${yearId}`)}
         onDateChange={(newDate) => {
           setSelectedDate(newDate);
-          // Use the merged data so that cross‑month dates are available
-          setSelectedMemories(allMemoriesData[newDate] || []);
+          setTimeout(() => {
+            setSelectedMemories(allMemoriesData[newDate] || []);
+          }, 50);
         }}
       />
     </div>

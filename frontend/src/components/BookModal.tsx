@@ -57,31 +57,43 @@ const BookModal: React.FC<BookModalProps> = ({
   const canGoPrev = currentPage > 0 || prevDateAvailable;
 
   const flipPage = (dir: number) => {
-    if (isFlipping) return;
-    setDirection(dir);
-    setIsFlipping(true);
-
-    if (dir === 1) {
-      if (currentPage < totalPages - 1) {
-        setCurrentPage(prev => prev + 1);
-      } else if (nextDateAvailable) {
-        const nextDate = datesWithMemories[currentDateIndex + 1];
-        onDateChange(nextDate);
-        // currentPage will be reset to 0 by useEffect
+      if (isFlipping) return;
+      
+      if (dir === 1) {
+        // Next
+        if (currentPage < totalPages - 1) {
+          setDirection(1);
+          setIsFlipping(true);
+          setCurrentPage(prev => prev + 1);
+          setTimeout(() => setIsFlipping(false), 600);
+        } else if (hasNextDate) {
+          setDirection(1);
+          setIsFlipping(true);
+          const nextDate = datesWithMemories[currentDateIndex + 1];
+          onDateChange(nextDate);
+          setTimeout(() => {
+            setCurrentPage(0);
+            setIsFlipping(false);
+          }, 300);
+        }
+      } else {
+        // Previous
+        if (currentPage > 0) {
+          setDirection(-1);
+          setIsFlipping(true);
+          setCurrentPage(prev => prev - 1);
+          setTimeout(() => setIsFlipping(false), 600);
+        } else if (hasPrevDate) {
+          setDirection(-1);
+          setIsFlipping(true);
+          const prevDate = datesWithMemories[currentDateIndex - 1];
+          onDateChange(prevDate);
+          setTimeout(() => {
+            setIsFlipping(false);
+          }, 300);
+        }
       }
-    } else {
-      if (currentPage > 0) {
-        setCurrentPage(prev => prev - 1);
-      } else if (prevDateAvailable) {
-        const prevDate = datesWithMemories[currentDateIndex - 1];
-        onDateChange(prevDate);
-        // currentPage will be reset to memories.length - 1 by useEffect? No, we need to set it manually
-        // We'll let the date change trigger the reset to 0, but we want to start at last page.
-        // So we'll handle it in the onDateChange of the parent? Actually we can use a ref.
-      }
-    }
-    setTimeout(() => setIsFlipping(false), 600);
-  };
+    };
 
   // When we go to a previous date, we want to land on its last memory
   useEffect(() => {
