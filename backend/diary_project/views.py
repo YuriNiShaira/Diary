@@ -98,16 +98,17 @@ class CoupleFilteredViewSet(viewsets.ModelViewSet):
 class YearViewSet(CoupleFilteredViewSet):
     queryset = Year.objects.all()
     serializer_class = YearSerializer
-
+    
     def perform_create(self, serializer):
         couple = get_couple(self.request)
         image_file = self.request.FILES.get('cover_image')
-
+        
         # Upload cover image to Supabase
         image_url = None
         if image_file:
             image_url = upload_to_supabase(image_file, folder='year_covers')
-
+        
+        # Validate anniversary year
         year_value = serializer.validated_data.get('year')
         if couple and couple.anniversary_date:
             anniversary_year = couple.anniversary_date.year
@@ -121,7 +122,7 @@ class YearViewSet(CoupleFilteredViewSet):
         if image_url:
             year.cover_image = image_url
             year.save(update_fields=['cover_image'])
-
+    
     @action(detail=True, methods=['get'])
     def memories(self, request, pk=None):
         year = self.get_object()
