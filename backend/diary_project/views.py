@@ -121,17 +121,12 @@ class MemoryViewSet(CoupleFilteredViewSet):
 
     def perform_create(self, serializer):
         print("===== PERFORM_CREATE CALLED =====")
-        print(f"FILES: {self.request.FILES}")
-        print(f"image_file: {self.request.FILES.get('image')}")
         
         couple = get_couple(self.request)
         year_id = self.request.data.get('year')
         memory_date = serializer.validated_data.get('date')
         image_file = self.request.FILES.get('image')
 
-        if image_file:
-            print(f"Uploading file: {image_file.name}, size: {image_file.size}")
-        
         # Validate date matches year
         if year_id and memory_date:
             try:
@@ -151,15 +146,16 @@ class MemoryViewSet(CoupleFilteredViewSet):
             image_url = upload_to_supabase(image_file)
             print(f"Result URL: {image_url}")
 
-        # Save
-        memory = serializer.save(couple=couple)
+        # Remove image from validated data to avoid URL validation on file
+        validated = serializer.validated_data.copy()
+        validated.pop('image', None)
+        
+        # Save without image, then update
+        memory = serializer.save(couple=couple, **validated)
         if image_url:
             memory.image = image_url
             memory.save(update_fields=['image'])
             print(f"Memory saved with image URL: {image_url}")
-        else:
-            print("No image URL - saving without image")
-
 
 class LoveLetterViewSet(CoupleFilteredViewSet):
     queryset = LoveLetter.objects.filter(is_active=True)

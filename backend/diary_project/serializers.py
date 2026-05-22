@@ -2,10 +2,12 @@ from rest_framework import serializers
 from .models import Year, Memory, LoveLetter, AnimeRating, YearFunFacts, AnimeCategory, CoupleGameScore, QuizScore, QuizQuestion, SongRecommendation, BucketListItem
 
 class MemorySerializer(serializers.ModelSerializer):
+    image = serializers.CharField(max_length=500, required=False, allow_null=True, allow_blank=True)
+    
     class Meta:
         model = Memory
         fields = '__all__'
-        read_only_fields = ['couple']  
+        read_only_fields = ['couple']
 
 class YearSerializer(serializers.ModelSerializer):
     memories = MemorySerializer(many=True, read_only=True)
