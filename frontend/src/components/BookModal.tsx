@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, Camera, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
@@ -40,28 +39,31 @@ const BookModal: React.FC<BookModalProps> = ({
   const hasNextDate = currentDateIndex < datesWithMemories.length - 1;
   const hasPrevDate = currentDateIndex > 0;
 
+  const canGoNext = currentPage < totalPages - 1 || hasNextDate;
+  const canGoPrev = currentPage > 0 || hasPrevDate;
+  
   const flipPage = (dir: number) => {
     if (isFlipping) return;
     setDirection(dir);
     setIsFlipping(true);
 
     if (dir === 1) {
-      // Next
       if (currentPage < totalPages - 1) {
         setCurrentPage(prev => prev + 1);
       } else if (hasNextDate) {
-        setCurrentPage(0);
         onDateChange(datesWithMemories[currentDateIndex + 1]);
+        setTimeout(() => setCurrentPage(0), 100);
       }
     } else {
-      // Previous
       if (currentPage > 0) {
         setCurrentPage(prev => prev - 1);
       } else if (hasPrevDate) {
-        onDateChange(datesWithMemories[currentDateIndex - 1]);
+        const prevDate = datesWithMemories[currentDateIndex - 1];
+        const prevMemories = allMemories[prevDate] || [];
+        onDateChange(prevDate);
+        setTimeout(() => setCurrentPage(prevMemories.length - 1), 100);
       }
     }
-    // Matches the new animation duration perfectly
     setTimeout(() => setIsFlipping(false), 600);
   };
 
@@ -82,7 +84,7 @@ const BookModal: React.FC<BookModalProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             className="relative w-full max-w-5xl"
-            style={{ perspective: "2500px" }} // Slightly increased for a better 3D depth effect
+            style={{ perspective: "2500px" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Book Cover */}
@@ -134,24 +136,22 @@ const BookModal: React.FC<BookModalProps> = ({
                   <div className="absolute bottom-0 w-0 h-0 border-l-[16px] border-r-[16px] border-b-[16px] border-l-transparent border-r-transparent border-b-[#FDFBF7] dark:border-b-[#232323]" />
                 </div>
 
-                {/* ✅ IMPROVED PAGE FLIP CONTAINER */}
+                {/* PAGE FLIP CONTAINER */}
                 <AnimatePresence mode="popLayout" custom={direction}>
                   <motion.div
                     key={`${date}-${currentPage}`}
                     custom={direction}
                     className="flex w-full flex-col md:flex-row absolute inset-0"
-                    // Pinned the transform origin to the center (the spine of the book)
                     style={{ transformStyle: "preserve-3d", transformOrigin: "center center" }}
                     initial={{
-                      // Open from a 90deg angle instead of 180, so it looks like it's lifting from the spine
                       rotateY: direction > 0 ? 90 : -90,
-                      z: 150, // Lifts the page toward the camera slightly while flipping
+                      z: 150,
                       scale: 0.98,
                       opacity: 0,
                     }}
                     animate={{
                       rotateY: 0,
-                      z: 0, // Settles flat
+                      z: 0,
                       scale: 1,
                       opacity: 1,
                     }}
@@ -163,10 +163,10 @@ const BookModal: React.FC<BookModalProps> = ({
                     }}
                     transition={{
                       duration: 0.6,
-                      ease: [0.32, 0.72, 0, 1], // Smooth, paper-like landing curve
+                      ease: [0.32, 0.72, 0, 1],
                     }}
                   >
-                    {/* ✅ Enhanced dynamic flip shadow to simulate a page turning over it */}
+                    {/* Dynamic flip shadow */}
                     <motion.div
                       className="pointer-events-none absolute inset-0 z-30"
                       initial={{ opacity: 0.6 }}
@@ -255,10 +255,10 @@ const BookModal: React.FC<BookModalProps> = ({
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Page Controls */}
+                {/* Page Controls - Replace button disabled props */}
                 <button
                   onClick={() => flipPage(-1)}
-                  disabled={(currentPage === 0 && !hasPrevDate) || isFlipping}
+                  disabled={!canGoPrev || isFlipping}
                   className="absolute bottom-6 left-6 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-md transition-all hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed dark:bg-gray-700/90 dark:text-gray-300"
                 >
                   <ChevronLeft className="h-5 w-5" />
@@ -270,7 +270,7 @@ const BookModal: React.FC<BookModalProps> = ({
 
                 <button
                   onClick={() => flipPage(1)}
-                  disabled={(currentPage === totalPages - 1 && !hasNextDate) || isFlipping}
+                  disabled={!canGoNext || isFlipping}
                   className="absolute bottom-6 right-6 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-md transition-all hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed dark:bg-gray-700/90 dark:text-gray-300"
                 >
                   <ChevronRight className="h-5 w-5" />
