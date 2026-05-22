@@ -26,11 +26,17 @@ def upload_to_supabase(file, folder="memories"):
     supabase_url = os.getenv('SUPABASE_URL')
     supabase_key = os.getenv('SUPABASE_ANON_KEY')
     
+    print(f"DEBUG: SUPABASE_URL = {supabase_url}")  
+    print(f"DEBUG: SUPABASE_KEY exists = {bool(supabase_key)}") 
+    
     if not supabase_url or not supabase_key or not file:
+        print(f"DEBUG: Missing config - url={bool(supabase_url)}, key={bool(supabase_key)}, file={bool(file)}")
         return None
     
     file_ext = file.name.split('.')[-1] if '.' in file.name else 'jpg'
     file_name = f"{folder}/{uuid.uuid4()}.{file_ext}"
+    
+    print(f"DEBUG: Uploading {file_name}...")  
     
     try:
         response = requests.post(
@@ -42,16 +48,19 @@ def upload_to_supabase(file, folder="memories"):
             data=file.read(),
         )
         
+        print(f"DEBUG: Response status = {response.status_code}")  
+        print(f"DEBUG: Response body = {response.text[:200]}")  
+        
         if response.status_code == 200:
-            return f"{supabase_url}/storage/v1/object/public/{file_name}"
+            url = f"{supabase_url}/storage/v1/object/public/{file_name}"
+            print(f"DEBUG: Success! URL = {url}")
+            return url
         else:
-            print(f"Upload failed: {response.status_code}")
+            print(f"Upload failed: {response.status_code} - {response.text}")
             return None
     except Exception as e:
         print(f"Upload error: {e}")
         return None
-
-
 # ============================================
 # HELPER
 # ============================================
@@ -111,11 +120,18 @@ class MemoryViewSet(CoupleFilteredViewSet):
         return Response(serializer.data)
 
     def perform_create(self, serializer):
+        print("===== PERFORM_CREATE CALLED =====")
+        print(f"FILES: {self.request.FILES}")
+        print(f"image_file: {self.request.FILES.get('image')}")
+        
         couple = get_couple(self.request)
         year_id = self.request.data.get('year')
         memory_date = serializer.validated_data.get('date')
         image_file = self.request.FILES.get('image')
 
+        if image_file:
+            print(f"Uploading file: {image_file.name}, size: {image_file.size}")
+        
         # Validate date matches year
         if year_id and memory_date:
             try:
@@ -131,13 +147,18 @@ class MemoryViewSet(CoupleFilteredViewSet):
         # Upload to Supabase
         image_url = None
         if image_file:
+            print("Calling upload_to_supabase...")
             image_url = upload_to_supabase(image_file)
+            print(f"Result URL: {image_url}")
 
         # Save
         memory = serializer.save(couple=couple)
         if image_url:
             memory.image = image_url
             memory.save(update_fields=['image'])
+            print(f"Memory saved with image URL: {image_url}")
+        else:
+            print("No image URL - saving without image")
 
 
 class LoveLetterViewSet(CoupleFilteredViewSet):
