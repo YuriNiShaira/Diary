@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Year, Memory, LoveLetter, AnimeRating, YearFunFacts, AnimeCategory, CoupleGameScore, QuizScore, QuizQuestion, SongRecommendation, BucketListItem
 
 class MemorySerializer(serializers.ModelSerializer):
-    image = serializers.CharField(max_length=500, required=False, allow_null=True, allow_blank=True)
+    image = serializers.CharField(max_length=500, required=False, allow_null=True, allow_blank=True, read_only=True)
     
     class Meta:
         model = Memory
