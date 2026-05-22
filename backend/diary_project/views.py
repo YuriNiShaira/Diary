@@ -121,6 +121,7 @@ class YearViewSet(CoupleFilteredViewSet):
         serializer = MemorySerializer(memories, many=True)
         return Response(serializer.data)
 
+
 class MemoryViewSet(CoupleFilteredViewSet):
     queryset = Memory.objects.all()
     serializer_class = MemorySerializer
@@ -140,6 +141,10 @@ class MemoryViewSet(CoupleFilteredViewSet):
         year_id = self.request.data.get('year')
         memory_date = serializer.validated_data.get('date')
         image_file = self.request.FILES.get('image')
+
+        if memory_date and memory_date > timezone.now().date():
+            from rest_framework import serializers as drf_serializers
+            raise drf_serializers.ValidationError({'date': 'You cannot create a memory in the future! 📅'})
 
         # Validate date matches year
         if year_id and memory_date:

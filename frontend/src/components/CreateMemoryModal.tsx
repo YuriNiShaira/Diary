@@ -190,9 +190,8 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    min={minDate}
-                    max={maxDate}
-                    className="w-full pl-10 pr-4 py-2 border border-soft-rose rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
+                    max={new Date().toISOString().split('T')[0]} 
+                    className="..."
                     required
                   />
                 </div>
