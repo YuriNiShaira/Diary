@@ -1,5 +1,5 @@
 // frontend/src/pages/MemoryCalendarPage.tsx
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -49,21 +49,46 @@ const MemoryCalendarPage: React.FC = () => {
   const [selectedMemories, setSelectedMemories] = useState<CalendarMemory[]>([]);
   const [viewMode, setViewMode] = useState<'calendar' | 'timeline'>('calendar');
   const [isBookOpen, setIsBookOpen] = useState(false);
-  const [allMemoriesData, setAllMemoriesData] = useState<Record<string, CalendarMemory[]>>({});
 
   // ✅ Dynamic start year from couple's anniversary
   const startYear = user?.anniversary_date
     ? new Date(user.anniversary_date).getFullYear()
     : today.getFullYear() - 5;
 
+  // Compute adjacent months (previous and next)
+  const prevMonthIndex = currentMonth === 0 ? 11 : currentMonth - 1;
+  const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+  const nextMonthIndex = currentMonth === 11 ? 0 : currentMonth + 1;
+  const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+
+  // Current month data
   const { data: calendarData, isLoading } = useQuery<CalendarData>({
     queryKey: ['calendar', currentYear, currentMonth + 1],
-    queryFn: async () => {
-      const response = await api.get(`/calendar/?year=${currentYear}&month=${currentMonth + 1}`);
-      setAllMemoriesData(response.data.memories);
-      return response.data;
-    },
+    queryFn: () => api.get(`/calendar/?year=${currentYear}&month=${currentMonth + 1}`).then(res => res.data),
   });
+
+  // Previous month data (if it falls within the valid year range)
+  const { data: prevCalendarData } = useQuery<CalendarData>({
+    queryKey: ['calendar', prevYear, prevMonthIndex + 1],
+    queryFn: () => api.get(`/calendar/?year=${prevYear}&month=${prevMonthIndex + 1}`).then(res => res.data),
+    enabled: prevYear >= startYear,
+  });
+
+  // Next month data (if it doesn't go beyond today)
+  const { data: nextCalendarData } = useQuery<CalendarData>({
+    queryKey: ['calendar', nextYear, nextMonthIndex + 1],
+    queryFn: () => api.get(`/calendar/?year=${nextYear}&month=${nextMonthIndex + 1}`).then(res => res.data),
+    enabled: nextYear < today.getFullYear() || (nextYear === today.getFullYear() && nextMonthIndex <= today.getMonth()),
+  });
+
+  // Merge all available month memories into one object for the book modal
+  const allMemoriesData = useMemo<Record<string, CalendarMemory[]>>(() => {
+    return {
+      ...(prevCalendarData?.memories || {}),
+      ...(calendarData?.memories || {}),
+      ...(nextCalendarData?.memories || {}),
+    };
+  }, [prevCalendarData, calendarData, nextCalendarData]);
 
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -557,7 +582,7 @@ const MemoryCalendarPage: React.FC = () => {
         )}
       </div>
 
-      {/* BookModal */}
+      {/* BookModal – now receives the merged allMemoriesData */}
       <BookModal
         isOpen={isBookOpen}
         onClose={() => setIsBookOpen(false)}
@@ -567,6 +592,7 @@ const MemoryCalendarPage: React.FC = () => {
         onNavigate={(yearId) => navigate(`/year/${yearId}`)}
         onDateChange={(newDate) => {
           setSelectedDate(newDate);
+          // Use the merged data so that cross‑month dates are available
           setSelectedMemories(allMemoriesData[newDate] || []);
         }}
       />
