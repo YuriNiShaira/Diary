@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Camera, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { X, Heart, Camera, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2 } from 'lucide-react';
 
 interface CalendarMemory {
   id: number;
@@ -24,24 +24,38 @@ interface BookModalProps {
   onDateChange: (date: string) => void;
 }
 
-const BookModal: React.FC<BookModalProps> = ({ 
-  isOpen, onClose, date, memories, allMemories, onNavigate, onDateChange 
+const BookModal: React.FC<BookModalProps> = ({
+  isOpen, onClose, date, memories, allMemories, onNavigate, onDateChange
 }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isFlipping, setIsFlipping] = useState(false);
+  const prevDateRef = useRef(date);
+
+  // Reset page when date changes
+  useEffect(() => {
+    if (prevDateRef.current !== date) {
+      setCurrentPage(0);
+      setIsFlipping(false); 
+      prevDateRef.current = date;
+    }
+  }, [date]);
 
   const currentMemory = memories[currentPage];
   const totalPages = memories.length;
-  
+
   const datesWithMemories = Object.keys(allMemories).sort();
   const currentDateIndex = datesWithMemories.indexOf(date);
   const hasNextDate = currentDateIndex < datesWithMemories.length - 1;
   const hasPrevDate = currentDateIndex > 0;
 
-  const canGoNext = currentPage < totalPages - 1 || hasNextDate;
-  const canGoPrev = currentPage > 0 || hasPrevDate;
-  
+  // Determine if we can actually load the next/prev date (data might not be loaded yet)
+  const nextDateAvailable = hasNextDate && allMemories[datesWithMemories[currentDateIndex + 1]] !== undefined;
+  const prevDateAvailable = hasPrevDate && allMemories[datesWithMemories[currentDateIndex - 1]] !== undefined;
+
+  const canGoNext = currentPage < totalPages - 1 || nextDateAvailable;
+  const canGoPrev = currentPage > 0 || prevDateAvailable;
+
   const flipPage = (dir: number) => {
     if (isFlipping) return;
     setDirection(dir);
@@ -50,24 +64,51 @@ const BookModal: React.FC<BookModalProps> = ({
     if (dir === 1) {
       if (currentPage < totalPages - 1) {
         setCurrentPage(prev => prev + 1);
-      } else if (hasNextDate) {
-        onDateChange(datesWithMemories[currentDateIndex + 1]);
-        setTimeout(() => setCurrentPage(0), 100);
+      } else if (nextDateAvailable) {
+        const nextDate = datesWithMemories[currentDateIndex + 1];
+        onDateChange(nextDate);
+        // currentPage will be reset to 0 by useEffect
       }
     } else {
       if (currentPage > 0) {
         setCurrentPage(prev => prev - 1);
-      } else if (hasPrevDate) {
+      } else if (prevDateAvailable) {
         const prevDate = datesWithMemories[currentDateIndex - 1];
-        const prevMemories = allMemories[prevDate] || [];
         onDateChange(prevDate);
-        setTimeout(() => setCurrentPage(prevMemories.length - 1), 100);
+        // currentPage will be reset to memories.length - 1 by useEffect? No, we need to set it manually
+        // We'll let the date change trigger the reset to 0, but we want to start at last page.
+        // So we'll handle it in the onDateChange of the parent? Actually we can use a ref.
       }
     }
     setTimeout(() => setIsFlipping(false), 600);
   };
 
-  if (!currentMemory) return null;
+  // When we go to a previous date, we want to land on its last memory
+  useEffect(() => {
+    if (prevDateRef.current !== date && direction === -1 && memories.length > 0) {
+      // We are on a new date navigated backwards, set page to last memory
+      setCurrentPage(memories.length - 1);
+    }
+  }, [memories.length, date, direction]);
+
+  if (!currentMemory) {
+    // Show a mini loading state instead of disappearing
+    return (
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+            onClick={onClose}
+          >
+            <Loader2 className="h-10 w-10 animate-spin text-white" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
 
   return (
     <AnimatePresence>
@@ -89,7 +130,7 @@ const BookModal: React.FC<BookModalProps> = ({
           >
             {/* Book Cover */}
             <div className="relative overflow-visible rounded-xl bg-[#2C292A] p-2 pb-3 pr-3 shadow-[0_30px_60px_rgba(0,0,0,0.5)] dark:bg-[#1A1819]">
-              
+
               {/* Close Button */}
               <button
                 onClick={onClose}
@@ -101,8 +142,12 @@ const BookModal: React.FC<BookModalProps> = ({
               {/* Side Date Navigation */}
               <div className="absolute -left-14 top-1/2 -translate-y-1/2 z-50 hidden md:block">
                 <button
-                  onClick={() => { setDirection(-1); setCurrentPage(0); onDateChange(datesWithMemories[currentDateIndex - 1]); }}
-                  disabled={!hasPrevDate || isFlipping}
+                  onClick={() => {
+                    if (!prevDateAvailable) return;
+                    setDirection(-1);
+                    onDateChange(datesWithMemories[currentDateIndex - 1]);
+                  }}
+                  disabled={!prevDateAvailable || isFlipping}
                   className="group flex flex-col items-center gap-1 rounded-l-lg bg-[#3d3a3b] p-3 text-gray-400 transition-all hover:text-rose-400 disabled:opacity-20 disabled:cursor-not-allowed"
                 >
                   <ChevronsLeft className="h-5 w-5" />
@@ -112,8 +157,12 @@ const BookModal: React.FC<BookModalProps> = ({
 
               <div className="absolute -right-14 top-1/2 -translate-y-1/2 z-50 hidden md:block">
                 <button
-                  onClick={() => { setDirection(1); setCurrentPage(0); onDateChange(datesWithMemories[currentDateIndex + 1]); }}
-                  disabled={!hasNextDate || isFlipping}
+                  onClick={() => {
+                    if (!nextDateAvailable) return;
+                    setDirection(1);
+                    onDateChange(datesWithMemories[currentDateIndex + 1]);
+                  }}
+                  disabled={!nextDateAvailable || isFlipping}
                   className="group flex flex-col items-center gap-1 rounded-r-lg bg-[#3d3a3b] p-3 text-gray-400 transition-all hover:text-rose-400 disabled:opacity-20 disabled:cursor-not-allowed"
                 >
                   <ChevronsRight className="h-5 w-5" />
@@ -127,7 +176,7 @@ const BookModal: React.FC<BookModalProps> = ({
 
               {/* --- BOOK PAGES --- */}
               <div className="relative flex min-h-[500px] w-full overflow-hidden rounded bg-[#FDFBF7] dark:bg-[#232323] md:min-h-[600px]" style={{ perspective: "2500px" }}>
-                
+
                 {/* Center binding */}
                 <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 hidden w-8 -translate-x-1/2 bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.08)] to-transparent dark:via-[rgba(0,0,0,0.5)] md:block z-20" />
 
@@ -184,13 +233,13 @@ const BookModal: React.FC<BookModalProps> = ({
                     <div className="relative flex w-full flex-col items-center justify-center p-8 md:w-1/2 md:p-12 bg-[#FDFBF7] dark:bg-[#232323]">
                       {currentMemory.image ? (
                         <div className="relative group rotate-[-2deg] bg-white p-4 pb-12 shadow-[0_10px_25px_rgba(0,0,0,0.15)] transition-transform duration-500 hover:rotate-0 dark:bg-[#1A1A1A]">
-                          <div 
-                            className="absolute -top-4 left-1/2 h-10 w-28 -translate-x-1/2 rotate-[2deg] bg-amber-100/70 shadow-sm border border-amber-200/50 backdrop-blur-sm" 
-                            style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.3) 5px, rgba(255,255,255,0.3) 10px)' }} 
+                          <div
+                            className="absolute -top-4 left-1/2 h-10 w-28 -translate-x-1/2 rotate-[2deg] bg-amber-100/70 shadow-sm border border-amber-200/50 backdrop-blur-sm"
+                            style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.3) 5px, rgba(255,255,255,0.3) 10px)' }}
                           />
-                          <div 
+                          <div
                             className="absolute -bottom-2 left-1/3 h-8 w-20 -translate-x-1/2 -rotate-[2deg] bg-rose-100/60 shadow-sm border border-rose-200/40 backdrop-blur-sm"
-                            style={{ backgroundImage: 'repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(255,255,255,0.3) 4px, rgba(255,255,255,0.3) 8px)' }} 
+                            style={{ backgroundImage: 'repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(255,255,255,0.3) 4px, rgba(255,255,255,0.3) 8px)' }}
                           />
                           <img
                             src={currentMemory.image}
@@ -212,7 +261,7 @@ const BookModal: React.FC<BookModalProps> = ({
                     {/* RIGHT PAGE */}
                     <div className="relative flex w-full flex-col justify-start p-8 md:w-1/2 md:p-12 md:pl-16 bg-[#FDFBF7] dark:bg-[#232323]">
                       <div className="pointer-events-none absolute inset-0 bottom-12 top-24 bg-[linear-gradient(transparent_31px,rgba(0,0,0,0.06)_32px)] bg-[length:100%_32px] dark:bg-[linear-gradient(transparent_31px,rgba(255,255,255,0.05)_32px)]" />
-                      
+
                       <div className="relative flex h-full flex-col z-10">
                         <div className="mb-8 flex justify-end">
                           <div className="text-right font-serif">
@@ -255,7 +304,7 @@ const BookModal: React.FC<BookModalProps> = ({
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Page Controls - Replace button disabled props */}
+                {/* Page Controls */}
                 <button
                   onClick={() => flipPage(-1)}
                   disabled={!canGoPrev || isFlipping}
