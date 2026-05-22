@@ -272,9 +272,34 @@ const BookModal: React.FC<BookModalProps> = ({
                           </div>
                         </div>
                       ) : (
-                        <div className="flex h-[360px] w-[320px] rotate-[-2deg] flex-col items-center justify-center border-2 border-dashed border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-[#1C1C1C]">
-                          <Camera className="mb-3 h-10 w-10 text-gray-300 dark:text-gray-600" />
-                          <span className="font-serif text-sm italic text-gray-400">No photo</span>
+                        <div 
+                          className="relative flex h-[360px] w-[320px] rotate-[-1deg] flex-col items-center justify-center overflow-hidden bg-black/[0.02] transition-transform duration-500 hover:rotate-0 dark:bg-white/[0.02] shadow-[inset_0_2px_15px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_2px_15px_rgba(0,0,0,0.3)]"
+                          style={{
+                            // Adds a very subtle paper grain texture to the empty space
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E")`
+                          }}
+                        >
+                          {/* Vintage Photo Mounting Corners */}
+                          <div className="absolute top-4 left-4 h-6 w-6 border-l-[1px] border-t-[1px] border-[#5c4b3a]/30 dark:border-[#d4c5b0]/20" />
+                          <div className="absolute top-4 right-4 h-6 w-6 border-r-[1px] border-t-[1px] border-[#5c4b3a]/30 dark:border-[#d4c5b0]/20" />
+                          <div className="absolute bottom-4 left-4 h-6 w-6 border-l-[1px] border-b-[1px] border-[#5c4b3a]/30 dark:border-[#d4c5b0]/20" />
+                          <div className="absolute bottom-4 right-4 h-6 w-6 border-r-[1px] border-b-[1px] border-[#5c4b3a]/30 dark:border-[#d4c5b0]/20" />
+                          
+                          {/* Faded Camera Icon */}
+                          <div className="mb-4 rounded-full border border-[#5c4b3a]/20 p-4 opacity-60 dark:border-[#d4c5b0]/20">
+                            <Camera strokeWidth={1} className="h-8 w-8 text-[#5c4b3a] dark:text-[#d4c5b0]" />
+                          </div>
+                          
+                          {/* Elegant Typography mimicking faded journal ink */}
+                          <span className="font-serif text-lg italic text-[#5c4b3a]/70 dark:text-[#d4c5b0]/60">
+                            No photograph
+                          </span>
+                          
+                          <div className="mt-3 h-px w-12 bg-[#5c4b3a]/20 dark:bg-[#d4c5b0]/20" />
+                          
+                          <span className="mt-4 px-8 text-center font-serif text-xs italic leading-relaxed text-[#5c4b3a]/50 dark:text-[#d4c5b0]/40">
+                            The memory is written,<br/>though the frame remains empty.
+                          </span>
                         </div>
                       )}
                     </div>
