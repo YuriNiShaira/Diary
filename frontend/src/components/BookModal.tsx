@@ -44,17 +44,26 @@ const BookModal: React.FC<BookModalProps> = ({
   const currentMemory = memories[currentPage];
   const totalPages = memories.length;
 
-  const datesWithMemories = Object.keys(allMemories).sort();
+  // --- THE FIX ---
+  // 1. Filter out dates that might exist in the keys but have no memories.
+  // 2. Sort mathematically by actual time, not alphabetically by string.
+  const datesWithMemories = Object.keys(allMemories)
+    .filter(d => allMemories[d] && allMemories[d].length > 0)
+    .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
   const currentDateIndex = datesWithMemories.indexOf(date);
-  const hasNextDate = currentDateIndex < datesWithMemories.length - 1;
+  
+  // Ensure we actually found the date (index !== -1) before allowing navigation
+  const hasNextDate = currentDateIndex !== -1 && currentDateIndex < datesWithMemories.length - 1;
   const hasPrevDate = currentDateIndex > 0;
 
-  // Determine if we can actually load the next/prev date (data might not be loaded yet)
-  const nextDateAvailable = hasNextDate && allMemories[datesWithMemories[currentDateIndex + 1]] !== undefined;
-  const prevDateAvailable = hasPrevDate && allMemories[datesWithMemories[currentDateIndex - 1]] !== undefined;
+  // Because we filtered out empty arrays above, we don't need the !== undefined check anymore
+  const nextDateAvailable = hasNextDate;
+  const prevDateAvailable = hasPrevDate;
 
   const canGoNext = currentPage < totalPages - 1 || nextDateAvailable;
   const canGoPrev = currentPage > 0 || prevDateAvailable;
+  // ---------------
 
   const flipPage = (dir: number) => {
       if (isFlipping) return;
