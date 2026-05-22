@@ -25,22 +25,17 @@ def upload_to_supabase(file, folder="memories"):
     """Upload file to Supabase Storage and return public URL"""
     supabase_url = os.getenv('SUPABASE_URL')
     supabase_key = os.getenv('SUPABASE_ANON_KEY')
-    
-    print(f"DEBUG: SUPABASE_URL = {supabase_url}")  
-    print(f"DEBUG: SUPABASE_KEY exists = {bool(supabase_key)}") 
+    bucket = "memories"  
     
     if not supabase_url or not supabase_key or not file:
-        print(f"DEBUG: Missing config - url={bool(supabase_url)}, key={bool(supabase_key)}, file={bool(file)}")
         return None
     
     file_ext = file.name.split('.')[-1] if '.' in file.name else 'jpg'
     file_name = f"{folder}/{uuid.uuid4()}.{file_ext}"
     
-    print(f"DEBUG: Uploading {file_name}...")  
-    
     try:
         response = requests.post(
-            f"{supabase_url}/storage/v1/object/{file_name}",
+            f"{supabase_url}/storage/v1/object/{bucket}/{file_name}",  
             headers={
                 "Authorization": f"Bearer {supabase_key}",
                 "Content-Type": file.content_type or "image/jpeg",
@@ -48,19 +43,15 @@ def upload_to_supabase(file, folder="memories"):
             data=file.read(),
         )
         
-        print(f"DEBUG: Response status = {response.status_code}")  
-        print(f"DEBUG: Response body = {response.text[:200]}")  
-        
         if response.status_code == 200:
-            url = f"{supabase_url}/storage/v1/object/public/{file_name}"
-            print(f"DEBUG: Success! URL = {url}")
-            return url
+            return f"{supabase_url}/storage/v1/object/public/{bucket}/{file_name}"  
         else:
             print(f"Upload failed: {response.status_code} - {response.text}")
             return None
     except Exception as e:
         print(f"Upload error: {e}")
         return None
+    
 # ============================================
 # HELPER
 # ============================================
