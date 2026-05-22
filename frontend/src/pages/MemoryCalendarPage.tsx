@@ -1,5 +1,5 @@
 // frontend/src/pages/MemoryCalendarPage.tsx
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -50,45 +50,25 @@ const MemoryCalendarPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'calendar' | 'timeline'>('calendar');
   const [isBookOpen, setIsBookOpen] = useState(false);
 
-  // ✅ Dynamic start year from couple's anniversary
+  // Dynamic start year from couple's anniversary
   const startYear = user?.anniversary_date
     ? new Date(user.anniversary_date).getFullYear()
     : today.getFullYear() - 5;
 
-  // Compute adjacent months (previous and next)
-  const prevMonthIndex = currentMonth === 0 ? 11 : currentMonth - 1;
-  const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-  const nextMonthIndex = currentMonth === 11 ? 0 : currentMonth + 1;
-  const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-
-  // Current month data
+  // Current month data for calendar display
   const { data: calendarData, isLoading } = useQuery<CalendarData>({
     queryKey: ['calendar', currentYear, currentMonth + 1],
     queryFn: () => api.get(`/calendar/?year=${currentYear}&month=${currentMonth + 1}`).then(res => res.data),
   });
 
-  // Previous month data (if it falls within the valid year range)
-  const { data: prevCalendarData } = useQuery<CalendarData>({
-    queryKey: ['calendar', prevYear, prevMonthIndex + 1],
-    queryFn: () => api.get(`/calendar/?year=${prevYear}&month=${prevMonthIndex + 1}`).then(res => res.data),
-    enabled: prevYear >= startYear,
+  // Full year data for BookModal cross-month navigation
+  const { data: allYearData } = useQuery<CalendarData>({
+    queryKey: ['calendar', currentYear],
+    queryFn: () => api.get(`/calendar/?year=${currentYear}`).then(res => res.data),
   });
 
-  // Next month data (if it doesn't go beyond today)
-  const { data: nextCalendarData } = useQuery<CalendarData>({
-    queryKey: ['calendar', nextYear, nextMonthIndex + 1],
-    queryFn: () => api.get(`/calendar/?year=${nextYear}&month=${nextMonthIndex + 1}`).then(res => res.data),
-    enabled: nextYear < today.getFullYear() || (nextYear === today.getFullYear() && nextMonthIndex <= today.getMonth()),
-  });
-
-  // Merge all available month memories into one object for the book modal
-  const allMemoriesData = useMemo<Record<string, CalendarMemory[]>>(() => {
-    return {
-      ...(prevCalendarData?.memories || {}),
-      ...(calendarData?.memories || {}),
-      ...(nextCalendarData?.memories || {}),
-    };
-  }, [prevCalendarData, calendarData, nextCalendarData]);
+  // Use the full year memories for the book modal
+  const allMemoriesData = allYearData?.memories || {};
 
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -98,7 +78,7 @@ const MemoryCalendarPage: React.FC = () => {
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
 
-  // ✅ Dynamic available years
+  // Dynamic available years
   const availableYears = Array.from(
     { length: today.getFullYear() - startYear + 1 },
     (_, i) => startYear + i
@@ -106,11 +86,7 @@ const MemoryCalendarPage: React.FC = () => {
 
   const jumpToYear = (year: number) => {
     setCurrentYear(year);
-    if (year === today.getFullYear()) {
-      setCurrentMonth(today.getMonth());
-    } else {
-      setCurrentMonth(0);
-    }
+    setCurrentMonth(year === today.getFullYear() ? today.getMonth() : 0);
     setSelectedDate(null);
     setSelectedMemories([]);
     setIsBookOpen(false);
@@ -582,7 +558,7 @@ const MemoryCalendarPage: React.FC = () => {
         )}
       </div>
 
-      {/* BookModal – now receives the merged allMemoriesData */}
+      {/* BookModal with all year data */}
       <BookModal
         isOpen={isBookOpen}
         onClose={() => setIsBookOpen(false)}
@@ -592,6 +568,7 @@ const MemoryCalendarPage: React.FC = () => {
         onNavigate={(yearId) => navigate(`/year/${yearId}`)}
         onDateChange={(newDate) => {
           setSelectedDate(newDate);
+          // Small delay ensures state update after date change
           setTimeout(() => {
             setSelectedMemories(allMemoriesData[newDate] || []);
           }, 50);
