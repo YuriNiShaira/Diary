@@ -4,7 +4,6 @@ import { X, Calendar, MapPin, Heart, Upload, Quote } from 'lucide-react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
-import { useTheme } from '../contexts/ThemeContext';
 
 interface CreateMemoryModalProps {
   isOpen: boolean;
