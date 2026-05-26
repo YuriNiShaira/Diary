@@ -40,7 +40,8 @@ const ScatteredPolaroidCard: React.FC<ScatteredPolaroidCardProps> = ({
       className="group relative cursor-pointer"
       style={{ transformOrigin: 'center center', zIndex }}
     >
-      <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 p-3 pb-6" onClick={onView}>
+      {/* CHANGED: */}
+      <div className="polaroid-bg bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 p-3 pb-6" onClick={onView}>
         <div className="relative aspect-square rounded-md overflow-hidden mb-3 bg-gradient-to-br from-pink-50 to-rose-50">
           {memory.image ? (
             <>
@@ -77,29 +78,37 @@ const ScatteredPolaroidCard: React.FC<ScatteredPolaroidCardProps> = ({
         </div>
         
         <div className="text-center px-2">
-          <h3 className="font-handwriting text-xl text-gray-700 mb-1 line-clamp-2 group-hover:text-rose-600 transition-colors">
+          {/* CHANGED: */}
+          <h3 className="polaroid-text font-handwriting text-xl text-gray-700 mb-1 line-clamp-2 group-hover:text-rose-600 transition-colors">
             {memory.title}
           </h3>
+          
           {memory.location && (
-            <div className="flex items-center justify-center gap-1 text-gray-400 text-xs mt-1">
+            /* CHANGED: */
+            <div className="polaroid-subtext flex items-center justify-center gap-1 text-gray-400 text-xs mt-1">
               <MapPin className="w-3 h-3" /> 
               <span className="line-clamp-1">{memory.location}</span>
             </div>
           )}
-          <p className="text-gray-500 text-xs mt-2 line-clamp-2 italic px-2">
+          
+          {/* CHANGED: */}
+          <p className="polaroid-subtext text-gray-500 text-xs mt-2 line-clamp-2 italic px-2">
             {memory.description.length > 80 ? `${memory.description.substring(0, 80)}...` : memory.description}
           </p>
-          <div className="mt-2 text-[10px] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">
+          
+          {/* CHANGED: Added 'polaroid-subtext' to lock hover tooltip color */}
+          <div className="polaroid-subtext mt-2 text-[10px] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">
             click to read full story ✨
           </div>
         </div>
         
+        {/* Buttons */}
         <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-2">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={(e) => { e.stopPropagation(); onEdit(); }}
-            className="bg-white/90 backdrop-blur rounded-full p-2 shadow-md hover:shadow-lg transition-all"
+            className="bg-white/90 backdrop-blur rounded-full p-2 shadow-md hover:shadow-lg transition-all border border-gray-100"
           >
             <svg className="w-4 h-4 text-gray-600 hover:text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -110,12 +119,13 @@ const ScatteredPolaroidCard: React.FC<ScatteredPolaroidCardProps> = ({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="bg-white/90 backdrop-blur rounded-full p-2 shadow-md hover:shadow-lg transition-all"
+            className="bg-white/90 backdrop-blur rounded-full p-2 shadow-md hover:shadow-lg transition-all border border-gray-100"
           >
             <Trash2 className="w-4 h-4 text-gray-600 hover:text-red-500" />
           </motion.button>
         </div>
         
+        {/* Tape overlays */}
         {index % 3 === 0 && <div className="absolute -top-1 left-4 w-12 h-6 bg-amber-200/40 rotate-[-15deg] rounded-sm blur-[1px]" />}
         {index % 5 === 0 && <div className="absolute -bottom-1 right-4 w-10 h-5 bg-amber-200/40 rotate-10 rounded-sm blur-[1px]" />}
       </div>
