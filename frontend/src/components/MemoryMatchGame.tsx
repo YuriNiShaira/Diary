@@ -8,6 +8,7 @@ import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
+import DeleteConfirmModal from './DeleteConfirmModal'; // ✅ import modal
 
 interface Memory {
   id: number;
@@ -60,6 +61,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
   const [gameWinner, setGameWinner] = useState<string | null>(null);
+  const [showResetModal, setShowResetModal] = useState(false); // ✅ modal state
 
   const { data: memories, isLoading } = useQuery<Memory[]>({
     queryKey: ['memoriesWithImages', yearId],
@@ -186,12 +188,16 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
   };
 
   const handleResetScore = () => {
-    if (window.confirm('Reset the score to 0-0?')) onReset();
+    setShowResetModal(true);  // open modal instead of window.confirm
+  };
+
+  const confirmReset = () => {
+    onReset();
+    setShowResetModal(false);
   };
 
   const getGridCols = () => {
-    if (cards.length <= 8) return 'grid-cols-4';
-    if (cards.length <= 12) return 'grid-cols-4';
+    // simplified; always 4 columns
     return 'grid-cols-4';
   };
 
@@ -347,6 +353,16 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
           </div>
         </>
       )}
+
+      {/* Reset Score Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        onConfirm={confirmReset}
+        title="Reset Score"
+        message="This will reset the score to 0-0. This action cannot be undone."
+        loading={false}
+      />
     </motion.div>
   );
 };
