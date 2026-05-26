@@ -42,7 +42,7 @@ const TimelineMemory: React.FC<TimelineMemoryProps> = ({
         whileHover={{ scale: 1.2 }}
       >
         <div className="relative">
-          <div className="w-14 h-14 rounded-full bg-white border-4 border-rose-400 shadow-lg flex items-center justify-center">
+          <div className="w-14 h-14 rounded-full bg-white dark:bg-gray-800 border-4 border-rose-400 shadow-lg flex items-center justify-center">
             <Calendar className="w-6 h-6 text-rose-500" />
           </div>
           <div className="absolute inset-0 rounded-full bg-rose-400/20 animate-ping" />
@@ -51,7 +51,7 @@ const TimelineMemory: React.FC<TimelineMemoryProps> = ({
       
       {/* Month indicator */}
       <div className={`absolute ${isEven ? 'right-[52%]' : 'left-[52%]'} top-0 whitespace-nowrap`}>
-        <div className="inline-block px-4 py-2 bg-rose-100/90 backdrop-blur-sm rounded-full text-sm font-semibold text-rose-600 shadow-sm border border-rose-200">
+        <div className="inline-block px-4 py-2 bg-rose-100/90 dark:bg-rose-950/80 backdrop-blur-sm rounded-full text-sm font-semibold text-rose-600 dark:text-rose-400 shadow-sm border border-rose-200 dark:border-rose-900/50">
           {fullDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </div>
       </div>
@@ -61,48 +61,48 @@ const TimelineMemory: React.FC<TimelineMemoryProps> = ({
         <div className={`${isEven ? 'md:order-1' : 'md:order-2'} pl-0 md:pl-0`}>
           <div className={`max-w-lg ${isEven ? 'md:ml-auto md:pr-8' : 'md:mr-auto md:pl-8'}`}>
             {/* Memory Type Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-pink-100 to-rose-100 rounded-full mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-pink-100 to-rose-100 dark:from-pink-950/40 dark:to-rose-950/40 rounded-full mb-4">
               <span className="text-lg">{memoryIcon}</span>
-              <span className="text-xs font-semibold text-rose-600 uppercase tracking-wide">
+              <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wide">
                 {memory.memory_type}
               </span>
             </div>
             
             {/* Title */}
-            <h3 className="text-3xl md:text-4xl font-serif text-gray-800 mb-3 group-hover:text-rose-600 transition-colors">
+            <h3 className="text-3xl md:text-4xl font-serif text-gray-800 dark:text-gray-100 mb-3 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
               {memory.title}
             </h3>
             
             {/* Date */}
-            <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
+            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-4">
               <Clock className="w-4 h-4" />
               <span>{formattedDate}</span>
               {memory.is_favorite && (
                 <>
                   <span className="mx-2">•</span>
                   <Star className="w-4 h-4 text-amber-500 fill-current" />
-                  <span className="text-amber-600">Favorite Memory</span>
+                  <span className="text-amber-600 dark:text-amber-400">Favorite Memory</span>
                 </>
               )}
             </div>
             
-            {/* Location */}
+            {/* Location – boosted contrast */}
             {memory.location && (
-              <div className="flex items-center gap-2 mb-4 p-2 bg-white/50 rounded-lg inline-flex">
+              <div className="flex items-center gap-2 mb-4 p-2 bg-white/50 dark:bg-gray-800/60 rounded-lg inline-flex border border-transparent dark:border-gray-700/50">
                 <MapPin className="w-4 h-4 text-rose-500" />
-                <span className="text-gray-600 text-sm">{memory.location}</span>
+                <span className="text-gray-600 dark:text-gray-200 text-sm font-medium">{memory.location}</span>
               </div>
             )}
             
-            {/* Description preview */}
-            <p className="text-gray-600 leading-relaxed mb-4 line-clamp-3">
+            {/* Description preview – brighter in dark mode */}
+            <p className="text-gray-600 dark:text-gray-200 leading-relaxed mb-4 line-clamp-3">
               {memory.description}
             </p>
             
             {/* Quote if exists */}
             {memory.favorite_quote && (
-              <div className="border-l-4 border-rose-300 pl-4 py-2 mb-4 bg-rose-50/50 rounded-r-lg">
-                <p className="text-gray-600 text-sm italic">"{memory.favorite_quote}"</p>
+              <div className="border-l-4 border-rose-300 dark:border-rose-500 pl-4 py-2 mb-4 bg-rose-50/50 dark:bg-rose-950/20 rounded-r-lg">
+                <p className="text-gray-600 dark:text-gray-300 text-sm italic">"{memory.favorite_quote}"</p>
               </div>
             )}
             
@@ -116,19 +116,21 @@ const TimelineMemory: React.FC<TimelineMemoryProps> = ({
               >
                 Read Full Story
               </motion.button>
+              
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onEdit}
-                className="px-6 py-2.5 rounded-full bg-white/80 backdrop-blur text-gray-700 font-medium shadow-md hover:shadow-lg transition-all border border-pink-200"
+                className="px-6 py-2.5 rounded-full bg-white/80 dark:bg-gray-800/90 backdrop-blur text-gray-700 dark:text-gray-200 font-medium shadow-md hover:shadow-lg transition-all border border-pink-200 dark:border-gray-700"
               >
                 Edit Memory
               </motion.button>
+              
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onDelete}
-                className="px-6 py-2.5 rounded-full bg-red-50 text-red-600 font-medium shadow-md hover:shadow-lg transition-all border border-red-200"
+                className="px-6 py-2.5 rounded-full bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 font-medium shadow-md hover:shadow-lg transition-all border border-red-200 dark:border-red-900/50"
               >
                 Delete
               </motion.button>
@@ -154,7 +156,7 @@ const TimelineMemory: React.FC<TimelineMemoryProps> = ({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               </>
             ) : (
-              <div className="w-full h-80 bg-gradient-to-br from-pink-100 to-rose-100 flex flex-col items-center justify-center">
+              <div className="w-full h-80 bg-gradient-to-br from-pink-100 to-rose-100 dark:from-gray-800 dark:to-gray-900 flex flex-col items-center justify-center">
                 <motion.div
                   animate={{ 
                     scale: [1, 1.1, 1],
@@ -162,10 +164,10 @@ const TimelineMemory: React.FC<TimelineMemoryProps> = ({
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  <Heart className="w-20 h-20 text-pink-300/60 mb-4" />
+                  <Heart className="w-20 h-20 text-pink-300/60 dark:text-gray-700 mb-4" />
                 </motion.div>
-                <p className="text-rose-400/70 text-sm italic">A beautiful moment waiting to be captured 📸</p>
-                <p className="text-gray-400 text-xs mt-2">Click to add a photo</p>
+                <p className="text-rose-400/70 dark:text-rose-400/50 text-sm italic">A beautiful moment waiting to be captured 📸</p>
+                <p className="text-gray-400 dark:text-gray-500 text-xs mt-2">Click to add a photo</p>
               </div>
             )}
             
@@ -176,8 +178,8 @@ const TimelineMemory: React.FC<TimelineMemoryProps> = ({
             {/* Add photo overlay when no image */}
             {!memory.image && (
               <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <div className="bg-white/90 backdrop-blur rounded-full p-3">
-                  <Camera className="w-6 h-6 text-rose-500" />
+                <div className="bg-white/90 dark:bg-gray-800 backdrop-blur rounded-full p-3">
+                  <Camera className="w-6 h-6 text-rose-500 dark:text-rose-400" />
                 </div>
               </div>
             )}
