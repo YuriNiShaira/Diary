@@ -44,32 +44,25 @@ const BookModal: React.FC<BookModalProps> = ({
   const currentMemory = memories[currentPage];
   const totalPages = memories.length;
 
-  // --- THE FIX ---
-  // 1. Filter out dates that might exist in the keys but have no memories.
-  // 2. Sort mathematically by actual time, not alphabetically by string.
   const datesWithMemories = Object.keys(allMemories)
     .filter(d => allMemories[d] && allMemories[d].length > 0)
     .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
   const currentDateIndex = datesWithMemories.indexOf(date);
   
-  // Ensure we actually found the date (index !== -1) before allowing navigation
   const hasNextDate = currentDateIndex !== -1 && currentDateIndex < datesWithMemories.length - 1;
   const hasPrevDate = currentDateIndex > 0;
 
-  // Because we filtered out empty arrays above, we don't need the !== undefined check anymore
   const nextDateAvailable = hasNextDate;
   const prevDateAvailable = hasPrevDate;
 
   const canGoNext = currentPage < totalPages - 1 || nextDateAvailable;
   const canGoPrev = currentPage > 0 || prevDateAvailable;
-  // ---------------
 
   const flipPage = (dir: number) => {
       if (isFlipping) return;
       
       if (dir === 1) {
-        // Next
         if (currentPage < totalPages - 1) {
           setDirection(1);
           setIsFlipping(true);
@@ -86,7 +79,6 @@ const BookModal: React.FC<BookModalProps> = ({
           }, 300);
         }
       } else {
-        // Previous
         if (currentPage > 0) {
           setDirection(-1);
           setIsFlipping(true);
@@ -104,16 +96,13 @@ const BookModal: React.FC<BookModalProps> = ({
       }
     };
 
-  // When we go to a previous date, we want to land on its last memory
   useEffect(() => {
     if (prevDateRef.current !== date && direction === -1 && memories.length > 0) {
-      // We are on a new date navigated backwards, set page to last memory
       setCurrentPage(memories.length - 1);
     }
   }, [memories.length, date, direction]);
 
   if (!currentMemory) {
-    // Show a mini loading state instead of disappearing
     return (
       <AnimatePresence>
         {isOpen && (
@@ -191,22 +180,22 @@ const BookModal: React.FC<BookModalProps> = ({
                 </button>
               </div>
 
-              {/* Stacked Pages */}
+              {/* Stacked Pages Behind Background */}
               <div className="absolute bottom-1 left-2 right-2 top-2 rounded border border-[#E5E0D8]/50 bg-[#E5E0D8] dark:border-gray-700/50 dark:bg-gray-800" />
               <div className="absolute bottom-2 left-2 right-2 top-2 rounded border border-[#F0ECE1]/50 bg-[#F0ECE1] dark:border-gray-700/50 dark:bg-gray-700" />
 
-              {/* --- BOOK PAGES --- */}
-              <div className="relative flex min-h-[500px] w-full overflow-hidden rounded bg-[#FDFBF7] dark:bg-[#232323] md:min-h-[600px]" style={{ perspective: "2500px" }}>
+              {/* --- BOOK PAGES CONTAINER WITH FORCED LIGHT CLASS --- */}
+              <div className="light-book-page relative flex min-h-[500px] w-full overflow-hidden rounded bg-[#FDFBF7] dark:bg-[#FDFBF7] md:min-h-[600px]" style={{ perspective: "2500px" }}>
 
-                {/* Center binding */}
-                <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 hidden w-8 -translate-x-1/2 bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.08)] to-transparent dark:via-[rgba(0,0,0,0.5)] md:block z-20" />
+                {/* Center binding split */}
+                <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 hidden w-8 -translate-x-1/2 bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.08)] to-transparent md:block z-20" />
 
-                {/* Bookmark */}
-                <div className="absolute left-1/2 top-0 hidden h-32 w-8 -translate-x-1/2 bg-[#8C2332] shadow-md dark:bg-rose-900 md:block z-10">
-                  <div className="absolute bottom-0 w-0 h-0 border-l-[16px] border-r-[16px] border-b-[16px] border-l-transparent border-r-transparent border-b-[#FDFBF7] dark:border-b-[#232323]" />
+                {/* Ribbon Bookmark */}
+                <div className="absolute left-1/2 top-0 hidden h-32 w-8 -translate-x-1/2 bg-[#8C2332] shadow-md md:block z-10">
+                  <div className="absolute bottom-0 w-0 h-0 border-l-[16px] border-r-[16px] border-b-[16px] border-l-transparent border-r-transparent border-b-[#FDFBF7]" />
                 </div>
 
-                {/* PAGE FLIP CONTAINER */}
+                {/* PAGE FLIP ANIMATIONS */}
                 <AnimatePresence mode="popLayout" custom={direction}>
                   <motion.div
                     key={`${date}-${currentPage}`}
@@ -236,7 +225,7 @@ const BookModal: React.FC<BookModalProps> = ({
                       ease: [0.32, 0.72, 0, 1],
                     }}
                   >
-                    {/* Dynamic flip shadow */}
+                    {/* Dynamic flip lighting shadow overlays */}
                     <motion.div
                       className="pointer-events-none absolute inset-0 z-30"
                       initial={{ opacity: 0.6 }}
@@ -250,10 +239,11 @@ const BookModal: React.FC<BookModalProps> = ({
                       }}
                     />
 
-                    {/* LEFT PAGE */}
-                    <div className="relative flex w-full flex-col items-center justify-center p-8 md:w-1/2 md:p-12 bg-[#FDFBF7] dark:bg-[#232323]">
+                    {/* LEFT PAGE (Visual Frame) */}
+                    <div className="relative flex w-full flex-col items-center justify-center p-8 md:w-1/2 md:p-12 bg-[#FDFBF7]">
                       {currentMemory.image ? (
-                        <div className="relative group rotate-[-2deg] bg-white p-4 pb-12 shadow-[0_10px_25px_rgba(0,0,0,0.15)] transition-transform duration-500 hover:rotate-0 dark:bg-[#1A1A1A]">
+                        <div className="polaroid-bg relative group rotate-[-2deg] bg-white p-4 pb-12 shadow-[0_10px_25px_rgba(0,0,0,0.15)] transition-transform duration-500 hover:rotate-0">
+                          {/* Tape accents */}
                           <div
                             className="absolute -top-4 left-1/2 h-10 w-28 -translate-x-1/2 rotate-[2deg] bg-amber-100/70 shadow-sm border border-amber-200/50 backdrop-blur-sm"
                             style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.3) 5px, rgba(255,255,255,0.3) 10px)' }}
@@ -267,72 +257,49 @@ const BookModal: React.FC<BookModalProps> = ({
                             alt={currentMemory.title}
                             className="h-[300px] w-[280px] object-cover shadow-inner md:h-[360px] md:w-[320px]"
                           />
-                          <div className="absolute bottom-4 left-0 right-0 text-center font-serif text-sm italic text-gray-500 dark:text-gray-400">
+                          {/* Caption */}
+                          <div className="polaroid-text absolute bottom-4 left-0 right-0 text-center font-serif text-sm italic text-black">
                             {currentMemory.location || "Captured moment"}
                           </div>
                         </div>
                       ) : (
-                        <div 
-                          className="relative flex h-[360px] w-[320px] rotate-[-1deg] flex-col items-center justify-center overflow-hidden bg-black/[0.02] transition-transform duration-500 hover:rotate-0 dark:bg-white/[0.02] shadow-[inset_0_2px_15px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_2px_15px_rgba(0,0,0,0.3)]"
-                          style={{
-                            // Adds a very subtle paper grain texture to the empty space
-                            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E")`
-                          }}
-                        >
-                          {/* Vintage Photo Mounting Corners */}
-                          <div className="absolute top-4 left-4 h-6 w-6 border-l-[1px] border-t-[1px] border-[#5c4b3a]/30 dark:border-[#d4c5b0]/20" />
-                          <div className="absolute top-4 right-4 h-6 w-6 border-r-[1px] border-t-[1px] border-[#5c4b3a]/30 dark:border-[#d4c5b0]/20" />
-                          <div className="absolute bottom-4 left-4 h-6 w-6 border-l-[1px] border-b-[1px] border-[#5c4b3a]/30 dark:border-[#d4c5b0]/20" />
-                          <div className="absolute bottom-4 right-4 h-6 w-6 border-r-[1px] border-b-[1px] border-[#5c4b3a]/30 dark:border-[#d4c5b0]/20" />
-                          
-                          {/* Faded Camera Icon */}
-                          <div className="mb-4 rounded-full border border-[#5c4b3a]/20 p-4 opacity-60 dark:border-[#d4c5b0]/20">
-                            <Camera strokeWidth={1} className="h-8 w-8 text-[#5c4b3a] dark:text-[#d4c5b0]" />
-                          </div>
-                          
-                          {/* Elegant Typography mimicking faded journal ink */}
-                          <span className="font-serif text-lg italic text-[#5c4b3a]/70 dark:text-[#d4c5b0]/60">
-                            No photograph
-                          </span>
-                          
-                          <div className="mt-3 h-px w-12 bg-[#5c4b3a]/20 dark:bg-[#d4c5b0]/20" />
-                          
-                          <span className="mt-4 px-8 text-center font-serif text-xs italic leading-relaxed text-[#5c4b3a]/50 dark:text-[#d4c5b0]/40">
-                            The memory is written,<br/>though the frame remains empty.
-                          </span>
+                        <div className="polaroid-bg flex h-[360px] w-[320px] rotate-[-2deg] flex-col items-center justify-center border-2 border-dashed border-gray-300 bg-white">
+                          <Camera className="polaroid-subtext mb-3 h-10 w-10 text-gray-400" />
+                          <span className="polaroid-text font-serif text-sm italic text-black">No photo</span>
                         </div>
                       )}
                     </div>
 
-                    {/* RIGHT PAGE */}
-                    <div className="relative flex w-full flex-col justify-start p-8 md:w-1/2 md:p-12 md:pl-16 bg-[#FDFBF7] dark:bg-[#232323]">
-                      <div className="pointer-events-none absolute inset-0 bottom-12 top-24 bg-[linear-gradient(transparent_31px,rgba(0,0,0,0.06)_32px)] bg-[length:100%_32px] dark:bg-[linear-gradient(transparent_31px,rgba(255,255,255,0.05)_32px)]" />
+                    {/* RIGHT PAGE (Journal Lines & Typography) */}
+                    <div className="relative flex w-full flex-col justify-start p-8 md:w-1/2 md:p-12 md:pl-16 bg-[#FDFBF7]">
+                      {/* Notebook Rules */}
+                      <div className="pointer-events-none absolute inset-0 bottom-12 top-24 bg-[linear-gradient(transparent_31px,rgba(0,0,0,0.06)_32px)] bg-[length:100%_32px]" />
 
                       <div className="relative flex h-full flex-col z-10">
                         <div className="mb-8 flex justify-end">
                           <div className="text-right font-serif">
-                            <p className="text-lg text-gray-800 dark:text-gray-200">
+                            <p className="text-lg text-gray-800">
                               {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' })},
                             </p>
-                            <p className="text-sm italic text-gray-500 dark:text-gray-400">
+                            <p className="text-sm italic text-gray-500">
                               {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                             </p>
                           </div>
                         </div>
 
                         <div className="flex-1 space-y-6 pt-2">
-                          <h2 className="font-serif text-3xl font-bold text-gray-800 dark:text-gray-100">
+                          <h2 className="font-serif text-3xl font-bold text-gray-800">
                             {currentMemory.title}
                             {currentMemory.is_favorite && (
                               <Heart className="ml-3 inline-block h-6 w-6 -translate-y-1 fill-[#8C2332] text-[#8C2332]" />
                             )}
                           </h2>
 
-                          <span className="font-serif text-xs italic tracking-wide text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 px-2 py-1 rounded border border-rose-100 dark:border-rose-900/50">
+                          <span className="font-serif text-xs italic tracking-wide text-rose-700 bg-rose-50 px-2 py-1 rounded border border-rose-100">
                             {currentMemory.memory_type.charAt(0).toUpperCase() + currentMemory.memory_type.slice(1)}
                           </span>
 
-                          <p className="min-h-[150px] font-serif text-lg leading-[32px] text-gray-700 dark:text-gray-300">
+                          <p className="min-h-[150px] font-serif text-lg leading-[32px] text-gray-700">
                             {currentMemory.description}
                           </p>
                         </div>
@@ -340,7 +307,7 @@ const BookModal: React.FC<BookModalProps> = ({
                         <div className="mt-8 flex justify-center pb-4">
                           <button
                             onClick={() => { onClose(); onNavigate(currentMemory.year_id); }}
-                            className="font-serif text-sm italic text-gray-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200 underline decoration-gray-300 underline-offset-4"
+                            className="font-serif text-sm italic text-gray-400 transition-colors hover:text-gray-800 underline decoration-gray-300 underline-offset-4"
                           >
                             Flip back to {currentMemory.year} chapter...
                           </button>
@@ -350,11 +317,11 @@ const BookModal: React.FC<BookModalProps> = ({
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Page Controls */}
+                {/* Flip Page Buttons */}
                 <button
                   onClick={() => flipPage(-1)}
                   disabled={!canGoPrev || isFlipping}
-                  className="absolute bottom-6 left-6 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-md transition-all hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed dark:bg-gray-700/90 dark:text-gray-300"
+                  className="absolute bottom-6 left-6 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-md transition-all hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
@@ -366,7 +333,7 @@ const BookModal: React.FC<BookModalProps> = ({
                 <button
                   onClick={() => flipPage(1)}
                   disabled={!canGoNext || isFlipping}
-                  className="absolute bottom-6 right-6 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-md transition-all hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed dark:bg-gray-700/90 dark:text-gray-300"
+                  className="absolute bottom-6 right-6 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-md transition-all hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>

@@ -20,7 +20,6 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
 
   const queryClient = useQueryClient();
 
-  // Get anniversary year from user data
   const anniversaryYear = user?.anniversary_date 
     ? new Date(user.anniversary_date).getFullYear() 
     : null;
@@ -91,36 +90,37 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
             initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
-            className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+            // 👇 Fixed: use modal-card class and forced dark background
+            className="modal-card bg-white dark:!bg-gray-900 rounded-3xl p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-serif text-gray-800">
+              <h2 className="text-2xl font-serif text-gray-800 dark:text-gray-100">
                 Create New Year ✨
               </h2>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Year Input with Warning */}
+              {/* Year Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Year *
                 </label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                   <input
                     type="number"
                     value={year}
                     onChange={(e) => setYear(parseInt(e.target.value) || '' as any)}
                     min={1950}
                     max={today.getFullYear()}
-                    className="w-full pl-10 pr-4 py-2 border border-soft-rose rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-soft-rose dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-love-red dark:bg-gray-800 dark:text-gray-100"
                     placeholder="e.g., 2024"
                     required
                   />
@@ -130,14 +130,14 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2"
+                    className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-2"
                   >
                     <span className="text-lg">📖</span>
                     <div>
-                      <p className="text-sm font-medium text-amber-800">
+                      <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
                         This is before your official anniversary ({anniversaryYear})
                       </p>
-                      <p className="text-xs text-amber-600 mt-0.5">
+                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
                         You started dating in {anniversaryYear}. This year will be marked as "The Prequel" - your love story before it officially began! 💕
                       </p>
                     </div>
@@ -145,24 +145,24 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                 )}
               </div>
 
-              {/* Description Input */}
+              {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description (Optional)
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Year Title
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2 border border-soft-rose rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
-                  placeholder="What made this year special? 💕"
+                  className="w-full px-4 py-2 border border-soft-rose dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-love-red dark:bg-gray-800 dark:text-gray-100"
+                  placeholder="Give this year a name..."
                 />
               </div>
 
-              {/* Cover Image Upload */}
+              {/* Cover Image */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cover Photo (Optional)
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Cover Photo
                 </label>
                 <div className="relative">
                   <input
@@ -188,10 +188,10 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                         </div>
                       </div>
                     ) : (
-                      <div className="h-40 border-2 border-dashed border-soft-rose rounded-xl flex flex-col items-center justify-center hover:border-love-red transition-colors">
-                        <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                        <p className="text-gray-500">Click to upload cover photo</p>
-                        <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 10MB</p>
+                      <div className="h-40 border-2 border-dashed border-soft-rose dark:border-gray-600 rounded-xl flex flex-col items-center justify-center hover:border-love-red dark:hover:border-gray-500 transition-colors">
+                        <Upload className="w-8 h-8 text-gray-400 dark:text-gray-500 mb-2" />
+                        <p className="text-gray-500 dark:text-gray-400">Click to upload cover photo</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">PNG, JPG up to 10MB</p>
                       </div>
                     )}
                   </label>

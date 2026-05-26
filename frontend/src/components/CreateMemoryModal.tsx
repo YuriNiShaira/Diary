@@ -4,6 +4,7 @@ import { X, Calendar, MapPin, Heart, Upload, Quote } from 'lucide-react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface CreateMemoryModalProps {
   isOpen: boolean;
@@ -38,7 +39,6 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
 
   const queryClient = useQueryClient();
 
-  // Get the year object to check
   const { data: yearData } = useQuery<YearData>({
     queryKey: ['year', yearId],
     queryFn: async () => {
@@ -85,13 +85,12 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title || !date || !description) {
       toast.error('Please fill in the required fields 💝');
       return;
     }
 
-    // Check if date year matches the year page
     const selectedYear = new Date(date).getFullYear();
     if (yearData && selectedYear !== yearData.year) {
       toast.error(`Please select a date in ${yearData.year}. The memory year must match the year page.`);
@@ -125,8 +124,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
     setImage(null);
     setPreview('');
   };
-  
-  // Check if selected date matches the year
+
   const selectedYear = date ? new Date(date).getFullYear() : null;
   const isYearMismatch = !!(selectedYear && yearData && selectedYear !== yearData.year);
 
@@ -144,60 +142,60 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
             initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
-            className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            // ✅ THE FIX: force dark background with !important + modal-card class
+            className="modal-card bg-white dark:!bg-gray-900 rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-serif text-gray-800">
+              <h2 className="text-2xl font-serif text-gray-800 dark:text-gray-100">
                 Create New Memory 💕
               </h2>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Title Input */}
+              {/* Title */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Title *
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-2 border border-soft-rose rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
+                  className="w-full px-4 py-2 border border-soft-rose dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-love-red dark:bg-gray-800 dark:text-gray-100"
                   placeholder="Our first date, Beach trip, etc."
                   required
                 />
               </div>
 
-              {/* Date Input with Year Validation */}
+              {/* Date */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Date *
                 </label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                   <input
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    max={new Date().toISOString().split('T')[0]} 
-                    className="..."
+                    max={new Date().toISOString().split('T')[0]}
+                    className="w-full pl-10 pr-4 py-2 border border-soft-rose dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-love-red dark:bg-gray-800 dark:text-gray-100"
                     required
                   />
                 </div>
-                
-                {/* Warning if date doesn't match year */}
+
                 {isYearMismatch && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700"
+                    className="mt-2 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl text-sm text-amber-700 dark:text-amber-300"
                   >
                     The selected date is outside {yearData?.year}. To keep memories organized by year, please choose a date within {yearData?.year}.
                   </motion.div>
@@ -206,13 +204,13 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
 
               {/* Memory Type */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Memory Type
                 </label>
                 <select
                   value={memoryType}
                   onChange={(e) => setMemoryType(e.target.value)}
-                  className="w-full px-4 py-2 border border-soft-rose rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
+                  className="w-full px-4 py-2 border border-soft-rose dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-love-red dark:bg-gray-800 dark:text-gray-100"
                 >
                   {memoryTypes.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -224,14 +222,14 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Story *
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={4}
-                  className="w-full px-4 py-2 border border-soft-rose rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
+                  className="w-full px-4 py-2 border border-soft-rose dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-love-red dark:bg-gray-800 dark:text-gray-100"
                   placeholder="Tell the story of this beautiful moment..."
                   required
                 />
@@ -239,16 +237,16 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
 
               {/* Location */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Location (Optional)
                 </label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                   <input
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-soft-rose rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-soft-rose dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-love-red dark:bg-gray-800 dark:text-gray-100"
                     placeholder="Where did this happen?"
                   />
                 </div>
@@ -256,16 +254,16 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
 
               {/* Favorite Quote */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Favorite Quote (Optional)
                 </label>
                 <div className="relative">
-                  <Quote className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+                  <Quote className="absolute left-3 top-3 text-gray-400 dark:text-gray-500 w-5 h-5" />
                   <textarea
                     value={favoriteQuote}
                     onChange={(e) => setFavoriteQuote(e.target.value)}
                     rows={2}
-                    className="w-full pl-10 pr-4 py-2 border border-soft-rose rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-soft-rose dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-love-red dark:bg-gray-800 dark:text-gray-100"
                     placeholder="Something special you said or I said..."
                   />
                 </div>
@@ -273,7 +271,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
 
               {/* Image Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Photo (Optional)
                 </label>
                 <div className="relative">
@@ -297,10 +295,10 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                         </div>
                       </div>
                     ) : (
-                      <div className="h-48 border-2 border-dashed border-soft-rose rounded-xl flex flex-col items-center justify-center hover:border-love-red transition-colors">
-                        <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                        <p className="text-gray-500">Click to upload a photo</p>
-                        <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 10MB</p>
+                      <div className="h-48 border-2 border-dashed border-soft-rose dark:border-gray-600 rounded-xl flex flex-col items-center justify-center hover:border-love-red dark:hover:border-gray-500 transition-colors">
+                        <Upload className="w-8 h-8 text-gray-400 dark:text-gray-500 mb-2" />
+                        <p className="text-gray-500 dark:text-gray-400">Click to upload a photo</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">PNG, JPG up to 10MB</p>
                       </div>
                     )}
                   </label>
@@ -316,8 +314,8 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                     onChange={(e) => setIsFavorite(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-love-red/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-love-red"></div>
-                  <span className="ms-3 text-sm font-medium text-gray-700 flex items-center">
+                  <div className="relative w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-love-red/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border-gray-300 dark:after:border-gray-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-love-red"></div>
+                  <span className="ms-3 text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
                     Mark as Favorite
                     <Heart className="w-4 h-4 ml-1 text-love-red fill-current" />
                   </span>
@@ -332,8 +330,8 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                 disabled={createMemoryMutation.isPending || isYearMismatch}
                 className={`w-full py-3 rounded-xl font-semibold shadow-lg transition-all duration-300 ${
                   isYearMismatch
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-linear-to-r from-rose-500 to-pink-500 hover:shadow-xl'
+                    ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-rose-500 to-pink-500 hover:shadow-xl'
                 } text-white`}
               >
                 {createMemoryMutation.isPending ? (
