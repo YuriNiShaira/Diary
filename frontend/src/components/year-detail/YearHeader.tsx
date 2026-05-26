@@ -18,28 +18,32 @@ const YearHeader: React.FC<YearHeaderProps> = ({ year, description, onDeleteYear
       animate={{ opacity: 1, y: 0 }}
       className="mb-8"
     >
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="flex items-center text-gray-600 hover:text-rose-500 transition-colors group"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-          Back to Dashboard
-        </button>
-
-        {/* Delete Year Button */}
+      {/* Action buttons row */}
+      <div className="flex items-center justify-between mb-6">
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.03, x: -4 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => navigate('/dashboard')}
+          className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg hover:bg-white dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium transition-all"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="hidden sm:inline">Back to Dashboard</span>
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
           onClick={onDeleteYear}
-          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
-          title="Delete Year"
+          className="flex items-center gap-2 px-5 py-3 rounded-xl bg-red-500/90 hover:bg-red-600 text-white font-medium shadow-md hover:shadow-lg transition-all"
+          title="Delete this year and all its memories"
         >
           <Trash2 className="w-5 h-5" />
+          <span className="hidden sm:inline">Delete Year</span>
         </motion.button>
       </div>
 
-      <div className="text-center mb-6">
+      {/* Year title and description */}
+      <div className="text-center">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -51,13 +55,13 @@ const YearHeader: React.FC<YearHeaderProps> = ({ year, description, onDeleteYear
           </div>
         </motion.div>
         
-        <h1 className="text-5xl md:text-6xl font-serif text-gray-800 mb-2">
-          <span className="bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+        <h1 className="text-5xl md:text-6xl font-serif text-gray-800 dark:text-gray-100 mb-2">
+          <span className="bg-gradient-to-r from-rose-600 to-pink-600 dark:from-rose-400 dark:to-pink-400 bg-clip-text text-transparent">
             {year}
           </span>
         </h1>
         {description && (
-          <p className="text-gray-600 text-lg italic">"{description}"</p>
+          <p className="text-gray-600 dark:text-gray-300 text-lg italic">"{description}"</p>
         )}
       </div>
     </motion.div>
