@@ -4,7 +4,6 @@ import { X, Upload } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
 
 interface CreateYearModalProps {
   isOpen: boolean;
@@ -12,8 +11,7 @@ interface CreateYearModalProps {
 }
 
 const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) => {
-  const { user } = useAuth();
-  const [yearNumber, setYearNumber] = useState<number | ''>(1);
+  const [yearNumber, setYearNumber] = useState<number>(1);
   const [description, setDescription] = useState('');
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>('');
@@ -23,9 +21,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
   const createYearMutation = useMutation({
     mutationFn: async (formData: FormData) => {
       const response = await api.post('/years/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       return response.data;
     },
@@ -45,18 +41,20 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
     if (file) {
       setCoverImage(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
+      reader.onloadend = () => setPreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!yearNumber) return;
+    if (yearNumber < 1) {
+      toast.error('Year number must be 1 or greater');
+      return;
+    }
+
     const formData = new FormData();
-    formData.append('year', yearNumber.toString());
+    formData.append('year_number', yearNumber.toString());   // ✅ fixed field name
     formData.append('description', description);
     if (coverImage) {
       formData.append('cover_image', coverImage);
@@ -101,19 +99,19 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Year Number Input */}
+              {/* Year Number */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Year Number 
+                  Year Number *
                 </label>
                 <input
                   type="number"
                   min={1}
                   value={yearNumber}
-                  onChange={(e) => setYearNumber(parseInt(e.target.value) || '')}
-                  required
+                  onChange={(e) => setYearNumber(parseInt(e.target.value) || 1)}
                   className="w-full px-4 py-2 border border-soft-rose dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-love-red dark:bg-gray-800 dark:text-gray-100"
-                  placeholder="e.g., 1, 2, 3..."
+                  placeholder="1, 2, 3…"
+                  required
                 />
               </div>
 
@@ -127,7 +125,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   className="w-full px-4 py-2 border border-soft-rose dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-love-red dark:bg-gray-800 dark:text-gray-100"
-                  placeholder="Give this year a name..."
+                  placeholder="Give this year a name…"
                 />
               </div>
 
@@ -147,11 +145,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                   <label htmlFor="cover-image" className="cursor-pointer block">
                     {preview ? (
                       <div className="relative h-40 rounded-xl overflow-hidden">
-                        <img
-                          src={preview}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={preview} alt="Preview" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                           <p className="text-white">Change Photo</p>
                         </div>
@@ -167,7 +161,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                 </div>
               </div>
 
-              {/* Submit Button */}
+              {/* Submit */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
