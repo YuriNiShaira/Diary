@@ -1,21 +1,28 @@
 from django.db import models
 from accounts.models import Couple
 from django.utils import timezone
-
+from datetime import timedelta
 
 class Year(models.Model):
     couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='years')
-    year = models.IntegerField()
+    year_number = models.PositiveIntegerField()
     cover_image = models.URLField(max_length=500, null=True, blank=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-year']
-        unique_together = ['couple', 'year']
+        ordering = ['year_number']
+        unique_together = ['couple', 'year_number']
+
+    def get_date_range(self):
+        """Return (start_date, end_date) for this relationship year."""
+        anniversary = self.couple.anniversary_date
+        start = anniversary.replace(year=anniversary.year + (self.year_number - 1))
+        end = anniversary.replace(year=anniversary.year + self.year_number) - timedelta(days=1)
+        return start, end
 
     def __str__(self):
-        return f"{self.couple.name} - {self.year}"
+        return f"{self.couple.name} – Year {self.year_number}"
 
 
 class Memory(models.Model):

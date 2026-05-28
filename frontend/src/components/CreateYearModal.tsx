@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Upload } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
@@ -13,16 +13,12 @@ interface CreateYearModalProps {
 
 const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
-  const [year, setYear] = useState(new Date().getFullYear());
+  const [yearNumber, setYearNumber] = useState<number | ''>(1);
   const [description, setDescription] = useState('');
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>('');
 
   const queryClient = useQueryClient();
-
-  const anniversaryYear = user?.anniversary_date 
-    ? new Date(user.anniversary_date).getFullYear() 
-    : null;
 
   const createYearMutation = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -58,8 +54,9 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!yearNumber) return;
     const formData = new FormData();
-    formData.append('year', year.toString());
+    formData.append('year', yearNumber.toString());
     formData.append('description', description);
     if (coverImage) {
       formData.append('cover_image', coverImage);
@@ -68,13 +65,11 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
   };
 
   const resetForm = () => {
-    setYear(new Date().getFullYear());
+    setYearNumber(1);
     setDescription('');
     setCoverImage(null);
     setPreview('');
   };
-
-  const today = new Date();
 
   return (
     <AnimatePresence>
@@ -90,7 +85,6 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
             initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
-            // 👇 Fixed: use modal-card class and forced dark background
             className="modal-card bg-white dark:!bg-gray-900 rounded-3xl p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
@@ -107,42 +101,20 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Year Input */}
+              {/* Year Number Input */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Year *
+                  Year Number 
                 </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
-                  <input
-                    type="number"
-                    value={year}
-                    onChange={(e) => setYear(parseInt(e.target.value) || '' as any)}
-                    min={1950}
-                    max={today.getFullYear()}
-                    className="w-full pl-10 pr-4 py-2 border border-soft-rose dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-love-red dark:bg-gray-800 dark:text-gray-100"
-                    placeholder="e.g., 2024"
-                    required
-                  />
-                </div>
-                
-                {anniversaryYear && year && year < anniversaryYear && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-2"
-                  >
-                    <span className="text-lg">📖</span>
-                    <div>
-                      <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                        This is before your official anniversary ({anniversaryYear})
-                      </p>
-                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
-                        You started dating in {anniversaryYear}. This year will be marked as "The Prequel" - your love story before it officially began! 💕
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
+                <input
+                  type="number"
+                  min={1}
+                  value={yearNumber}
+                  onChange={(e) => setYearNumber(parseInt(e.target.value) || '')}
+                  required
+                  className="w-full px-4 py-2 border border-soft-rose dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-love-red dark:bg-gray-800 dark:text-gray-100"
+                  placeholder="e.g., 1, 2, 3..."
+                />
               </div>
 
               {/* Description */}
@@ -172,10 +144,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                     className="hidden"
                     id="cover-image"
                   />
-                  <label
-                    htmlFor="cover-image"
-                    className="cursor-pointer block"
-                  >
+                  <label htmlFor="cover-image" className="cursor-pointer block">
                     {preview ? (
                       <div className="relative h-40 rounded-xl overflow-hidden">
                         <img

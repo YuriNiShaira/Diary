@@ -12,13 +12,13 @@ class MemorySerializer(serializers.ModelSerializer):
 class YearSerializer(serializers.ModelSerializer):
     memories = MemorySerializer(many=True, read_only=True)
     memory_count = serializers.SerializerMethodField()
-    cover_image = serializers.CharField(max_length=500, required=False, allow_null=True, allow_blank=True, read_only=True)
-    
+    cover_image = serializers.CharField(max_length=500, required=False, allow_null=True, allow_blank=True)
+
     class Meta:
         model = Year
         fields = '__all__'
         read_only_fields = ['couple']
-    
+
     def get_memory_count(self, obj):
         return obj.memories.count()
 

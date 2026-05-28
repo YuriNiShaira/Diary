@@ -19,7 +19,7 @@ from django.db.models import Avg
 import os
 import uuid
 import requests
-
+from rest_framework import serializers as drf_serializers
 
 def upload_to_supabase(file, folder="memories"):
     """Upload file to Supabase Storage and return public URL"""
@@ -89,31 +89,29 @@ class CoupleFilteredViewSet(viewsets.ModelViewSet):
 class YearViewSet(CoupleFilteredViewSet):
     queryset = Year.objects.all()
     serializer_class = YearSerializer
-    
+
     def perform_create(self, serializer):
         couple = get_couple(self.request)
+        year_number = serializer.validated_data.get('year_number')
+
+        if year_number is not None and year_number < 1:
+            raise drf_serializers.ValidationError({'year_number': 'Year number must be 1 or greater.'})
+
+        # Check for duplicate year numbers for this couple
+        if Year.objects.filter(couple=couple, year_number=year_number).exists():
+            raise drf_serializers.ValidationError({'year_number': f'Year {year_number} already exists for your relationship.'})
+
+        # Upload cover image if provided
         image_file = self.request.FILES.get('cover_image')
-        
-        # Upload cover image to Supabase
         image_url = None
         if image_file:
             image_url = upload_to_supabase(image_file, folder='year_covers')
-        
-        # Validate anniversary year
-        year_value = serializer.validated_data.get('year')
-        if couple and couple.anniversary_date:
-            anniversary_year = couple.anniversary_date.year
-            if year_value and year_value < anniversary_year:
-                from rest_framework import serializers as drf_serializers
-                raise drf_serializers.ValidationError({
-                    'year': f'You can\'t create a year before your relationship started ({anniversary_year}). 💕'
-                })
-        
+
         year = serializer.save(couple=couple)
         if image_url:
             year.cover_image = image_url
             year.save(update_fields=['cover_image'])
-    
+
     @action(detail=True, methods=['get'])
     def memories(self, request, pk=None):
         year = self.get_object()
@@ -135,25 +133,25 @@ class MemoryViewSet(CoupleFilteredViewSet):
         return Response(serializer.data)
 
     def perform_create(self, serializer):
-        print("===== PERFORM_CREATE CALLED =====")
-        
         couple = get_couple(self.request)
         year_id = self.request.data.get('year')
         memory_date = serializer.validated_data.get('date')
         image_file = self.request.FILES.get('image')
 
+        # Prevent future dates
         if memory_date and memory_date > timezone.now().date():
-            from rest_framework import serializers as drf_serializers
-            raise drf_serializers.ValidationError({'date': 'You cannot create a memory in the future! 📅'})
+            raise drf_serializers.ValidationError({
+                'date': 'You cannot create a memory in the future! 📅'
+            })
 
-        # Validate date matches year
+        # Validate that the date belongs to the selected relationship year
         if year_id and memory_date:
             try:
-                year = Year.objects.get(id=year_id, couple=couple)
-                if memory_date.year != year.year:
-                    from rest_framework import serializers as drf_serializers
+                year_obj = Year.objects.get(id=year_id, couple=couple)
+                start, end = year_obj.get_date_range()
+                if not (start <= memory_date <= end):
                     raise drf_serializers.ValidationError({
-                        'date': f'This memory is from {memory_date.year}, but this year is {year.year}.'
+                        'date': f'This date must be between {start.strftime("%b %d, %Y")} and {end.strftime("%b %d, %Y")} for Year {year_obj.year_number}.'
                     })
             except Year.DoesNotExist:
                 pass
@@ -161,20 +159,14 @@ class MemoryViewSet(CoupleFilteredViewSet):
         # Upload to Supabase
         image_url = None
         if image_file:
-            print("Calling upload_to_supabase...")
             image_url = upload_to_supabase(image_file)
-            print(f"Result URL: {image_url}")
 
-        # Remove image from validated data to avoid URL validation on file
         validated = serializer.validated_data.copy()
         validated.pop('image', None)
-        
-        # Save without image, then update
         memory = serializer.save(couple=couple, **validated)
         if image_url:
             memory.image = image_url
             memory.save(update_fields=['image'])
-            print(f"Memory saved with image URL: {image_url}")
 
 class LoveLetterViewSet(CoupleFilteredViewSet):
     queryset = LoveLetter.objects.filter(is_active=True)
