@@ -54,7 +54,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
     }
 
     const formData = new FormData();
-    formData.append('year_number', yearNumber.toString());   // ✅ fixed field name
+    formData.append('year_number', yearNumber.toString());
     formData.append('description', description);
     if (coverImage) {
       formData.append('cover_image', coverImage);
