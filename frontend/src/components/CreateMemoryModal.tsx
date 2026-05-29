@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, MapPin, Heart, Upload, Quote } from 'lucide-react';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
 
@@ -9,12 +9,6 @@ interface CreateMemoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   yearId: number;
-}
-
-interface YearData {
-  id: number;
-  year: number;
-  description?: string;
 }
 
 const memoryTypes = [
@@ -38,22 +32,9 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
 
   const queryClient = useQueryClient();
 
-  const { data: yearData } = useQuery<YearData>({
-    queryKey: ['year', yearId],
-    queryFn: async () => {
-      const response = await api.get(`/years/${yearId}/`);
-      return response.data;
-    },
-    enabled: !!yearId && isOpen,
-  });
-
   const createMemoryMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await api.post('/memories/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.post('/memories/', formData);
       return response.data;
     },
     onSuccess: () => {
@@ -90,14 +71,8 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
       return;
     }
 
-    const selectedYear = new Date(date).getFullYear();
-    if (yearData && selectedYear !== yearData.year) {
-      toast.error(`Please select a date in ${yearData.year}. The memory year must match the year page.`);
-      return;
-    }
-
     const formData = new FormData();
-    formData.append('year', yearId.toString());
+    formData.append('year', yearId.toString());   // yearId is the relationship year ID
     formData.append('title', title);
     formData.append('date', date);
     formData.append('description', description);
@@ -124,9 +99,6 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
     setPreview('');
   };
 
-  const selectedYear = date ? new Date(date).getFullYear() : null;
-  const isYearMismatch = !!(selectedYear && yearData && selectedYear !== yearData.year);
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -141,7 +113,6 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
             initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
-            // ✅ THE FIX: force dark background with !important + modal-card class
             className="modal-card bg-white dark:!bg-gray-900 rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
@@ -189,16 +160,6 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                     required
                   />
                 </div>
-
-                {isYearMismatch && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-2 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl text-sm text-amber-700 dark:text-amber-300"
-                  >
-                    The selected date is outside {yearData?.year}. To keep memories organized by year, please choose a date within {yearData?.year}.
-                  </motion.div>
-                )}
               </div>
 
               {/* Memory Type */}
@@ -326,12 +287,8 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                disabled={createMemoryMutation.isPending || isYearMismatch}
-                className={`w-full py-3 rounded-xl font-semibold shadow-lg transition-all duration-300 ${
-                  isYearMismatch
-                    ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-rose-500 to-pink-500 hover:shadow-xl'
-                } text-white`}
+                disabled={createMemoryMutation.isPending}
+                className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
               >
                 {createMemoryMutation.isPending ? (
                   <div className="flex items-center justify-center">
