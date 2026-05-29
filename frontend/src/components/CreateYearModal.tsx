@@ -20,9 +20,8 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
 
   const createYearMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await api.post('/years/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // ✅ No manual Content-Type header – let the browser set the boundary
+      const response = await api.post('/years/', formData);
       return response.data;
     },
     onSuccess: () => {
