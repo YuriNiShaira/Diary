@@ -12,7 +12,7 @@ class MemorySerializer(serializers.ModelSerializer):
 class YearSerializer(serializers.ModelSerializer):
     memories = MemorySerializer(many=True, read_only=True)
     memory_count = serializers.SerializerMethodField()
-    cover_image = serializers.CharField(max_length=500, required=False, allow_null=True, allow_blank=True)
+    cover_image = serializers.CharField(max_length=500, required=False, allow_null=True, allow_blank=True, read_only=True)
 
     class Meta:
         model = Year
