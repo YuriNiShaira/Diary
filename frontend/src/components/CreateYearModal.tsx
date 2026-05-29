@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, Calendar } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 interface CreateYearModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface CreateYearModalProps {
 }
 
 const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) => {
+  const { user } = useAuth();
   const [yearNumber, setYearNumber] = useState<number>(1);
   const [description, setDescription] = useState('');
   const [coverImage, setCoverImage] = useState<File | null>(null);
@@ -18,9 +20,21 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
 
   const queryClient = useQueryClient();
 
+  const getDateRange = (num: number) => {
+    if (!user?.anniversary_date) return null;
+    const anniversary = new Date(user.anniversary_date);
+    const start = new Date(anniversary);
+    start.setFullYear(start.getFullYear() + (num - 1));
+    const end = new Date(start);
+    end.setFullYear(end.getFullYear() + 1);
+    end.setDate(end.getDate() - 1);
+    return { start, end };
+  };
+
+  const dateRange = getDateRange(yearNumber);
+
   const createYearMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      // ✅ No manual Content-Type header – let the browser set the boundary
       const response = await api.post('/years/', formData);
       return response.data;
     },
@@ -30,8 +44,9 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
       onClose();
       resetForm();
     },
-    onError: () => {
-      toast.error('Failed to create year. Please try again.');
+    onError: (error: any) => {
+      const msg = error.response?.data?.year_number?.[0] || 'Failed to create year.';
+      toast.error(msg);
     },
   });
 
@@ -51,7 +66,6 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
       toast.error('Year number must be 1 or greater');
       return;
     }
-
     const formData = new FormData();
     formData.append('year_number', yearNumber.toString());
     formData.append('description', description);
@@ -98,7 +112,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Year Number */}
+              {/* Year Number + Date Range Preview */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Year Number *
@@ -112,6 +126,30 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                   placeholder="1, 2, 3…"
                   required
                 />
+                {/* Live date range preview */}
+                {dateRange && (
+                  <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                    <Calendar className="w-4 h-4 shrink-0" />
+                    <span>
+                      This year covers{' '}
+                      <strong>
+                        {dateRange.start.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </strong>{' '}
+                      –{' '}
+                      <strong>
+                        {dateRange.end.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </strong>
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Description */}
