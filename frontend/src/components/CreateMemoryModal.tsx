@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, MapPin, Heart, Upload, Quote } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 interface CreateMemoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   yearId: number;
+}
+
+interface YearData {
+  id: number;
+  year_number: number;
+  description?: string;
 }
 
 const memoryTypes = [
@@ -20,6 +27,7 @@ const memoryTypes = [
 ];
 
 const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, yearId }) => {
+  const { user } = useAuth();   // ✅ provides anniversary date
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
@@ -31,6 +39,32 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
   const [preview, setPreview] = useState<string>('');
 
   const queryClient = useQueryClient();
+
+  const { data: yearData } = useQuery<YearData>({
+    queryKey: ['year', yearId],
+    queryFn: async () => {
+      const response = await api.get(`/years/${yearId}/`);
+      return response.data;
+    },
+    enabled: !!yearId && isOpen,
+  });
+
+  const getDateRange = (): { start: Date; end: Date } | null => {
+    if (!user?.anniversary_date || !yearData?.year_number) return null;
+    const anniversary = new Date(user.anniversary_date);
+    const yearNumber = yearData.year_number;
+    const start = new Date(anniversary);
+    start.setFullYear(start.getFullYear() + (yearNumber - 1));
+    const end = new Date(start);
+    end.setFullYear(end.getFullYear() + 1);
+    end.setDate(end.getDate() - 1);
+    return { start, end };
+  };
+
+  const dateRange = getDateRange();
+  const selectedDate = date ? new Date(date) : null;
+  const isDateOutOfRange =
+    dateRange && selectedDate && (selectedDate < dateRange.start || selectedDate > dateRange.end);
 
   const createMemoryMutation = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -72,7 +106,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
     }
 
     const formData = new FormData();
-    formData.append('year', yearId.toString());   // yearId is the relationship year ID
+    formData.append('year', yearId.toString());
     formData.append('title', title);
     formData.append('date', date);
     formData.append('description', description);
@@ -144,7 +178,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                 />
               </div>
 
-              {/* Date */}
+              {/* Date with relationship‑year range warning */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Date *
@@ -160,6 +194,24 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                     required
                   />
                 </div>
+                {/* Gentle warning when date is outside the relationship year */}
+                {isDateOutOfRange && dateRange && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-2 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl text-sm text-amber-700 dark:text-amber-300"
+                  >
+                    This date is outside Year {yearData?.year_number}. Allowed range:{' '}
+                    <strong>
+                      {dateRange.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </strong>{' '}
+                    –{' '}
+                    <strong>
+                      {dateRange.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </strong>
+                    .
+                  </motion.div>
+                )}
               </div>
 
               {/* Memory Type */}
