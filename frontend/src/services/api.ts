@@ -7,8 +7,12 @@ const api = axios.create({
   },
 });
 
-// Request interceptor - add access token
 api.interceptors.request.use((config) => {
+
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+
   const token = localStorage.getItem('accessToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -16,13 +20,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor - handle token refresh
+// Response interceptor – handle token refresh (unchanged)
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
     
-    // If 401 and haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       
@@ -36,12 +39,9 @@ api.interceptors.response.use(
           
           const { access } = response.data;
           localStorage.setItem('accessToken', access);
-          
-          // Retry original request with new token
           originalRequest.headers.Authorization = `Bearer ${access}`;
           return api(originalRequest);
         } catch (refreshError) {
-          // Refresh failed - force logout
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           localStorage.removeItem('coupleUser');
