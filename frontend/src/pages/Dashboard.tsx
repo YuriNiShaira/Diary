@@ -25,7 +25,7 @@ import toast from 'react-hot-toast';
 
 interface Year {
   id: number;
-  year: number;
+  year_number: number;          // ✅ anniversary‑based year number
   cover_image?: string;
   description?: string;
   memory_count?: number;
@@ -42,7 +42,7 @@ interface Stats {
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { theme } = useTheme(); // ✅ Dark mode
+  const { theme } = useTheme();
   const [isCreateYearModalOpen, setIsCreateYearModalOpen] = useState(false);
   const [stats, setStats] = useState<Stats>({
     total_years: 0,
@@ -54,7 +54,7 @@ const Dashboard: React.FC = () => {
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
 
-  const { data: yearsData, isLoading } = useQuery({
+  const { data: yearsData, isLoading } = useQuery<Year[]>({
     queryKey: ['years'],
     queryFn: async () => {
       const response = await api.get('/years/');
@@ -113,7 +113,6 @@ const Dashboard: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-12 relative"
         >
-          {/* Invite Partner Button */}
           {user && !user.has_partner && (
             <div className="absolute right-0 top-0">
               <motion.button
@@ -129,7 +128,6 @@ const Dashboard: React.FC = () => {
           )}
 
           <div className="text-center">
-            {/* ✅ Dynamic name + dark mode */}
             <h1 className={`text-5xl md:text-6xl font-serif mb-4 ${
               theme === 'dark' ? 'text-purple-100' : 'text-gray-800'
             }`}>
@@ -158,7 +156,7 @@ const Dashboard: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Time Counter - ✅ Dynamic anniversary */}
+        {/* Time Counter */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
