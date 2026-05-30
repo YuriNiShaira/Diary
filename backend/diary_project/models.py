@@ -1,11 +1,11 @@
 from django.db import models
 from accounts.models import Couple
 from django.utils import timezone
-from datetime import timedelta
+from datetime import date, timedelta
 
 class Year(models.Model):
     couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='years')
-    year_number = models.PositiveIntegerField()
+    year_number = models.IntegerField()   # 0 = prequel, 1, 2, 3... = relationship years
     cover_image = models.URLField(max_length=500, null=True, blank=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -15,13 +15,23 @@ class Year(models.Model):
         unique_together = ['couple', 'year_number']
 
     def get_date_range(self):
-        """Return (start_date, end_date) for this relationship year."""
+        """Return (start_date, end_date) for this relationship year.
+        - Prequel (0): from the earliest representable date to the day before the anniversary.
+        - Normal years (1+): from anniversary + (n-1) years to anniversary + n years - 1 day.
+        """
         anniversary = self.couple.anniversary_date
-        start = anniversary.replace(year=anniversary.year + (self.year_number - 1))
-        end = anniversary.replace(year=anniversary.year + self.year_number) - timedelta(days=1)
-        return start, end
+        if self.year_number == 0:
+            # Prequel covers any date before the anniversary
+            start_date = date.min
+            end_date = anniversary - timedelta(days=1)
+        else:
+            start_date = anniversary.replace(year=anniversary.year + (self.year_number - 1))
+            end_date = anniversary.replace(year=anniversary.year + self.year_number) - timedelta(days=1)
+        return start_date, end_date
 
     def __str__(self):
+        if self.year_number == 0:
+            return f"{self.couple.name} – Prequel"
         return f"{self.couple.name} – Year {self.year_number}"
 
 

@@ -78,8 +78,9 @@ class CoupleFilteredViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         couple = get_couple(self.request)
-        if couple:
-            serializer.save(couple=couple)
+        if not couple:
+            raise drf_serializers.ValidationError({'detail': 'Your user profile does not have a couple assigned.'})
+        serializer.save(couple=couple)
 
 
 # ============================================
@@ -94,12 +95,14 @@ class YearViewSet(CoupleFilteredViewSet):
         couple = get_couple(self.request)
         year_number = serializer.validated_data.get('year_number')
 
-        if year_number is not None and year_number < 1:
-            raise drf_serializers.ValidationError({'year_number': 'Year number must be 1 or greater.'})
+        # Allow 0 (prequel) and positive numbers
+        if year_number is not None and year_number < 0:
+            raise drf_serializers.ValidationError({'year_number': 'Year number cannot be negative.'})
 
-        # Check for duplicate year numbers for this couple
+        # Check for duplicate year numbers (including prequel)
         if Year.objects.filter(couple=couple, year_number=year_number).exists():
-            raise drf_serializers.ValidationError({'year_number': f'Year {year_number} already exists for your relationship.'})
+            label = "Prequel" if year_number == 0 else f"Year {year_number}"
+            raise drf_serializers.ValidationError({'year_number': f'{label} already exists for your relationship.'})
 
         # Upload cover image if provided
         image_file = self.request.FILES.get('cover_image')
@@ -413,6 +416,46 @@ class SongRecommendationViewSet(CoupleFilteredViewSet):
     queryset = SongRecommendation.objects.all()
     serializer_class = SongRecommendationSerializer
 
+    def perform_create(self, serializer):
+        couple = get_couple(self.request)
+        year_id = self.request.data.get('year')
+
+        if not couple:
+            raise drf_serializers.ValidationError({'detail': 'Unable to determine your couple.'})
+
+        if not year_id:
+            raise drf_serializers.ValidationError({'year': 'Year is required.'})
+
+        try:
+            Year.objects.get(id=year_id, couple=couple)
+        except Year.DoesNotExist:
+            raise drf_serializers.ValidationError({'year': 'The selected year is not valid for your relationship.'})
+
+        rating = self.request.data.get('rating')
+        if rating == 0:
+            serializer.validated_data['rating'] = None
+
+        serializer.save(couple=couple)
+
+    def perform_update(self, serializer):
+        couple = get_couple(self.request)
+        year_id = self.request.data.get('year')
+
+        if not couple:
+            raise drf_serializers.ValidationError({'detail': 'Unable to determine your couple.'})
+
+        if year_id:
+            try:
+                Year.objects.get(id=year_id, couple=couple)
+            except Year.DoesNotExist:
+                raise drf_serializers.ValidationError({'year': 'The selected year is not valid for your relationship.'})
+
+        rating = self.request.data.get('rating')
+        if rating == 0:
+            serializer.validated_data['rating'] = None
+
+        serializer.save()
+
     def get_queryset(self):
         queryset = super().get_queryset()
         year_id = self.request.query_params.get('year', None)
@@ -493,40 +536,41 @@ class BucketListViewSet(CoupleFilteredViewSet):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def calendar_memories(request):
-    """Get memories grouped by date - FILTERED BY COUPLE"""
-    couple = get_couple(request)
-    
-    if not couple:
-        return Response({'memories': {}, 'total_dates': 0, 'total_memories': 0})
-    
-    year = request.query_params.get('year', None)
-    month = request.query_params.get('month', None)
+    try:
+        couple = get_couple(request)
+        if not couple:
+            return Response({'memories': {}, 'total_dates': 0, 'total_memories': 0})
 
-    queryset = Memory.objects.filter(couple=couple)
+        year = request.query_params.get('year', None)
+        month = request.query_params.get('month', None)
 
-    if year:
-        queryset = queryset.filter(date__year=year)
-    if month:
-        queryset = queryset.filter(date__month=month)
+        queryset = Memory.objects.filter(couple=couple)
 
-    from collections import defaultdict
+        if year:
+            queryset = queryset.filter(date__year=year)
+        if month:
+            queryset = queryset.filter(date__month=month)
 
-    memories_by_date = defaultdict(list)
-    for memory in queryset:
-        date_key = memory.date.isoformat()
-        
-        image_url = memory.image if memory.image else None
-        
-        memories_by_date[date_key].append({
-            'id': memory.id,
-            'title': memory.title,
-            'description': memory.description[:100],
-            'image': image_url,
-            'memory_type': memory.memory_type,
-            'is_favorite': memory.is_favorite,
-            'location': memory.location,
-            'year_id': memory.year_id,
-            'year': memory.year.year if memory.year else None,
-        })
+        from collections import defaultdict
 
-    return Response({'memories': dict(memories_by_date),'total_dates': len(memories_by_date),'total_memories': queryset.count(),})
+        memories_by_date = defaultdict(list)
+        for memory in queryset:
+            date_key = memory.date.isoformat()
+            image_url = memory.image if memory.image else None
+
+            memories_by_date[date_key].append({
+                'id': memory.id,
+                'title': memory.title,
+                'description': memory.description[:100],
+                'image': image_url,
+                'memory_type': memory.memory_type,
+                'is_favorite': memory.is_favorite,
+                'location': memory.location,
+                'year_id': memory.year_id,
+                'year': memory.year.year if memory.year else None,
+            })
+
+        return Response({'memories': dict(memories_by_date),'total_dates': len(memories_by_date),'total_memories': queryset.count(),})
+    except Exception as e:
+        import traceback
+        return Response({'error': str(e),'traceback': traceback.format_exc()}, status=500)
