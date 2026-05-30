@@ -536,41 +536,44 @@ class BucketListViewSet(CoupleFilteredViewSet):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def calendar_memories(request):
-    try:
-        couple = get_couple(request)
-        if not couple:
-            return Response({'memories': {}, 'total_dates': 0, 'total_memories': 0})
+    """Get memories grouped by date - FILTERED BY COUPLE"""
+    couple = get_couple(request)
+    
+    if not couple:
+        return Response({'memories': {}, 'total_dates': 0, 'total_memories': 0})
+    
+    year = request.query_params.get('year', None)
+    month = request.query_params.get('month', None)
 
-        year = request.query_params.get('year', None)
-        month = request.query_params.get('month', None)
+    queryset = Memory.objects.filter(couple=couple)
 
-        queryset = Memory.objects.filter(couple=couple)
+    if year:
+        queryset = queryset.filter(date__year=year)
+    if month:
+        queryset = queryset.filter(date__month=month)
 
-        if year:
-            queryset = queryset.filter(date__year=year)
-        if month:
-            queryset = queryset.filter(date__month=month)
+    from collections import defaultdict
 
-        from collections import defaultdict
+    memories_by_date = defaultdict(list)
+    for memory in queryset:
+        date_key = memory.date.isoformat()
+        
+        image_url = memory.image if memory.image else None
+        
+        memories_by_date[date_key].append({
+            'id': memory.id,
+            'title': memory.title,
+            'description': memory.description[:100],
+            'image': image_url,
+            'memory_type': memory.memory_type,
+            'is_favorite': memory.is_favorite,
+            'location': memory.location,
+            'year_id': memory.year_id,
+            'year': memory.year.year_number if memory.year else None, 
+        })
 
-        memories_by_date = defaultdict(list)
-        for memory in queryset:
-            date_key = memory.date.isoformat()
-            image_url = memory.image if memory.image else None
-
-            memories_by_date[date_key].append({
-                'id': memory.id,
-                'title': memory.title,
-                'description': memory.description[:100],
-                'image': image_url,
-                'memory_type': memory.memory_type,
-                'is_favorite': memory.is_favorite,
-                'location': memory.location,
-                'year_id': memory.year_id,
-                'year': memory.year.year if memory.year else None,
-            })
-
-        return Response({'memories': dict(memories_by_date),'total_dates': len(memories_by_date),'total_memories': queryset.count(),})
-    except Exception as e:
-        import traceback
-        return Response({'error': str(e),'traceback': traceback.format_exc()}, status=500)
+    return Response({
+        'memories': dict(memories_by_date),
+        'total_dates': len(memories_by_date),
+        'total_memories': queryset.count(),
+    })
