@@ -126,12 +126,12 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                   placeholder="1, 2, 3…"
                   required
                 />
-                {/* Live date range preview */}
-                {dateRange && (
+                {/* Live date range preview - only for years 1+ */}
+                {dateRange && yearNumber >= 1 && (
                   <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm text-blue-700 dark:text-blue-300 flex items-center gap-2">
                     <Calendar className="w-4 h-4 shrink-0" />
                     <span>
-                      This year covers{' '}
+                      📅 This year covers{' '}
                       <strong>
                         {dateRange.start.toLocaleDateString('en-US', {
                           month: 'short',

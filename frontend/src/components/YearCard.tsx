@@ -39,7 +39,7 @@ const YearCard: React.FC<YearCardProps> = ({ year, onClick }) => {
           {year.cover_image ? (
             <img
               src={year.cover_image}
-              alt={`Year ${year.year_number}`}
+              alt={year.year_number === 0 ? 'Prequel' : `Year ${year.year_number}`}
               className="w-full h-full object-cover object-center scale-100 group-hover:scale-110 transition-transform duration-[2000ms] ease-out"
             />
           ) : (
@@ -107,7 +107,7 @@ const YearCard: React.FC<YearCardProps> = ({ year, onClick }) => {
               </span>
 
               <span className="text-lg font-bold font-serif leading-none mt-1">
-                {year.year_number}
+                {year.year_number === 0 ? 'Prequel' : `Year ${year.year_number}`}
               </span>
             </div>
           </motion.div>
@@ -134,7 +134,7 @@ const YearCard: React.FC<YearCardProps> = ({ year, onClick }) => {
               whileHover={{ scale: 1.01 }}
               className="text-white text-3xl sm:text-4xl font-serif italic leading-tight drop-shadow-2xl line-clamp-2"
             >
-              {year.description || `Chapter ${year.year_number}`}
+              {year.description || (year.year_number === 0 ? 'Before We Were Official' : `Year ${year.year_number}`)}
             </motion.h2>
 
             <div className="mt-3 w-16 h-[2px] bg-white/70 rounded-full group-hover:w-24 transition-all duration-500" />
