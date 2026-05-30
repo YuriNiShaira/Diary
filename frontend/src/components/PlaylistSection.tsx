@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Music, Plus, Edit, Trash2, X, CheckCircle,
-  Star, Heart, Volume2, Play
+  Star, Heart, Volume2, Play,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,6 +23,8 @@ interface SongRecommendation {
   is_listened: boolean;
   listened_date: string | null;
   rating: number;
+  mood: string;
+  mood_display: string;
   created_at: string;
   year: number;
 }
@@ -40,6 +42,13 @@ interface PlaylistSectionProps {
   yearId: number;
   yearNumber: number;
 }
+
+const MOOD_CHOICES = [
+  { value: 'romantic', label: '💕 Romantic' },
+  { value: 'sad', label: '😢 Sad' },
+  { value: 'chill', label: '😌 Chill' },
+  { value: 'other', label: '✨ Other' },
+];
 
 const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber }) => {
   const { user } = useAuth();
@@ -61,6 +70,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
     spotify_link: '',
     is_listened: false,
     rating: 0,
+    mood: 'other',
   });
 
   const queryClient = useQueryClient();
@@ -95,6 +105,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
         spotify_link: data.spotify_link || '',
         is_listened: false,
         rating: null,
+        mood: data.mood,
         year: yearId,
       };
       const response = await api.post('/song-recommendations/', payload);
@@ -116,7 +127,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
         title: data.title, artist: data.artist,
         recommended_by: data.recommended_by, recommended_to: data.recommended_to,
         youtube_link: data.youtube_link || '', spotify_link: data.spotify_link || '',
-        is_listened: data.is_listened, year: yearId,
+        is_listened: data.is_listened, mood: data.mood, year: yearId,
       };
       payload.rating = (data.rating >= 1 && data.rating <= 5) ? data.rating : null;
       const response = await api.put(`/song-recommendations/${id}/`, payload);
@@ -162,7 +173,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
       title: song.title, artist: song.artist,
       recommended_by: song.recommended_by, recommended_to: song.recommended_to,
       youtube_link: song.youtube_link || '', spotify_link: song.spotify_link || '',
-      is_listened: song.is_listened, rating: song.rating || 0,
+      is_listened: song.is_listened, rating: song.rating || 0, mood: song.mood || 'other',
     });
     setIsModalOpen(true);
   };
@@ -173,7 +184,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
       title: '', artist: '',
       recommended_by: 'me', recommended_to: 'shaira',
       youtube_link: '', spotify_link: '',
-      is_listened: false, rating: 0,
+      is_listened: false, rating: 0, mood: 'other',
     });
   };
 
@@ -283,7 +294,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
             >
               <button
                 onClick={() => toggleListenedMutation.mutate({ id: song.id, is_listened: !song.is_listened })}
-                className="relative flex-shrink-0"
+                className="relative shrink-0"
               >
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
                   song.is_listened ? 'bg-emerald-500/10 text-emerald-500' : (theme === 'dark' ? 'bg-purple-700/30 text-purple-400' : 'bg-gray-100 text-gray-400')
@@ -301,13 +312,38 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
                       ))}
                     </div>
                   )}
+                  {song.mood && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                      {song.mood_display || song.mood}
+                    </span>
+                  )}
                 </div>
                 <p className={`text-sm font-medium mb-2 ${theme === 'dark' ? 'text-purple-300' : 'text-gray-600'}`}>{song.artist}</p>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
-                  song.recommended_by === 'me' ? 'bg-love-red text-white' : 'bg-purple-500 text-white'
-                }`}>
-                  {song.recommended_by === 'me' ? displayName : partnerName}'s Pick
-                </span>
+                
+                {/* ✅ Link buttons now visible */}
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
+                    song.recommended_by === 'me' ? 'bg-love-red text-white' : 'bg-purple-500 text-white'
+                  }`}>
+                    {song.recommended_by === 'me' ? displayName : partnerName}'s Pick
+                  </span>
+                  {song.youtube_link && (
+                    <a href={song.youtube_link} target="_blank" rel="noopener noreferrer"
+                      className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors"
+                      title="Listen on YouTube"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                    </a>
+                  )}
+                  {song.spotify_link && (
+                    <a href={song.spotify_link} target="_blank" rel="noopener noreferrer"
+                      className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-colors"
+                      title="Listen on Spotify"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+                    </a>
+                  )}
+                </div>
               </div>
               <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button onClick={() => handleEdit(song)} className="p-2 rounded-xl hover:bg-blue-500/10 text-blue-400"><Edit className="w-4 h-4" /></button>
@@ -318,7 +354,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
         </div>
       )}
 
-      {/* Modal - Fixed X button */}
+      {/* Modal */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -378,6 +414,16 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
                       <option value="me">{displayName}</option>
                     </select>
                   </div>
+                </div>
+                {/* ✅ Mood selector */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-widest text-gray-400 ml-1">Mood</label>
+                  <select value={formData.mood} onChange={(e) => setFormData({ ...formData, mood: e.target.value })}
+                    className={`w-full px-4 py-3 rounded-2xl border-2 ${theme === 'dark' ? 'bg-purple-900/40 border-purple-800 text-white' : 'bg-gray-50 border-gray-100'}`}>
+                    {MOOD_CHOICES.map((mood) => (
+                      <option key={mood.value} value={mood.value}>{mood.label}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold uppercase tracking-widest text-gray-400 ml-1">YouTube Link</label>

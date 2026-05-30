@@ -86,6 +86,7 @@ class QuizScoreSerializer(serializers.ModelSerializer):
 class SongRecommendationSerializer(serializers.ModelSerializer):
     recommended_by_display = serializers.SerializerMethodField()
     recommended_to_display = serializers.SerializerMethodField()
+    mood_display = serializers.SerializerMethodField()
 
     class Meta:
         model = SongRecommendation
@@ -94,9 +95,12 @@ class SongRecommendationSerializer(serializers.ModelSerializer):
 
     def get_recommended_by_display(self, obj):
         return obj.get_recommended_by_display()
-    
+
     def get_recommended_to_display(self, obj):
         return obj.get_recommended_to_display()
+
+    def get_mood_display(self, obj):
+        return obj.get_mood_display() if obj.mood else ''
     
 
 class BucketListItemSerializer(serializers.ModelSerializer):

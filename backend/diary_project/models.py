@@ -247,6 +247,12 @@ class QuizScore(models.Model):
 
 
 class SongRecommendation(models.Model):
+    MOOD_CHOICES = [
+        ('romantic', '💕 Romantic'),
+        ('sad', '😢 Sad'),
+        ('chill', '😌 Chill'),
+        ('other', '✨ Other'),
+    ]
     couple = models.ForeignKey(Couple, on_delete=models.CASCADE, related_name='song_recommendations')
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='song_recommendations')
     title = models.CharField(max_length=200)
@@ -257,6 +263,7 @@ class SongRecommendation(models.Model):
     spotify_link = models.URLField(blank=True)
     is_listened = models.BooleanField(default=False)
     rating = models.IntegerField(null=True, blank=True, choices=[(i, str(i)) for i in range(1, 6)])
+    mood = models.CharField(max_length=20, choices=MOOD_CHOICES, default='other')  # ✅ new
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
