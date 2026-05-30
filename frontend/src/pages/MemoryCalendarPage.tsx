@@ -50,25 +50,29 @@ const MemoryCalendarPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'calendar' | 'timeline'>('calendar');
   const [isBookOpen, setIsBookOpen] = useState(false);
 
-  // Dynamic start year from couple's anniversary
+  // Use couple's anniversary year as the starting point, with a reasonable fallback
   const startYear = user?.anniversary_date
     ? new Date(user.anniversary_date).getFullYear()
-    : today.getFullYear() - 5;
+    : 2000;
 
-  // Current month data for calendar display
+  // Current month data for the calendar grid
   const { data: calendarData, isLoading } = useQuery<CalendarData>({
     queryKey: ['calendar', currentYear, currentMonth + 1],
-    queryFn: () => api.get(`/calendar/?year=${currentYear}&month=${currentMonth + 1}`).then(res => res.data),
+    queryFn: () =>
+      api.get(`/calendar/?year=${currentYear}&month=${currentMonth + 1}`).then(res => res.data),
   });
 
-  // Full year data for BookModal cross-month navigation
+  // Full year data for the BookModal (so we can navigate across months)
   const { data: allYearData } = useQuery<CalendarData>({
     queryKey: ['calendar', currentYear],
     queryFn: () => api.get(`/calendar/?year=${currentYear}`).then(res => res.data),
   });
 
-  // Use the full year memories for the book modal
-  const allMemoriesData = allYearData?.memories || {};
+  // Merge both sources: current month + full year, ensuring the modal always has enough data
+  const allMemoriesData = {
+    ...calendarData?.memories,
+    ...allYearData?.memories,
+  };
 
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -78,7 +82,7 @@ const MemoryCalendarPage: React.FC = () => {
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
 
-  // Dynamic available years
+  // Available calendar years (anniversary year → current year)
   const availableYears = Array.from(
     { length: today.getFullYear() - startYear + 1 },
     (_, i) => startYear + i
@@ -131,7 +135,11 @@ const MemoryCalendarPage: React.FC = () => {
   };
 
   const isToday = (day: number) => {
-    return day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+    return (
+      day === today.getDate() &&
+      currentMonth === today.getMonth() &&
+      currentYear === today.getFullYear()
+    );
   };
 
   const handleDateClick = (day: number) => {
@@ -179,16 +187,12 @@ const MemoryCalendarPage: React.FC = () => {
               <h1 className="text-4xl md:text-5xl font-serif text-gray-800 dark:text-purple-100 mb-2">
                 <span className="text-gradient-love">Memory Calendar</span>
               </h1>
-              <p className={`text-lg ${
-                theme === 'dark' ? 'text-purple-200' : 'text-gray-600'
-              }`}>
+              <p className={`text-lg ${theme === 'dark' ? 'text-purple-200' : 'text-gray-600'}`}>
                 Every special day, remembered forever
               </p>
             </div>
 
-            {/* Quick Year Switcher & View Toggle */}
             <div className="flex items-center gap-3 flex-wrap">
-              {/* Year Switcher */}
               <div className={`flex items-center gap-2 p-1.5 rounded-2xl backdrop-blur-sm ${
                 theme === 'dark'
                   ? 'bg-purple-900/30 border border-purple-800/50'
@@ -213,16 +217,12 @@ const MemoryCalendarPage: React.FC = () => {
                   value={currentYear}
                   onChange={(e) => jumpToYear(parseInt(e.target.value))}
                   className={`px-3 py-2 bg-transparent font-semibold text-lg outline-none cursor-pointer appearance-none text-center ${
-                    theme === 'dark'
-                      ? 'text-purple-100'
-                      : 'text-gray-800'
+                    theme === 'dark' ? 'text-purple-100' : 'text-gray-800'
                   }`}
                 >
                   {availableYears.map((year) => (
                     <option key={year} value={year} className={`${
-                      theme === 'dark'
-                        ? 'bg-gray-800 text-purple-100'
-                        : 'bg-white text-gray-800'
+                      theme === 'dark' ? 'bg-gray-800 text-purple-100' : 'bg-white text-gray-800'
                     }`}>
                       {year}
                     </option>
@@ -245,7 +245,6 @@ const MemoryCalendarPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* View Toggle */}
               <div className={`flex gap-1 p-1 rounded-xl backdrop-blur-sm ${
                 theme === 'dark'
                   ? 'bg-purple-900/30 border border-purple-800/50'
@@ -281,11 +280,8 @@ const MemoryCalendarPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Year Quick Jump Pills */}
           <div className="flex items-center gap-2 mt-4 flex-wrap">
-            <span className={`text-xs mr-1 ${
-              theme === 'dark' ? 'text-purple-300' : 'text-gray-500'
-            }`}>Jump to:</span>
+            <span className={`text-xs mr-1 ${theme === 'dark' ? 'text-purple-300' : 'text-gray-500'}`}>Jump to:</span>
             {availableYears.map((year) => (
               <motion.button
                 key={year}
@@ -303,13 +299,6 @@ const MemoryCalendarPage: React.FC = () => {
                 {year}
               </motion.button>
             ))}
-            {today.getFullYear() > startYear && (
-              <span className={`text-xs ml-1 ${
-                theme === 'dark' ? 'text-purple-300' : 'text-gray-500'
-              }`}>
-                ({availableYears.length} years of memories)
-              </span>
-            )}
           </div>
         </motion.div>
 
@@ -319,6 +308,7 @@ const MemoryCalendarPage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12"
         >
+          {/* ... stats remain identical to your original code ... */}
           <div className={`rounded-2xl p-5 text-center backdrop-blur-sm transition-all ${
             theme === 'dark'
               ? 'bg-purple-900/30 border border-purple-800/50'
@@ -550,7 +540,6 @@ const MemoryCalendarPage: React.FC = () => {
           </motion.div>
         )}
 
-        {/* Loading */}
         {isLoading && (
           <div className="text-center py-12">
             <div className="w-8 h-8 border-3 border-love-red border-t-transparent rounded-full animate-spin mx-auto" />
@@ -558,7 +547,7 @@ const MemoryCalendarPage: React.FC = () => {
         )}
       </div>
 
-      {/* BookModal with all year data */}
+      {/* BookModal – now uses merged memories and direct onDateChange */}
       <BookModal
         isOpen={isBookOpen}
         onClose={() => setIsBookOpen(false)}
@@ -568,10 +557,7 @@ const MemoryCalendarPage: React.FC = () => {
         onNavigate={(yearId) => navigate(`/year/${yearId}`)}
         onDateChange={(newDate) => {
           setSelectedDate(newDate);
-          // Small delay ensures state update after date change
-          setTimeout(() => {
-            setSelectedMemories(allMemoriesData[newDate] || []);
-          }, 50);
+          setSelectedMemories(allMemoriesData[newDate] || []);
         }}
       />
     </div>
