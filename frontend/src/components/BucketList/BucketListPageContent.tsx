@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -39,6 +39,99 @@ const BucketListPageContent: React.FC = () => {
   });
 
   const queryClient = useQueryClient();
+
+  // THE NUCLEAR OPTION: Force fix hardcoded white backgrounds and dark inputs
+  useEffect(() => {
+    const styleId = 'bucketlist-theme-overrides';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      document.head.appendChild(style);
+    }
+    
+    const styleEl = document.getElementById(styleId) as HTMLStyleElement;
+    
+    if (theme === 'dark') {
+      styleEl.innerHTML = `
+        /* Override stubborn white backgrounds and notebook patterns */
+        #bucketlist-page-wrapper .bg-white,
+        #bucketlist-page-wrapper .notebook-page,
+        div[role="dialog"] .bg-white,
+        div[role="dialog"] .notebook-page {
+          background-color: #1f2937 !important;
+          background-image: none !important;
+          border-color: #374151 !important;
+        }
+        
+        /* Ensure text is readable on the new dark backgrounds */
+        #bucketlist-page-wrapper .bg-white p, 
+        #bucketlist-page-wrapper .bg-white h1, 
+        #bucketlist-page-wrapper .bg-white h2, 
+        #bucketlist-page-wrapper .bg-white h3, 
+        #bucketlist-page-wrapper .bg-white h4,
+        #bucketlist-page-wrapper .bg-white label,
+        div[role="dialog"] p,
+        div[role="dialog"] h1,
+        div[role="dialog"] h2,
+        div[role="dialog"] h3,
+        div[role="dialog"] h4,
+        div[role="dialog"] label {
+           color: #e5e7eb !important;
+        }
+        
+        /* Fix text inputs and textareas (prevents gray-on-gray unreadable text) */
+        #bucketlist-page-wrapper input, 
+        #bucketlist-page-wrapper textarea, 
+        #bucketlist-page-wrapper select,
+        div[role="dialog"] input,
+        div[role="dialog"] textarea,
+        div[role="dialog"] select {
+          background-color: #374151 !important;
+          color: #f3f4f6 !important;
+          border: 1px solid #4b5563 !important;
+          color-scheme: dark !important;
+          -webkit-text-fill-color: #f3f4f6 !important;
+        }
+        
+        #bucketlist-page-wrapper input::placeholder, 
+        #bucketlist-page-wrapper textarea::placeholder,
+        div[role="dialog"] input::placeholder,
+        div[role="dialog"] textarea::placeholder {
+          color: #9ca3af !important;
+          -webkit-text-fill-color: #9ca3af !important;
+        }
+      `;
+    } else {
+      styleEl.innerHTML = `
+        /* Safety guard for Light mode */
+        #bucketlist-page-wrapper input, 
+        #bucketlist-page-wrapper textarea, 
+        #bucketlist-page-wrapper select,
+        div[role="dialog"] input,
+        div[role="dialog"] textarea,
+        div[role="dialog"] select {
+          background-color: rgba(255, 255, 255, 0.9) !important;
+          color: #1f2937 !important;
+          border: 1px solid #d1d5db !important;
+          color-scheme: light !important;
+          -webkit-text-fill-color: #1f2937 !important;
+        }
+        
+        #bucketlist-page-wrapper input::placeholder, 
+        #bucketlist-page-wrapper textarea::placeholder,
+        div[role="dialog"] input::placeholder,
+        div[role="dialog"] textarea::placeholder {
+          color: #9ca3af !important;
+          -webkit-text-fill-color: #9ca3af !important;
+        }
+      `;
+    }
+
+    return () => {
+      const style = document.getElementById(styleId);
+      if (style) style.remove();
+    };
+  }, [theme]);
 
   const { data: items, isLoading } = useQuery<BucketListItem[]>({
     queryKey: ['bucketlist'],
@@ -180,7 +273,7 @@ const BucketListPageContent: React.FC = () => {
   const completedItems = filteredItems?.filter((i) => i.status === 'completed') || [];
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div id="bucketlist-page-wrapper" className="min-h-screen relative overflow-hidden">
       <RomanticBackground />
       <Navbar />
 
