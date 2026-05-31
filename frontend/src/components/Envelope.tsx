@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Sparkles, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -28,6 +28,8 @@ const Envelope: React.FC = () => {
   const [showMagic, setShowMagic] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  
+  const timeoutsRef = useRef<number[]>([]);
 
   const { data: loveLetters, isLoading, isError } = useQuery<LoveLetter[]>({
     queryKey: ["loveLetters"],
@@ -42,323 +44,261 @@ const Envelope: React.FC = () => {
     return loveLetters[0];
   }, [loveLetters]);
 
+  // Clean up timeouts on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      classNameTimeoutsClean();
+    };
+  }, []);
+
+  const classNameTimeoutsClean = () => {
+    timeoutsRef.current.forEach((id) => clearTimeout(id));
+    timeoutsRef.current = [];
+  };
+
   const handleEnvelopeClick = () => {
     if (!currentLetter || isAnimating) return;
 
+    classNameTimeoutsClean();
     setIsAnimating(true);
     setIsEnvelopeOpen(true);
 
-    setTimeout(() => {
+    const t1 = window.setTimeout(() => {
       setShowMagic(true);
-    }, 100);
+    }, 150);
 
-    setTimeout(() => {
+    const t2 = window.setTimeout(() => {
       setShowLetterPreview(true);
-    }, 220);
+    }, 350);
 
-    setTimeout(() => {
-      setShowModal(true);
-    }, 980);
-
-    setTimeout(() => {
-      setShowMagic(false);
+    const t3 = window.setTimeout(() => {
+      // Smoothly cross-fade from preview inline state into open modal state
       setShowLetterPreview(false);
+      setShowModal(true);
+    }, 1400);
+
+    const t4 = window.setTimeout(() => {
+      setShowMagic(false);
       setIsEnvelopeOpen(false);
       setIsAnimating(false);
-    }, 1160);
+    }, 1600);
+
+    timeoutsRef.current = [t1, t2, t3, t4];
   };
 
   const handleClose = () => {
     setShowModal(false);
+    // Reset all internal states seamlessly
+    setIsEnvelopeOpen(false);
+    setShowLetterPreview(false);
+    setShowMagic(false);
+    setIsAnimating(false);
+    classNameTimeoutsClean();
   };
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center py-10">
+      <div className="flex flex-col items-center justify-center py-12 select-none">
         <motion.button
           type="button"
           onClick={handleEnvelopeClick}
           disabled={!currentLetter || isAnimating}
-          whileHover={!isAnimating ? { scale: 1.03, y: -6 } : {}}
-          whileTap={!isAnimating ? { scale: 0.985 } : {}}
-          className="relative h-[230px] w-[340px] cursor-pointer border-0 bg-transparent p-0"
+          whileHover={!isAnimating ? { scale: 1.04, y: -8 } : {}}
+          whileTap={!isAnimating ? { scale: 0.98 } : {}}
+          className="relative h-[240px] w-[350px] cursor-pointer border-0 bg-transparent p-0 outline-none focus:ring-2 focus:ring-pink-400/40 rounded-[32px]"
         >
           <motion.div
             animate={
               isEnvelopeOpen
-                ? {
-                    y: -10,
-                    scale: 1.02,
-                    rotate: -1,
-                  }
-                : {
-                    y: [0, -4, 0],
-                    scale: 1,
-                    rotate: 0,
-                  }
+                ? { y: -12, scale: 1.02, rotate: -0.5 }
+                : { y: [0, -5, 0], scale: 1, rotate: 0 }
             }
             transition={
               isEnvelopeOpen
-                ? { duration: 0.35, ease: "easeOut" }
-                : {
-                    duration: 3.2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }
+                ? { duration: 0.4, ease: "easeOut" }
+                : { duration: 3.5, repeat: Infinity, ease: "easeInOut" }
             }
             className="relative h-full w-full"
+            style={{ transformStyle: "preserve-3d" }}
           >
-            {/* Background glow - unchanged */}
+            {/* Background glow */}
             <motion.div
               animate={
                 isEnvelopeOpen
-                  ? { opacity: 1, scale: 1.08 }
-                  : { opacity: [0.5, 0.8, 0.5], scale: [1, 1.02, 1] }
+                  ? { opacity: 1, scale: 1.1 }
+                  : { opacity: [0.4, 0.7, 0.4], scale: [1, 1.03, 1] }
               }
               transition={
                 isEnvelopeOpen
-                  ? { duration: 0.35 }
-                  : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }
+                  ? { duration: 0.4 }
+                  : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
               }
-              className="absolute inset-0 rounded-[32px] bg-pink-400/20 blur-2xl"
+              className={`absolute inset-0 rounded-[32px] blur-2xl transition-colors duration-500 ${
+                theme === "dark" ? "bg-purple-500/20" : "bg-pink-400/20"
+              }`}
             />
 
-            {/* Floating hearts / sparkles - unchanged */}
+            {/* Floating particles */}
             <AnimatePresence>
               {showMagic && (
                 <>
                   {floatingHearts.map((item) => (
                     <motion.div
                       key={item.id}
-                      initial={{ opacity: 0, y: 10, scale: 0.6 }}
-                      animate={{ opacity: [0, 1, 0], y: -85, scale: [0.6, 1, 0.8] }}
+                      initial={{ opacity: 0, y: 20, scale: 0.5 }}
+                      animate={{ opacity: [0, 1, 0], y: -100, scale: [0.5, 1.2, 0.7] }}
                       exit={{ opacity: 0 }}
-                      transition={{
-                        duration: 0.9,
-                        delay: item.delay,
-                        ease: "easeOut",
-                      }}
-                      className="absolute top-[78px] z-[60]"
+                      transition={{ duration: 1.1, delay: item.delay, ease: "easeOut" }}
+                      className="absolute top-[60px] z-50"
                       style={{ left: item.left }}
                     >
-                      <Heart className="h-4 w-4 fill-current text-pink-400/90" />
+                      <Heart className="h-4 w-4 fill-current text-pink-400 drop-shadow-sm" />
                     </motion.div>
                   ))}
 
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.7, rotate: -12 }}
-                    animate={{
-                      opacity: [0, 1, 0],
-                      scale: [0.7, 1.05, 0.85],
-                      rotate: [-12, 6, 12],
-                    }}
+                    initial={{ opacity: 0, scale: 0.6, rotate: -15 }}
+                    animate={{ opacity: [0, 1, 0], scale: [0.6, 1.2, 0.8], rotate: [-15, 10, 25] }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.9, delay: 0.12 }}
-                    className="absolute left-[28%] top-[82px] z-[60]"
+                    transition={{ duration: 1, delay: 0.1 }}
+                    className="absolute left-[25%] top-[65px] z-50"
                   >
-                    <Sparkles className="h-4 w-4 text-yellow-300" />
+                    <Sparkles className="h-5 w-5 text-yellow-300 drop-shadow-md" />
                   </motion.div>
 
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.7, rotate: 12 }}
-                    animate={{
-                      opacity: [0, 1, 0],
-                      scale: [0.7, 1.05, 0.85],
-                      rotate: [12, -6, -12],
-                    }}
+                    initial={{ opacity: 0, scale: 0.6, rotate: 15 }}
+                    animate={{ opacity: [0, 1, 0], scale: [0.6, 1.2, 0.8], rotate: [15, -10, -25] }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.9, delay: 0.22 }}
-                    className="absolute right-[28%] top-[76px] z-[60]"
+                    transition={{ duration: 1, delay: 0.2 }}
+                    className="absolute right-[25%] top-[60px] z-50"
                   >
-                    <Sparkles className="h-4 w-4 text-pink-200" />
+                    <Sparkles className="h-4 w-4 text-pink-200 drop-shadow-md" />
                   </motion.div>
                 </>
               )}
             </AnimatePresence>
 
-            {/* Letter preview - ONLY THIS CHANGES for dark mode */}
+            {/* ================= LAYER 1: BACK FLAP & MAIN BODY BODY ================= */}
+            <div className="absolute inset-0 z-10 rounded-[30px] bg-gradient-to-br from-rose-300 via-pink-300 to-fuchsia-400 shadow-[0_28px_70px_rgba(236,72,153,0.18)]" />
+            <div className="absolute inset-[2px] z-12 rounded-[28px] bg-gradient-to-b from-white/20 to-transparent" />
+
+            {/* ================= LAYER 2: LETTER PREVIEW (EMERGES FROM INSIDE) ================= */}
             <AnimatePresence>
               {showLetterPreview && currentLetter && (
                 <motion.div
-                  initial={{ y: 42, scale: 0.9, opacity: 0, rotate: 0 }}
-                  animate={{
-                    y: -102,
-                    scale: 1,
-                    opacity: 1,
-                    rotate: -2,
-                  }}
-                  exit={{
-                    y: -128,
-                    scale: 1.02,
-                    opacity: 0,
-                    rotate: -1,
-                  }}
-                  transition={{
-                    duration: 0.72,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                  className="absolute left-1/2 top-[52px] z-40 w-[82%] -translate-x-1/2"
+                  layoutId={`letter-card-container-${currentLetter.id}`}
+                  initial={{ y: 40, scale: 0.9, opacity: 0 }}
+                  animate={{ y: -115, scale: 1, opacity: 1, rotate: -1.5 }}
+                  exit={{ y: -140, scale: 0.95, opacity: 0 }}
+                  transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute left-[7.5%] top-[40px] z-20 w-[85%]"
                 >
-                  <motion.div
-                    animate={{
-                      rotate: [-2, -1, -2],
-                    }}
-                    transition={{
-                      duration: 2.4,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                    className={`rounded-[22px] border shadow-[0_24px_50px_rgba(15,23,42,0.16)] ${
-                      theme === 'dark'
-                        ? 'border-purple-500/30 bg-gradient-to-b from-purple-900/90 to-purple-800/90'
-                        : 'border-rose-100 bg-gradient-to-b from-white to-rose-50'
-                    } px-5 py-6`}
+                  <div
+                    className={`rounded-[20px] border shadow-[0_20px_40px_rgba(15,23,42,0.12)] ${
+                      theme === "dark"
+                        ? "border-purple-500/40 bg-gradient-to-b from-purple-900/95 to-purple-800/95 shadow-purple-950/50"
+                        : "border-rose-100 bg-gradient-to-b from-white to-rose-50/95"
+                    } p-5 text-left`}
                   >
-                    <div className="mb-3 flex items-center justify-center">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-full shadow-sm ${
-                        theme === 'dark' ? 'bg-purple-700' : 'bg-pink-100'
+                    <div className="mb-2 flex justify-center">
+                      <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                        theme === "dark" ? "bg-purple-800" : "bg-pink-100"
                       }`}>
-                        <Heart className={`h-5 w-5 fill-current ${
-                          theme === 'dark' ? 'text-purple-300' : 'text-pink-500'
-                        }`} />
+                        <Heart className={`h-4 w-4 fill-current ${theme === "dark" ? "text-purple-300" : "text-pink-500"}`} />
                       </div>
                     </div>
-
-                    <h3 className={`line-clamp-1 text-center text-lg font-bold ${
-                      theme === 'dark' ? 'text-purple-100' : 'text-rose-950'
+                    <h3 className={`line-clamp-1 text-center text-base font-bold tracking-wide ${
+                      theme === "dark" ? "text-purple-100" : "text-rose-950"
                     }`}>
                       {currentLetter.title}
                     </h3>
-
-                    <div className={`mx-auto mt-3 h-px w-16 bg-gradient-to-r from-transparent via-pink-300 to-transparent ${
-                      theme === 'dark' && 'via-purple-500/50'
-                    }`} />
-
-                    <p className={`mt-3 line-clamp-3 text-center text-sm leading-6 ${
-                      theme === 'dark' ? 'text-purple-300' : 'text-gray-500'
+                    <p className={`mt-2 line-clamp-2 text-center text-xs leading-5 ${
+                      theme === "dark" ? "text-purple-300" : "text-gray-500"
                     }`}>
                       {currentLetter.content}
                     </p>
-                  </motion.div>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Main envelope body - UNCHANGED */}
-            <div className="absolute inset-0 rounded-[30px] bg-gradient-to-br from-rose-300 via-pink-300 to-fuchsia-400 shadow-[0_28px_70px_rgba(236,72,153,0.24)]" />
+            {/* ================= LAYER 3: ENVELOPE FRONT COVER & POCKET ================= */}
+            {/* Front pocket wall */}
+            <div className="absolute bottom-0 left-0 z-30 h-[142px] w-full rounded-b-[30px] bg-gradient-to-br from-rose-100 via-pink-100 to-pink-200" />
 
-            {/* Inner highlight - UNCHANGED */}
-            <div className="absolute inset-[2px] rounded-[28px] bg-gradient-to-b from-white/20 to-transparent" />
+            {/* Geometric Folds */}
+            <div
+              className="absolute bottom-0 left-0 z-32 h-[142px] w-1/2"
+              style={{
+                clipPath: "polygon(0 0, 100% 50%, 100% 100%, 0 100%)",
+                background: "linear-gradient(135deg, rgba(255,255,255,0.45), rgba(255,255,255,0.15))",
+                borderBottomLeftRadius: "30px",
+              }}
+            />
+            <div
+              className="absolute bottom-0 right-0 z-32 h-[142px] w-1/2"
+              style={{
+                clipPath: "polygon(0 50%, 100% 0, 100% 100%, 0 100%)",
+                background: "linear-gradient(225deg, rgba(255,255,255,0.4), rgba(255,255,255,0.12))",
+                borderBottomRightRadius: "30px",
+              }}
+            />
+            <div
+              className="absolute bottom-0 left-1/2 z-33 h-[96px] w-[200px] -translate-x-1/2"
+              style={{
+                clipPath: "polygon(50% 100%, 0 0, 100% 0)",
+                background: "rgba(255,255,255,0.22)",
+              }}
+            />
+            <div className="absolute left-6 top-5 z-34 h-22 w-32 rounded-full bg-white/15 blur-xl" />
 
-            {/* Top flap - UNCHANGED */}
+            {/* Top flap */}
             <motion.div
               initial={false}
-              animate={
-                isEnvelopeOpen
-                  ? {
-                      rotateX: -172,
-                      y: -4,
-                    }
-                  : {
-                      rotateX: 0,
-                      y: 0,
-                    }
-              }
-              transition={{
-                duration: 0.72,
-                ease: [0.34, 1.56, 0.64, 1],
-              }}
-              className="absolute left-0 top-0 z-30 h-[118px] w-full origin-top"
-              style={{ transformStyle: "preserve-3d", perspective: 1200 }}
+              animate={isEnvelopeOpen ? { rotateX: -165, y: -2 } : { rotateX: 0, y: 0 }}
+              transition={{ duration: 0.65, ease: [0.25, 1, 0.5, 1] }}
+              className="absolute left-0 top-0 z-35 h-[122px] w-full origin-top"
+              style={{ transformStyle: "preserve-3d", perspective: 1000 }}
             >
               <div
-                className="absolute inset-0"
+                className="absolute inset-0 shadow-md"
                 style={{
                   clipPath: "polygon(0 0, 100% 0, 50% 100%)",
-                  background:
-                    "linear-gradient(135deg, #fb7185 0%, #ec4899 50%, #be185d 100%)",
+                  background: "linear-gradient(135deg, #fb7185 0%, #ec4899 50%, #be185d 100%)",
                   borderTopLeftRadius: "30px",
                   borderTopRightRadius: "30px",
-                  boxShadow: "0 14px 24px rgba(0,0,0,0.10)",
                 }}
               />
             </motion.div>
 
-            {/* Front pocket - UNCHANGED */}
-            <div className="absolute bottom-0 left-0 z-20 h-[138px] w-full rounded-b-[30px] bg-gradient-to-br from-rose-100 via-pink-100 to-pink-200" />
-
-            {/* Left fold - UNCHANGED */}
-            <div
-              className="absolute bottom-0 left-0 z-30 h-[138px] w-1/2"
-              style={{
-                clipPath: "polygon(0 0, 100% 50%, 100% 100%, 0 100%)",
-                background:
-                  "linear-gradient(135deg, rgba(255,255,255,0.48), rgba(255,255,255,0.14))",
-                borderBottomLeftRadius: "30px",
-              }}
-            />
-
-            {/* Right fold - UNCHANGED */}
-            <div
-              className="absolute bottom-0 right-0 z-30 h-[138px] w-1/2"
-              style={{
-                clipPath: "polygon(0 50%, 100% 0, 100% 100%, 0 100%)",
-                background:
-                  "linear-gradient(225deg, rgba(255,255,255,0.4), rgba(255,255,255,0.12))",
-                borderBottomRightRadius: "30px",
-              }}
-            />
-
-            {/* Bottom center fold - UNCHANGED */}
-            <div
-              className="absolute bottom-0 left-1/2 z-30 h-[92px] w-[190px] -translate-x-1/2"
-              style={{
-                clipPath: "polygon(50% 100%, 0 0, 100% 0)",
-                background: "rgba(255,255,255,0.24)",
-              }}
-            />
-
-            {/* Shine - UNCHANGED */}
-            <div className="absolute left-5 top-4 z-10 h-20 w-28 rounded-full bg-white/18 blur-xl" />
-
-            {/* Text content - UNCHANGED */}
+            {/* ================= LAYER 4: INNER TEXT CONTENT (FRONT FACE) ================= */}
             <motion.div
-              animate={
-                isEnvelopeOpen
-                  ? { opacity: 0, y: 10, scale: 0.98 }
-                  : { opacity: 1, y: 0, scale: 1 }
-              }
-              transition={{ duration: 0.22 }}
+              animate={isEnvelopeOpen ? { opacity: 0, y: 10, scale: 0.95 } : { opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.25 }}
               className="absolute inset-0 z-40 flex items-center justify-center"
             >
               <div className="flex flex-col items-center gap-3 px-6 text-center">
                 <motion.div
-                  animate={!isEnvelopeOpen ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-                  transition={{
-                    duration: 1.8,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                  className="flex h-14 w-14 items-center justify-center rounded-full bg-white/95 shadow-md"
+                  animate={!isEnvelopeOpen ? { scale: [1, 1.06, 1] } : { scale: 1 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="flex h-13 w-13 items-center justify-center rounded-full bg-white/95 shadow-md shadow-pink-200/50"
                 >
-                  <Heart className="h-7 w-7 fill-current text-pink-500" />
+                  <Heart className="h-6 w-6 fill-current text-pink-500" />
                 </motion.div>
 
                 <div>
-                  <p className="text-xl font-semibold text-rose-950">
+                  <p className="text-lg font-bold tracking-wide text-rose-950">
                     {isLoading
-                      ? "Loading letter..."
+                      ? "Unlocking thoughts..."
                       : isError
-                      ? "Failed to load"
+                      ? "Failed to load entry"
                       : currentLetter
                       ? "Open my letter 💌"
-                      : "No letter yet"}
+                      : "No entries recorded"}
                   </p>
-
-                  <p className="mt-1 text-sm text-rose-900/70">
-                    {currentLetter
-                      ? "Tap to read something sweet"
-                      : "Create a love letter first! ✨"}
+                  <p className="mt-1 text-xs font-medium text-rose-900/60">
+                    {currentLetter ? "Tap to read something sweet" : "Write down a fresh letter view! ✨"}
                   </p>
                 </div>
               </div>
@@ -367,78 +307,83 @@ const Envelope: React.FC = () => {
         </motion.button>
       </div>
 
-      {/* Modal - ONLY THIS CHANGES for dark mode */}
+      {/* ================= MODAL DIALOG CONTAINER ================= */}
       <AnimatePresence>
         {showModal && currentLetter && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.22 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-md"
             onClick={handleClose}
           >
             <motion.div
-              initial={{ opacity: 0, y: 42, scale: 0.92, rotateX: 8 }}
-              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-              exit={{ opacity: 0, y: 18, scale: 0.97 }}
-              transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
-              className={`relative w-full max-w-2xl rounded-[30px] border shadow-[0_30px_90px_rgba(15,23,42,0.28)] ${
-                theme === 'dark'
-                  ? 'border-purple-500/30 bg-gradient-to-br from-purple-900 to-purple-800'
-                  : 'border-white/40 bg-white'
-              } p-6`}
+              layoutId={`letter-card-container-${currentLetter.id}`}
+              transition={{ type: "spring", damping: 26, stiffness: 190 }}
+              className={`relative w-full max-w-xl overflow-hidden rounded-[28px] border shadow-[0_30px_80px_rgba(15,23,42,0.3)] ${
+                theme === "dark"
+                  ? "border-purple-500/30 bg-gradient-to-br from-purple-950 to-purple-900 shadow-purple-950/40"
+                  : "border-white/60 bg-white"
+              } p-6 md:p-8`}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className={`absolute inset-x-0 top-0 h-24 rounded-t-[30px] bg-gradient-to-r ${
-                theme === 'dark'
-                  ? 'from-purple-800 via-purple-700 to-purple-800'
-                  : 'from-rose-100 via-pink-50 to-rose-100'
-              }`} />
+              {/* Soft decorative header mesh */}
+              <div
+                className={`absolute inset-x-0 top-0 h-32 bg-gradient-to-r opacity-60 ${
+                  theme === "dark"
+                    ? "from-purple-900 via-indigo-950 to-purple-900"
+                    : "from-rose-100/70 via-pink-50/50 to-rose-100/70"
+                }`}
+              />
 
+              {/* Close Button */}
               <button
                 type="button"
                 onClick={handleClose}
-                className={`absolute right-4 top-4 z-10 rounded-full p-2 transition ${
-                  theme === 'dark'
-                    ? 'text-purple-400 hover:bg-purple-800 hover:text-purple-200'
-                    : 'text-gray-400 hover:bg-pink-50 hover:text-pink-500'
+                className={`absolute right-4 top-4 z-50 rounded-full p-2 transition-all duration-200 active:scale-90 ${
+                  theme === "dark"
+                    ? "text-purple-400 hover:bg-purple-900 hover:text-purple-100"
+                    : "text-gray-400 hover:bg-rose-50 hover:text-pink-500"
                 }`}
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <div className="relative mb-5 flex flex-col items-center text-center">
-                <div className={`mb-3 flex h-16 w-16 items-center justify-center rounded-full shadow-sm ${
-                  theme === 'dark' ? 'bg-purple-700' : 'bg-pink-100'
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <div className={`mb-3.5 flex h-14 w-14 items-center justify-center rounded-full shadow-sm ${
+                  theme === "dark" ? "bg-purple-900 border border-purple-500/30" : "bg-pink-50"
                 }`}>
-                  <Heart className={`h-8 w-8 fill-current ${
-                    theme === 'dark' ? 'text-purple-300' : 'text-pink-500'
-                  }`} />
+                  <Heart className={`h-6 w-6 fill-current ${theme === "dark" ? "text-purple-400" : "text-pink-500"}`} />
                 </div>
 
-                <h2 className={`text-3xl font-bold ${
-                  theme === 'dark' ? 'text-purple-100' : 'text-rose-950'
+                <h2 className={`text-2xl font-extrabold tracking-tight md:text-3xl ${
+                  theme === "dark" ? "text-purple-500 bg-gradient-to-r from-purple-200 to-indigo-200 bg-clip-text text-transparent" : "text-rose-950"
                 }`}>
                   {currentLetter.title}
                 </h2>
+                
+                <div className={`my-4 h-[1px] w-20 bg-gradient-to-r from-transparent via-pink-400 to-transparent ${
+                  theme === "dark" && "via-purple-500/40"
+                }`} />
               </div>
 
-              <div className={`max-h-[55vh] overflow-y-auto rounded-2xl border p-6 shadow-inner ${
-                theme === 'dark'
-                  ? 'border-purple-700/50 bg-purple-800/40'
-                  : 'border-rose-100 bg-rose-50/80'
+              {/* Letter content window */}
+              <div className={`relative z-10 max-h-[50vh] overflow-y-auto rounded-2xl border p-5 md:p-6 shadow-inner ${
+                theme === "dark"
+                  ? "border-purple-800/40 bg-purple-950/50 custom-scrollbar-dark"
+                  : "border-rose-100/60 bg-rose-50/40 custom-scrollbar-light"
               }`}>
-                <p className={`whitespace-pre-line text-[15px] leading-8 ${
-                  theme === 'dark' ? 'text-purple-200' : 'text-gray-700'
+                <p className={`whitespace-pre-line text-sm md:text-base font-normal leading-7 md:leading-8 tracking-wide ${
+                  theme === "dark" ? "text-purple-200/90" : "text-gray-700"
                 }`}>
                   {currentLetter.content}
                 </p>
               </div>
 
-              <div className="mt-5 text-center">
-                <p className={`text-sm font-medium ${
-                  theme === 'dark' ? 'text-purple-300' : 'text-pink-500'
+              <div className="relative z-10 mt-5 text-center">
+                <p className={`text-xs font-semibold tracking-widest uppercase ${
+                  theme === "dark" ? "text-purple-400/80" : "text-pink-500/90"
                 }`}>
                   With love, always ♡
                 </p>
