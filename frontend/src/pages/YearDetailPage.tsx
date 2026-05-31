@@ -159,7 +159,7 @@ const YearDetailPage: React.FC = () => {
       
       <div className="max-w-7xl mx-auto relative z-10">
         <YearHeader
-          year={year.year_number}  // ✅ Fixed: use year_number
+          year={year.year_number} 
           description={year.description}
           onDeleteYear={() => setShowDeleteYearModal(true)}
         />
