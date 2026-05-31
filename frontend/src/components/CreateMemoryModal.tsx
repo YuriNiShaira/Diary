@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, MapPin, Heart, Upload, Quote, Save } from 'lucide-react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
@@ -28,8 +28,8 @@ const memoryTypes = [
 ];
 
 // Helper: Torn tape
-const WashiTape = ({ rotate = '-rotate-2', color = 'bg-rose-100/50 dark:bg-rose-900/30' }) => (
-  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-8 ${color} backdrop-blur-md shadow-sm border border-black/5 dark:border-white/5 ${rotate} z-20`} 
+const WashiTape = ({ rotate = '-rotate-2', color = 'bg-rose-100/50' }) => (
+  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-8 ${color} backdrop-blur-md shadow-sm border border-black/5 ${rotate} z-20`} 
        style={{ clipPath: 'polygon(2% 0%, 98% 2%, 100% 100%, 0% 96%)' }} 
   />
 );
@@ -47,6 +47,42 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
   const [preview, setPreview] = useState<string>('');
 
   const queryClient = useQueryClient();
+
+  // THE NUCLEAR OPTION: Inject styles directly into the document head
+  useEffect(() => {
+    if (isOpen) {
+      const styleId = 'force-light-inputs-style-create';
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.innerHTML = `
+          #create-memory-modal-root input,
+          #create-memory-modal-root textarea,
+          #create-memory-modal-root select {
+            background: transparent !important;
+            background-color: transparent !important;
+            color: #1f2937 !important;
+            color-scheme: light !important;
+            -webkit-text-fill-color: #1f2937 !important;
+          }
+          #create-memory-modal-root input::placeholder,
+          #create-memory-modal-root textarea::placeholder {
+            color: #9ca3af !important;
+            -webkit-text-fill-color: #9ca3af !important;
+          }
+          #create-memory-modal-root select option {
+            background-color: #ffffff !important;
+            color: #1f2937 !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      return () => {
+        const style = document.getElementById(styleId);
+        if (style) style.remove();
+      };
+    }
+  }, [isOpen]);
 
   const { data: yearData } = useQuery<YearData>({
     queryKey: ['year', yearId],
@@ -153,22 +189,23 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
           />
           
           <motion.div
+            id="create-memory-modal-root"
             initial={{ scale: 0.95, y: 20, rotate: 1 }}
             animate={{ scale: 1, y: 0, rotate: 0 }}
             exit={{ scale: 0.95, y: 20, rotate: -1 }}
-            className="relative w-full max-w-3xl bg-[#faf8f5] dark:bg-[#1a1a1a] shadow-2xl overflow-hidden rounded-sm border border-gray-200 dark:border-gray-800 my-auto z-10 flex flex-col max-h-[90vh]"
+            className="relative w-full max-w-3xl bg-[#faf8f5] shadow-2xl overflow-hidden rounded-sm border border-gray-200 my-auto z-10 flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <WashiTape rotate="rotate-2" />
 
             {/* Header */}
-            <div className="flex justify-between items-center px-8 pt-8 pb-4 border-b border-gray-300 dark:border-gray-700 shrink-0">
-              <h2 className="text-3xl font-serif text-gray-800 dark:text-gray-100">
+            <div className="flex justify-between items-center px-8 pt-8 pb-4 border-b border-gray-300 shrink-0">
+              <h2 className="text-3xl font-serif text-gray-800">
                 Log New Memory
               </h2>
               <button onClick={onClose} className="p-2 text-gray-500 hover:text-rose-500 transition-colors">
@@ -187,24 +224,24 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
               <form id="create-memory-form" onSubmit={handleSubmit} className="space-y-8">
                 
                 {/* Core Details (Title, Date, Type) */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/60 dark:bg-black/40 backdrop-blur-sm p-6 rounded-sm border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/60 backdrop-blur-sm p-6 rounded-sm border border-gray-200 shadow-sm">
                   
                   <div className="md:col-span-12">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">
                       Memory Title *
                     </label>
                     <input
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="w-full bg-transparent border-b-2 border-dashed border-gray-300 dark:border-gray-600 outline-none font-handwriting text-3xl text-gray-800 dark:text-gray-200 focus:border-rose-400 transition-colors pb-1"
+                      className="w-full !bg-transparent border-b-2 border-dashed border-gray-300 outline-none font-handwriting text-3xl !text-gray-800 focus:border-rose-400 transition-colors pb-1"
                       placeholder="What happened?"
                       required
                     />
                   </div>
 
                   <div className="md:col-span-6">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">
                       Date *
                     </label>
                     <div className="relative">
@@ -214,7 +251,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
                         max={new Date().toISOString().split('T')[0]}
-                        className="w-full bg-transparent border-b-2 border-dashed border-gray-300 dark:border-gray-600 outline-none font-handwriting text-2xl text-gray-800 dark:text-gray-200 focus:border-rose-400 transition-colors pl-6 pb-1 cursor-pointer"
+                        className="w-full !bg-transparent border-b-2 border-dashed border-gray-300 outline-none font-handwriting text-2xl !text-gray-800 focus:border-rose-400 transition-colors pl-6 pb-1 cursor-pointer"
                         required
                       />
                     </div>
@@ -223,9 +260,9 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                       <motion.div
                         initial={{ opacity: 0, y: -5 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800/30 rounded-sm transform rotate-1"
+                        className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-sm transform rotate-1"
                       >
-                        <p className="font-handwriting text-xl text-yellow-700 dark:text-yellow-500 leading-tight">
+                        <p className="font-handwriting text-xl text-yellow-700 leading-tight">
                           Wait, this is outside Chapter {yearData?.year_number}! It should be between{' '}
                           <span className="font-bold">{dateRange.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           {' '}and{' '}
@@ -236,13 +273,13 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                   </div>
 
                   <div className="md:col-span-6">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">
                       Category
                     </label>
                     <select
                       value={memoryType}
                       onChange={(e) => setMemoryType(e.target.value)}
-                      className="w-full bg-transparent border-b-2 border-dashed border-gray-300 dark:border-gray-600 outline-none font-handwriting text-2xl text-gray-800 dark:text-gray-200 focus:border-rose-400 transition-colors pb-1 cursor-pointer appearance-none"
+                      className="w-full !bg-transparent border-b-2 border-dashed border-gray-300 outline-none font-handwriting text-2xl !text-gray-800 focus:border-rose-400 transition-colors pb-1 cursor-pointer appearance-none"
                     >
                       {memoryTypes.map((type) => (
                         <option key={type.value} value={type.value} className="font-sans text-base">
@@ -260,10 +297,10 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                   <div className="lg:col-span-5 space-y-6">
                     {/* Polaroid Image Upload */}
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
                         Photo Memory
                       </label>
-                      <div className="bg-white dark:bg-gray-200 p-2 pb-8 shadow-md transform rotate-1 relative group w-full max-w-[250px] mx-auto sm:mx-0">
+                      <div className="bg-white p-2 pb-8 shadow-md transform rotate-1 relative group w-full max-w-[250px] mx-auto sm:mx-0">
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-4 bg-yellow-100/80 shadow-sm transform -rotate-3 z-10" />
                         
                         {preview ? (
@@ -289,7 +326,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
 
                     {/* Location */}
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">
                         Location
                       </label>
                       <div className="relative">
@@ -298,7 +335,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                           type="text"
                           value={location}
                           onChange={(e) => setLocation(e.target.value)}
-                          className="w-full bg-transparent border-b-2 border-dashed border-gray-300 dark:border-gray-600 outline-none font-handwriting text-2xl text-gray-800 dark:text-gray-200 focus:border-rose-400 transition-colors pl-7 pb-1"
+                          className="w-full !bg-transparent border-b-2 border-dashed border-gray-300 outline-none font-handwriting text-2xl !text-gray-800 focus:border-rose-400 transition-colors pl-7 pb-1"
                           placeholder="Where did this happen?"
                         />
                       </div>
@@ -309,13 +346,13 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                       <label className="flex items-center gap-3 cursor-pointer w-max group">
                         <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
                           isFavorite 
-                            ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20' 
+                            ? 'border-rose-500 bg-rose-50' 
                             : 'border-gray-400 bg-transparent group-hover:border-rose-300'
                         }`}>
                           <Heart className={`w-4 h-4 ${isFavorite ? 'text-rose-500 fill-current' : 'text-gray-400'}`} />
                         </div>
                         <input type="checkbox" checked={isFavorite} onChange={(e) => setIsFavorite(e.target.checked)} className="hidden" />
-                        <span className="font-handwriting text-2xl text-gray-700 dark:text-gray-300 select-none">
+                        <span className="font-handwriting text-2xl text-gray-700 select-none">
                           Mark as favorite
                         </span>
                       </label>
@@ -326,15 +363,15 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                   <div className="lg:col-span-7 space-y-6">
                     
                     {/* Story */}
-                    <div className="bg-white/60 dark:bg-black/40 backdrop-blur-sm p-6 rounded-sm border border-gray-200 dark:border-gray-700 shadow-sm h-full flex flex-col">
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-4">
+                    <div className="bg-white/60 backdrop-blur-sm p-6 rounded-sm border border-gray-200 shadow-sm h-full flex flex-col">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-4">
                         The Story *
                       </label>
                       <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={7}
-                        className="w-full flex-1 bg-transparent resize-none outline-none font-handwriting text-2xl text-gray-800 dark:text-gray-200 leading-8"
+                        className="w-full flex-1 !bg-transparent resize-none outline-none font-handwriting text-2xl !text-gray-800 leading-8"
                         style={{
                           backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, rgba(156, 163, 175, 0.2) 31px, rgba(156, 163, 175, 0.2) 32px)',
                           backgroundAttachment: 'local',
@@ -346,15 +383,15 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
                     </div>
 
                     {/* Quote */}
-                    <div className="bg-blue-50/80 dark:bg-blue-900/10 p-4 border border-blue-200 dark:border-blue-900/30 transform -rotate-1">
-                      <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-blue-700 dark:text-blue-500 mb-2">
+                    <div className="bg-blue-50/80 p-4 border border-blue-200 transform -rotate-1">
+                      <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-blue-700 mb-2">
                         <Quote className="w-3 h-3" /> Memorable Quote
                       </label>
                       <textarea
                         value={favoriteQuote}
                         onChange={(e) => setFavoriteQuote(e.target.value)}
                         rows={2}
-                        className="w-full bg-transparent resize-none outline-none font-handwriting text-2xl text-gray-800 dark:text-gray-200 text-center"
+                        className="w-full !bg-transparent resize-none outline-none font-handwriting text-2xl !text-gray-800 text-center"
                         placeholder="Something special that was said..."
                       />
                     </div>
@@ -364,11 +401,11 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({ isOpen, onClose, 
             </div>
 
             {/* Footer Actions */}
-            <div className="px-8 py-4 bg-gray-100 dark:bg-[#111] border-t border-gray-300 dark:border-gray-800 flex flex-wrap items-center justify-end gap-4 shrink-0">
+            <div className="px-8 py-4 bg-gray-100 border-t border-gray-300 flex flex-wrap items-center justify-end gap-4 shrink-0">
               <button
                 type="button"
                 onClick={onClose}
-                className="font-handwriting text-2xl text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                className="font-handwriting text-2xl text-gray-500 hover:text-gray-800 transition-colors"
               >
                 Nevermind
               </button>

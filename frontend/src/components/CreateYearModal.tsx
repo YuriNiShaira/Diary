@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Image as ImageIcon, BookOpen } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -12,8 +12,8 @@ interface CreateYearModalProps {
 }
 
 // Helper: Torn Washi Tape
-const WashiTape = ({ rotate = '-rotate-2', color = 'bg-rose-100/50 dark:bg-rose-900/30' }) => (
-  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-8 ${color} backdrop-blur-md shadow-sm border border-black/5 dark:border-white/5 ${rotate} z-20`} 
+const WashiTape = ({ rotate = '-rotate-2', color = 'bg-rose-100/50' }) => (
+  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-8 ${color} backdrop-blur-md shadow-sm border border-black/5 ${rotate} z-20`} 
        style={{ clipPath: 'polygon(2% 0%, 98% 2%, 100% 100%, 0% 96%)' }} 
   />
 );
@@ -26,6 +26,42 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
   const [preview, setPreview] = useState<string>('');
 
   const queryClient = useQueryClient();
+
+  // THE NUCLEAR OPTION: Inject styles directly into the document head
+  useEffect(() => {
+    if (isOpen) {
+      const styleId = 'force-light-inputs-style-create-year';
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.innerHTML = `
+          #create-year-modal-root input,
+          #create-year-modal-root textarea,
+          #create-year-modal-root select {
+            background: transparent !important;
+            background-color: transparent !important;
+            color: #1f2937 !important;
+            color-scheme: light !important;
+            -webkit-text-fill-color: #1f2937 !important;
+          }
+          #create-year-modal-root input[type="number"] {
+            color: #f43f5e !important; /* text-rose-500 */
+            -webkit-text-fill-color: #f43f5e !important;
+          }
+          #create-year-modal-root input::placeholder,
+          #create-year-modal-root textarea::placeholder {
+            color: #9ca3af !important;
+            -webkit-text-fill-color: #9ca3af !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      return () => {
+        const style = document.getElementById(styleId);
+        if (style) style.remove();
+      };
+    }
+  }, [isOpen]);
 
   const getDateRange = (num: number) => {
     if (!user?.anniversary_date) return null;
@@ -105,15 +141,16 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
           />
           
           <motion.div
+            id="create-year-modal-root"
             initial={{ scale: 0.95, y: 20, rotate: 1 }}
             animate={{ scale: 1, y: 0, rotate: 0 }}
             exit={{ scale: 0.95, y: 20, rotate: -1 }}
-            className="relative w-full max-w-lg bg-[#faf8f5] dark:bg-[#1a1a1a] shadow-2xl rounded-sm border border-gray-200 dark:border-gray-800 my-auto z-10 max-h-[90vh] overflow-y-auto custom-scrollbar"
+            className="relative w-full max-w-lg bg-[#faf8f5] shadow-2xl rounded-sm border border-gray-200 my-auto z-10 max-h-[90vh] overflow-y-auto custom-scrollbar"
             style={{
               backgroundImage: 'radial-gradient(rgba(156, 163, 175, 0.3) 1px, transparent 1px)',
               backgroundSize: '20px 20px'
@@ -124,12 +161,12 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
 
             <div className="p-8 sm:p-10">
               {/* Header */}
-              <div className="flex justify-between items-start mb-8 border-b-2 border-gray-300 dark:border-gray-700 pb-4 bg-[#faf8f5] dark:bg-[#1a1a1a] inline-flex w-full">
+              <div className="flex justify-between items-start mb-8 border-b-2 border-gray-300 pb-4 bg-[#faf8f5] inline-flex w-full">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center bg-white dark:bg-gray-800">
-                    <BookOpen className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                  <div className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center bg-white">
+                    <BookOpen className="w-5 h-5 text-gray-600" />
                   </div>
-                  <h2 className="text-4xl font-serif text-gray-800 dark:text-gray-100">
+                  <h2 className="text-4xl font-serif text-gray-800">
                     New Chapter
                   </h2>
                 </div>
@@ -144,9 +181,9 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
               <form onSubmit={handleSubmit} className="space-y-8">
                 
                 {/* Year Number Area */}
-                <div className="bg-white/60 dark:bg-black/40 backdrop-blur-sm p-6 rounded-sm border border-gray-200 dark:border-gray-700 shadow-sm relative transform -rotate-1">
+                <div className="bg-white/60 backdrop-blur-sm p-6 rounded-sm border border-gray-200 shadow-sm relative transform -rotate-1">
                   <div className="flex items-end gap-4 mb-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 pb-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 pb-1">
                       Chapter No.
                     </label>
                     <input
@@ -154,18 +191,18 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                       min={0}
                       value={yearNumber}
                       onChange={(e) => setYearNumber(parseInt(e.target.value) || 0)}
-                      className="w-24 bg-transparent border-b-2 border-dashed border-gray-400 dark:border-gray-600 outline-none font-serif text-4xl text-rose-500 dark:text-rose-400 text-center pb-1 focus:border-rose-500 transition-colors"
+                      className="w-24 !bg-transparent border-b-2 border-dashed border-gray-400 outline-none font-serif text-4xl !text-rose-500 text-center pb-1 focus:border-rose-500 transition-colors"
                       required
                     />
                   </div>
-                  <p className="font-handwriting text-xl text-gray-500 dark:text-gray-400">
+                  <p className="font-handwriting text-xl text-gray-500">
                     (Use 0 for the Prequel timeline)
                   </p>
 
                   {/* Date Range Marginalia */}
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="mt-4 pt-4 border-t border-gray-200">
                     {dateRange && yearNumber === 0 && (
-                      <div className="flex items-start gap-2 text-gray-600 dark:text-gray-300">
+                      <div className="flex items-start gap-2 text-gray-600">
                         <Calendar className="w-4 h-4 shrink-0 mt-1" />
                         <span className="font-handwriting text-2xl leading-tight">
                           The Prequel: everything before our anniversary on{' '}
@@ -176,7 +213,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                       </div>
                     )}
                     {dateRange && yearNumber >= 1 && dateRange.start && (
-                      <div className="flex items-start gap-2 text-gray-600 dark:text-gray-300">
+                      <div className="flex items-start gap-2 text-gray-600">
                         <Calendar className="w-4 h-4 shrink-0 mt-1" />
                         <span className="font-handwriting text-2xl leading-tight">
                           This chapter timeline spans from{' '}
@@ -195,14 +232,14 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
 
                 {/* Chapter Title / Description */}
                 <div className="relative">
-                  <label className="bg-[#faf8f5] dark:bg-[#1a1a1a] inline-block pr-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-[-10px] relative z-10">
+                  <label className="bg-[#faf8f5] inline-block pr-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-[-10px] relative z-10">
                     Chapter Title / Focus
                   </label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={2}
-                    className="w-full bg-transparent resize-none outline-none font-handwriting text-3xl text-gray-800 dark:text-gray-200 leading-[40px] mt-[-10px]"
+                    className="w-full !bg-transparent resize-none outline-none font-handwriting text-3xl !text-gray-800 leading-[40px] mt-[-10px]"
                     placeholder={yearNumber === 0 ? "e.g., How We Met, The Chase..." : "Give this era a name..."}
                     style={{
                       backgroundImage: 'repeating-linear-gradient(transparent, transparent 39px, rgba(156, 163, 175, 0.3) 39px, rgba(156, 163, 175, 0.3) 40px)',
@@ -213,10 +250,10 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
 
                 {/* Cover Image Upload - Polaroid Style */}
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
                     Cover Photo (Optional)
                   </label>
-                  <div className="bg-white dark:bg-gray-200 p-3 pb-10 shadow-[0_4px_15px_rgba(0,0,0,0.1)] transform rotate-1 relative group w-full aspect-[4/3]">
+                  <div className="bg-white p-3 pb-10 shadow-[0_4px_15px_rgba(0,0,0,0.1)] transform rotate-1 relative group w-full aspect-[4/3]">
                     
                     {/* Small piece of tape for the photo */}
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-4 bg-yellow-200/60 shadow-sm transform -rotate-3 z-10" />
@@ -248,11 +285,11 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                 </div>
 
                 {/* Submit Actions */}
-                <div className="flex items-center justify-between pt-6 border-t border-gray-300 dark:border-gray-700">
+                <div className="flex items-center justify-between pt-6 border-t border-gray-300">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="font-handwriting text-2xl text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                    className="font-handwriting text-2xl text-gray-500 hover:text-gray-800 transition-colors"
                   >
                     Nevermind
                   </button>

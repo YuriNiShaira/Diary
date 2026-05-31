@@ -286,10 +286,13 @@
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Headings only (leave paragraphs to Tailwind dark:text-*) */
-.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-  color: #f0e0ff !important;
-}
+/* ✅ Remove forced heading colors - let Tailwind dark:text-* classes work */
+/* Instead, only set defaults for unstyled text */
+.dark .text-gray-800 { color: #e5e5e5 !important; }
+.dark .text-gray-700 { color: #d4d4d4 !important; }
+.dark .text-gray-600 { color: #b0a0c0 !important; }
+.dark .text-gray-500 { color: #9182a8 !important; }
+.dark .text-gray-400 { color: #706080 !important; }
 
 /* Form elements */
 .dark input, .dark textarea, .dark select {
@@ -329,80 +332,6 @@
   color: transparent;
 }
 
-/* Timer specific dark styles */
-.dark .border-rose-200\/70,
-.dark .border-rose-200\/80 {
-  border-color: rgba(100, 70, 120, 0.4) !important;
-}
-
-.dark .bg-gradient-to-br.from-white\/80,
-.dark .bg-gradient-to-br.from-white\/85 {
-  background: linear-gradient(135deg, rgba(40, 25, 55, 0.85), rgba(55, 35, 70, 0.75), rgba(45, 28, 60, 0.85)) !important;
-}
-
-.dark .shadow-\[0_20px_70px_rgba\(244\,114\,182\,0\.18\)\] {
-  box-shadow: 0 20px 70px rgba(80, 40, 100, 0.3) !important;
-}
-
-.dark .bg-pink-200\/30 {
-  background-color: rgba(100, 50, 120, 0.25) !important;
-}
-
-.dark .bg-rose-200\/30 {
-  background-color: rgba(120, 50, 100, 0.25) !important;
-}
-
-.dark .from-rose-100\/70,
-.dark .via-pink-100\/40,
-.dark .to-rose-100\/70 {
-  background: linear-gradient(to right, rgba(80, 40, 100, 0.6), rgba(100, 50, 120, 0.3), rgba(80, 40, 100, 0.6)) !important;
-}
-
-.dark .text-rose-200\/70,
-.dark .text-pink-200\/70,
-.dark .text-rose-200\/60,
-.dark .text-pink-200\/60 {
-  color: rgba(180, 130, 200, 0.5) !important;
-}
-
-.dark .fill-current {
-  fill: rgba(180, 130, 200, 0.4) !important;
-}
-
-.dark .text-rose-500 {
-  color: #ffb0c5 !important;
-}
-
-.dark .border-white\/60 {
-  border-color: rgba(150, 120, 170, 0.25) !important;
-}
-
-.dark .bg-white\/55 {
-  background-color: rgba(35, 20, 50, 0.6) !important;
-}
-
-.dark .shadow-\[inset_0_1px_0_rgba\(255\,255\,255\,0\.9\)\,0_10px_30px_rgba\(244\,114\,182\,0\.08\)\] {
-  box-shadow: inset 0 1px 0 rgba(150, 120, 170, 0.2), 0 10px 30px rgba(80, 40, 100, 0.2) !important;
-}
-
-.dark .bg-gradient-to-r.from-rose-300.via-pink-400.to-rose-300 {
-  background: linear-gradient(to right, rgba(180, 130, 200, 0.6), rgba(200, 150, 220, 0.8), rgba(180, 130, 200, 0.6)) !important;
-}
-
-.dark .via-rose-200\/80 {
-  background: linear-gradient(to bottom, transparent, rgba(180, 130, 200, 0.4), transparent) !important;
-}
-
-.dark .hover\:shadow-\[0_20px_60px_rgba\(244\,114\,182\,0\.2\)\]:hover {
-  box-shadow: 0 20px 60px rgba(100, 50, 130, 0.35) !important;
-}
-
-.dark .from-rose-100\/70,
-.dark .via-pink-100\/50,
-.dark .to-rose-100\/70 {
-  background: linear-gradient(to right, rgba(80, 40, 100, 0.5), rgba(100, 50, 120, 0.3), rgba(80, 40, 100, 0.5)) !important;
-}
-
 /* =======================================================
    POLAROID - Force white in dark mode
    ======================================================= */
@@ -424,6 +353,13 @@
 .dark .modal-card {
   background-color: #111827 !important; 
   color: #e5e7eb !important;
+}
+
+/* =======================================================
+   STICKY NOTE - Always yellow
+   ======================================================= */
+.dark .stats-card-sticky {
+  background-color: #fff9b0 !important;
 }
 
 /* =======================================================
@@ -450,3 +386,38 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* =======================================================
+   FORCE LIGHT MODE FOR EDIT MEMORY MODAL
+   ======================================================= */
+/* Overrides the global .dark !important rules above */
+.dark .force-light-theme input, 
+.dark .force-light-theme textarea, 
+.dark .force-light-theme select {
+  background-color: transparent !important;
+  color: #1f2937 !important;
+  border-color: #d1d5db !important;
+}
+
+.dark .force-light-theme input:focus,
+.dark .force-light-theme textarea:focus,
+.dark .force-light-theme select:focus {
+  border-color: #fb7185 !important;
+}
+
+.dark .force-light-theme input::placeholder,
+.dark .force-light-theme textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+.dark .force-light-theme select option {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+/* Override text color !important rules */
+.dark .force-light-theme .text-gray-800 { color: #1f2937 !important; }
+.dark .force-light-theme .text-gray-700 { color: #374151 !important; }
+.dark .force-light-theme .text-gray-600 { color: #4b5563 !important; }
+.dark .force-light-theme .text-gray-500 { color: #6b7280 !important; }
+.dark .force-light-theme .text-gray-400 { color: #9ca3af !important; }

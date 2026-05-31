@@ -32,7 +32,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem('theme', newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
     
-    // ✅ Show gentle warning when switching to dark mode
     if (newTheme === 'dark') {
       toast('Light mode looks better here! Please use Lightmode', {
         icon: '💡',

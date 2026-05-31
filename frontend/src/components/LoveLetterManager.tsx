@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, X, Edit, Plus, Trash2, Mail } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -21,6 +21,35 @@ const LoveLetterManager: React.FC = () => {
   const [isActive, setIsActive] = useState(true);
 
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (isOpen) {
+      const styleId = 'force-light-inputs-style-love-letter';
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.innerHTML = `
+          #love-letter-modal-root input[type="text"],
+          #love-letter-modal-root textarea {
+            background-color: rgba(255, 255, 255, 0.8) !important;
+            color: #1f2937 !important;
+            color-scheme: light !important;
+            -webkit-text-fill-color: #1f2937 !important;
+          }
+          #love-letter-modal-root input::placeholder,
+          #love-letter-modal-root textarea::placeholder {
+            color: #9ca3af !important;
+            -webkit-text-fill-color: #9ca3af !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      return () => {
+        const style = document.getElementById(styleId);
+        if (style) style.remove();
+      };
+    }
+  }, [isOpen]);
 
   const { data: letters, refetch } = useQuery<LoveLetter[]>({
     queryKey: ['allLoveLetters'],
@@ -127,6 +156,7 @@ const LoveLetterManager: React.FC = () => {
             onClick={() => setIsOpen(false)}
           >
             <motion.div
+              id="love-letter-modal-root"
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
@@ -172,7 +202,7 @@ const LoveLetterManager: React.FC = () => {
                     placeholder="Letter Title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent bg-white/80"
+                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent !bg-white/80 !text-gray-800"
                     required
                     maxLength={200}
                   />
@@ -182,7 +212,7 @@ const LoveLetterManager: React.FC = () => {
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     rows={5}
-                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent bg-white/80 resize-none"
+                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent !bg-white/80 !text-gray-800 resize-none"
                     required
                   />
                   
