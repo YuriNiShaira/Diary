@@ -1,4 +1,5 @@
 import React from 'react';
+import { AlignLeft, LayoutGrid, LayoutTemplate } from 'lucide-react';
 
 interface MemoriesControlsProps {
   sortOrder: 'newest' | 'oldest';
@@ -14,61 +15,62 @@ const MemoriesControls: React.FC<MemoriesControlsProps> = ({
   onLayoutChange,
 }) => {
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-      <div className="flex items-center gap-3 bg-white/80 dark:bg-gray-800/70 backdrop-blur-md border border-white/70 dark:border-gray-700/50 shadow-sm rounded-2xl px-4 py-2">
-        <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Sort by:</span>
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-10 pb-4 border-b border-gray-200 dark:border-gray-800">
+      
+      {/* Sorting Control */}
+      <div className="flex items-center gap-3">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Sort Index</span>
         <select
           value={sortOrder}
           onChange={(e) => onSortChange(e.target.value as 'newest' | 'oldest')}
-          className="bg-transparent text-sm font-medium text-gray-700 dark:text-gray-200 outline-none cursor-pointer"
+          className="bg-transparent text-sm font-serif outline-none cursor-pointer border-b border-dashed border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 pb-1 focus:border-rose-500 transition-colors"
         >
-          <option value="newest">Newest First</option>
-          <option value="oldest">Oldest First</option>
+          <option value="newest" className="font-sans">Newest Entries</option>
+          <option value="oldest" className="font-sans">Archived First</option>
         </select>
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-500 dark:text-gray-400 mr-2">View as:</span>
+      {/* View Layout Controls */}
+      <div className="flex items-center gap-4">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mr-2 hidden sm:block">Layout</span>
+        
         <button
           onClick={() => onLayoutChange('timeline')}
-          className={`px-3 py-2 rounded-lg transition-all text-sm font-medium flex items-center gap-2 ${
+          className={`pb-2 px-1 text-sm font-medium flex items-center gap-2 transition-all border-b-2 -mb-4.25 ${
             layoutStyle === 'timeline'
-              ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md'
-              : 'bg-white/50 dark:bg-gray-800/60 text-gray-600 dark:text-gray-200 hover:bg-white/80 dark:hover:bg-gray-700/80'
+              ? 'border-rose-500 text-rose-600 dark:text-rose-400'
+              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
           }`}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M4 4v16M20 4v16M12 4v16" />
-          </svg>
-          Timeline
+          <AlignLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">Timeline</span>
         </button>
-        <button
-          onClick={() => onLayoutChange('scattered')}
-          className={`px-3 py-2 rounded-lg transition-all text-sm font-medium flex items-center gap-2 ${
-            layoutStyle === 'scattered'
-              ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md'
-              : 'bg-white/50 dark:bg-gray-800/60 text-gray-600 dark:text-gray-200 hover:bg-white/80 dark:hover:bg-gray-700/80'
-          }`}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M4 4v16M20 4v16M8 8h12M8 12h12M8 16h12" />
-          </svg>
-          Scattered
-        </button>
+        
         <button
           onClick={() => onLayoutChange('masonry')}
-          className={`px-3 py-2 rounded-lg transition-all text-sm font-medium flex items-center gap-2 ${
+          className={`pb-2 px-1 text-sm font-medium flex items-center gap-2 transition-all border-b-2 -mb-4.25 ${
             layoutStyle === 'masonry'
-              ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md'
-              : 'bg-white/50 dark:bg-gray-800/60 text-gray-600 dark:text-gray-200 hover:bg-white/80 dark:hover:bg-gray-700/80'
+              ? 'border-rose-500 text-rose-600 dark:text-rose-400'
+              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
           }`}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M4 4v16M20 4v16M8 4v16M16 4v16" />
-          </svg>
-          Masonry
+          <LayoutGrid className="w-4 h-4" />
+          <span className="hidden sm:inline">Masonry</span>
+        </button>
+
+        <button
+          onClick={() => onLayoutChange('scattered')}
+          className={`pb-2 px-1 text-sm font-medium flex items-center gap-2 transition-all border-b-2 -mb-4.25 ${
+            layoutStyle === 'scattered'
+              ? 'border-rose-500 text-rose-600 dark:text-rose-400'
+              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+          }`}
+        >
+          <LayoutTemplate className="w-4 h-4" />
+          <span className="hidden sm:inline">Scattered</span>
         </button>
       </div>
+      
     </div>
   );
 };

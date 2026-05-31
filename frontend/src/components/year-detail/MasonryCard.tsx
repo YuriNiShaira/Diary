@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Star, Image } from 'lucide-react';
+import { Star, Image as ImageIcon, Edit2, Trash, Maximize2 } from 'lucide-react';
 import type { Memory } from './utils';
 import { getMemoryTypeIcon, formatDate } from './utils';
 
@@ -21,56 +21,69 @@ const MasonryCard: React.FC<MasonryCardProps> = ({
 }) => {
   const memoryIcon = getMemoryTypeIcon(memory.memory_type);
   const formattedDate = formatDate(memory.date);
+  
+  // Heights for the masonry stagger effect
   const heights = ['h-80', 'h-96', 'h-72', 'h-88', 'h-64', 'h-104'];
   const height = heights[index % heights.length];
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -5 }}
-      transition={{ delay: index * 0.05 }}
-      className="break-inside-avoid mb-6 cursor-pointer"
+      whileHover={{ y: -4 }}
+      transition={{ delay: index * 0.05, duration: 0.4 }}
+      className="break-inside-avoid mb-6 cursor-pointer group"
       onClick={onView}
     >
-      <div className={`${height} bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all group relative border border-white/50`}>
-        {memory.image ? (
-          <>
-            <img src={memory.image} alt={memory.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          </>
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-pink-100 to-rose-100 flex flex-col items-center justify-center">
-            <Image className="w-20 h-20 text-pink-300/60 mb-3" />
-            <span className="text-sm text-pink-400/80">No photo yet</span>
-          </div>
-        )}
+      <div className={`${height} bg-[#fdfbf7] dark:bg-[#1a1a1a] border-gray-200 dark:border-gray-800 p-3 pb-4 rounded-sm shadow-sm hover:shadow-md transition-all relative border flex flex-col`}>
         
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-          <h3 className="text-white font-bold text-lg mb-1">{memory.title}</h3>
-          <p className="text-white/90 text-sm line-clamp-2">{memory.description}</p>
-          <div className="flex gap-2 mt-3">
-            <button className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-white text-xs">Read more →</button>
-            <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-white text-xs">Edit</button>
-            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="px-3 py-1 bg-red-500/30 backdrop-blur rounded-full text-white text-xs">Delete</button>
-          </div>
-        </div>
-        
-        <div className="absolute top-3 left-3 flex gap-2">
-          <span className="px-2 py-1 bg-white/90 backdrop-blur rounded-full text-xs font-semibold text-rose-500 flex items-center gap-1">
-            <span>{memoryIcon}</span>
+        {/* Top Badges (Memory Type & Date) */}
+        <div className="absolute top-5 left-5 right-5 flex justify-between z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="px-2 py-1 bg-white/90 dark:bg-black/80 backdrop-blur-sm rounded-sm text-xs font-medium text-gray-700 dark:text-gray-200 shadow-sm flex items-center gap-1">
+            {memoryIcon} <span className="capitalize">{memory.memory_type}</span>
           </span>
           {memory.is_favorite && (
-            <span className="px-2 py-1 bg-amber-500/90 backdrop-blur rounded-full text-xs font-semibold text-white flex items-center gap-1">
-              <Star className="w-3 h-3 fill-current" />
+            <span className="px-2 py-1 bg-white/90 dark:bg-black/80 backdrop-blur-sm rounded-sm shadow-sm flex items-center justify-center">
+              <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
             </span>
           )}
         </div>
+
+        {/* Media Section */}
+        {memory.image ? (
+          <div className="w-full flex-1 overflow-hidden rounded-sm relative border border-gray-100 dark:border-gray-800 bg-gray-100 dark:bg-gray-900">
+            <img 
+              src={memory.image} 
+              alt={memory.title} 
+              className="w-full h-full object-cover filter contrast-[1.02] group-hover:scale-105 transition-transform duration-700" 
+            />
+          </div>
+        ) : (
+          <div className="w-full flex-1 border border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center rounded-sm bg-gray-50 dark:bg-[#222]">
+            <ImageIcon className="w-8 h-8 text-gray-300 dark:text-gray-700 mb-2" />
+            <p className="font-serif italic text-sm text-gray-500 dark:text-gray-400">No photo</p>
+          </div>
+        )}
         
-        <div className="absolute bottom-3 right-3">
-          <span className="px-2 py-1 bg-black/50 backdrop-blur rounded-full text-xs text-white">
-            {formattedDate}
-          </span>
+        {/* Card Footer (Title & Actions) */}
+        <div className="mt-4 px-1 flex flex-col justify-between shrink-0">
+          <div>
+            <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">{formattedDate}</p>
+            <h3 className="font-serif text-lg leading-tight line-clamp-1 text-gray-800 dark:text-gray-200">{memory.title}</h3>
+          </div>
+
+          {/* Minimalist Action Buttons (Appear on hover) */}
+          <div className="flex gap-3 mt-3 pt-3 border-t border-gray-200 dark:border-gray-800 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors">
+              <Maximize2 className="w-3 h-3" /> View
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+              <Edit2 className="w-3 h-3" /> Edit
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors ml-auto">
+              <Trash className="w-3 h-3" />
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>

@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Heart, RotateCcw, User, Timer, Sparkles, Camera,
+  Heart, RotateCcw, User, Timer, Sparkles, Camera, ArrowLeft,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
-import DeleteConfirmModal from './DeleteConfirmModal'; // ✅ import modal
+import DeleteConfirmModal from './DeleteConfirmModal';
+import { useTheme } from '../contexts/ThemeContext'
 
 interface Memory {
   id: number;
@@ -46,6 +47,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
   yearId, onBack, currentScore, onWin, onReset,
 }) => {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const displayName = user?.display_name || 'You';
   const partnerName = user?.partner_name || 'Partner';
 
@@ -61,7 +63,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
   const [gameWinner, setGameWinner] = useState<string | null>(null);
-  const [showResetModal, setShowResetModal] = useState(false); // ✅ modal state
+  const [showResetModal, setShowResetModal] = useState(false);
 
   const { data: memories, isLoading } = useQuery<Memory[]>({
     queryKey: ['memoriesWithImages', yearId],
@@ -188,7 +190,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
   };
 
   const handleResetScore = () => {
-    setShowResetModal(true);  // open modal instead of window.confirm
+    setShowResetModal(true);
   };
 
   const confirmReset = () => {
@@ -197,16 +199,15 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
   };
 
   const getGridCols = () => {
-    // simplified; always 4 columns
     return 'grid-cols-4';
   };
 
   if (isLoading) {
     return (
-      <div className="glass-card rounded-2xl p-8">
+      <div className="rounded-2xl p-10 shadow-sm border bg-[#fffaf6] border-gray-200 dark:bg-[#1e1a1b] dark:border-gray-800">
         <div className="text-center py-12">
-          <div className="w-12 h-12 border-4 border-love-red border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading memories...</p>
+          <div className="w-12 h-12 border-4 border-rose-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="font-handwriting text-2xl text-gray-500">Dusting off the photo album...</p>
         </div>
       </div>
     );
@@ -216,151 +217,208 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
   const hasEnoughMemories = memoriesWithImages.length >= 2;
 
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card rounded-2xl p-8">
-      {/* Score Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button onClick={onBack} className="text-gray-500 hover:text-gray-700">← Back to Games</button>
-        <div className="flex items-center gap-4">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }} 
+      animate={{ opacity: 1, scale: 1 }} 
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="rounded-2xl p-6 sm:p-10 shadow-sm border bg-[#fffaf6] border-gray-200 dark:bg-[#1e1a1b] dark:border-gray-800"
+    >
+      {/* Score Header - Ledger Style */}
+      <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
+        <button onClick={onBack} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to Games
+        </button>
+        
+        <div className="flex items-center gap-6 px-6 py-2 rounded-xl border border-dashed bg-[#faf8f5] border-gray-300 dark:bg-[#1a1a1a] dark:border-gray-700">
           <div className="text-center">
-            <p className="text-sm text-gray-500">{displayName}</p>
-            <p className="text-xl font-bold text-love-red">{currentScore?.my_score || 0}</p>
+            <p className="text-[10px] uppercase font-bold tracking-widest text-gray-500 dark:text-gray-400">{displayName}</p>
+            <p className="text-3xl font-handwriting text-blue-500">{currentScore?.my_score || 0}</p>
           </div>
-          <button onClick={handleResetScore} className="p-2 text-gray-400 hover:text-gray-600" title="Reset Score">
+          
+          <button onClick={handleResetScore} className="p-2 rounded-full transition-colors hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-400" title="Erase Ledger">
             <RotateCcw className="w-4 h-4" />
           </button>
+          
           <div className="text-center">
-            <p className="text-sm text-gray-500">{partnerName}</p>
-            <p className="text-xl font-bold text-purple-500">{currentScore?.shaira_score || 0}</p>
+            <p className="text-[10px] uppercase font-bold tracking-widest text-gray-500 dark:text-gray-400">{partnerName}</p>
+            <p className="text-3xl font-handwriting text-rose-500">{currentScore?.shaira_score || 0}</p>
           </div>
         </div>
       </div>
 
-      {/* Game Title */}
-      <div className="text-center mb-6">
-        <h3 className="text-2xl font-serif text-gray-800 mb-2">Memory Match 🃏</h3>
-        {gameStarted && !gameCompleted && (
-          <div className="flex items-center justify-center gap-6">
-            <div className="flex items-center gap-2">
-              <Timer className="w-4 h-4 text-gray-500" />
-              <span className="text-gray-600">{formatTime(timer)}</span>
-            </div>
-            <div className={`flex items-center gap-2 ${currentPlayer === 'me' ? 'text-love-red' : 'text-purple-500'}`}>
-              <User className="w-4 h-4" />
-              <span className="font-medium">
-                {currentPlayer === 'me' ? displayName : partnerName}'s Turn
-              </span>
-            </div>
-          </div>
-        )}
+      {/* Game Title & Status */}
+      <div className="text-center mb-8">
+        <h3 className="text-3xl font-serif text-gray-900 dark:text-gray-100 mb-2">Memory Match</h3>
+        
+        <div className="h-6">
+          {gameStarted && !gameCompleted && (
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-center gap-6">
+              <div className="flex items-center gap-2 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-1 rounded-sm border border-yellow-200 dark:border-yellow-700/50 transform rotate-1">
+                <Timer className="w-4 h-4 text-yellow-600 dark:text-yellow-500" />
+                <span className="font-handwriting text-xl text-yellow-700 dark:text-yellow-400">{formatTime(timer)}</span>
+              </div>
+              <div className={`flex items-center gap-2 px-3 py-1 rounded-sm border transform -rotate-1 ${
+                currentPlayer === 'me' 
+                  ? 'bg-blue-50 border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:border-blue-800/50 dark:text-blue-400' 
+                  : 'bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-900/20 dark:border-rose-800/50 dark:text-rose-400'
+              }`}>
+                <User className="w-4 h-4" />
+                <span className="font-handwriting text-xl">
+                  {currentPlayer === 'me' ? displayName : partnerName}'s Turn
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </div>
       </div>
 
       {/* Not enough photos */}
       {!hasEnoughMemories ? (
-        <div className="text-center py-12">
-          <Camera className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h4 className="text-lg font-semibold text-gray-700 mb-2">Not enough photos!</h4>
-          <p className="text-gray-500 mb-4">You need at least 2 memories with photos to play.</p>
-          <p className="text-sm text-gray-400">Current photos: {memoriesWithImages.length}</p>
+        <div className="text-center py-16 px-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-[#1a1a1a]">
+          <Camera className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <h4 className="text-2xl font-serif text-gray-700 dark:text-gray-300 mb-2">Not enough photos!</h4>
+          <p className="font-handwriting text-2xl text-gray-500 dark:text-gray-400 mb-4">You need at least 2 photo memories to play.</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600">Current photos: {memoriesWithImages.length}</p>
         </div>
       ) : !gameStarted ? (
+        
         /* Start Screen */
-        <div className="text-center py-8">
-          <Sparkles className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
-          <h4 className="text-lg font-semibold text-gray-700 mb-4">Ready to test your memory?</h4>
-          <div className="flex gap-3 justify-center mb-6">
+        <div className="text-center py-12 max-w-lg mx-auto">
+          <Sparkles className="w-12 h-12 text-yellow-400 mx-auto mb-6" />
+          <h4 className="text-3xl font-serif text-gray-800 dark:text-gray-100 mb-8">Ready to test your memory?</h4>
+          
+          <div className="flex gap-4 justify-center mb-10 flex-wrap">
             {(['easy', 'medium', 'hard'] as const).map((d) => (
               <button key={d} onClick={() => setDifficulty(d)}
-                className={`px-4 py-2 rounded-xl capitalize transition-all ${
-                  difficulty === d ? 'bg-gradient-to-r from-love-red to-romantic-red text-white shadow-md' : 'bg-white/60 text-gray-600 hover:bg-white/80'
+                className={`px-5 py-2 rounded-sm font-handwriting text-2xl transition-all border-b-2 ${
+                  difficulty === d 
+                    ? 'border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 transform -rotate-2' 
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300'
                 }`}>
                 {d} ({d === 'easy' ? '4' : d === 'medium' ? '6' : '8'} pairs)
               </button>
             ))}
           </div>
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={initializeGame} className="btn-romantic">
-            Start Game 🎮
+          <motion.button 
+            whileHover={{ scale: 1.05, rotate: 1 }} 
+            whileTap={{ scale: 0.95 }} 
+            onClick={initializeGame} 
+            className="px-8 py-3 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-sm font-handwriting text-3xl shadow-md hover:shadow-lg transition-all"
+          >
+            Scatter the photos
           </motion.button>
         </div>
       ) : gameCompleted ? (
+        
         /* Game Over */
-        <div className="text-center py-8">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-6xl mb-4">
+        <div className="text-center py-10">
+          <motion.div initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 0 }} className="text-6xl mb-6">
             {gameWinner === displayName ? '🏆' : gameWinner === partnerName ? '👑' : '🤝'}
           </motion.div>
-          <h4 className="text-2xl font-serif text-gray-800 mb-2">
-            {gameWinner === 'tie' ? "It's a Tie!" : `${gameWinner} Wins!`}
+          <h4 className="text-4xl font-serif text-gray-900 dark:text-gray-100 mb-8">
+            {gameWinner === 'tie' ? "It's a Tie!" : `${gameWinner} Claims Victory!`}
           </h4>
-          <div className="flex justify-center gap-8 mb-6">
+          
+          <div className="flex justify-center gap-12 mb-8 bg-[#faf8f5] dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 p-6 rounded-sm max-w-sm mx-auto shadow-inner">
             <div>
-              <p className="text-sm text-gray-500">{displayName}'s Pairs</p>
-              <p className="text-3xl font-bold text-love-red">{myPairs}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">{displayName}</p>
+              <p className="text-4xl font-handwriting text-blue-500">{myPairs}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">{partnerName}'s Pairs</p>
-              <p className="text-3xl font-bold text-purple-500">{shairaPairs}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">{partnerName}</p>
+              <p className="text-4xl font-handwriting text-rose-500">{shairaPairs}</p>
             </div>
           </div>
-          <p className="text-gray-500 mb-6">Time: {formatTime(timer)}</p>
-          <div className="flex gap-3 justify-center">
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={initializeGame} className="btn-romantic">Play Again 🔄</motion.button>
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setGameStarted(false)} className="btn-soft">Change Difficulty</motion.button>
+          
+          <p className="font-handwriting text-2xl text-gray-500 dark:text-gray-400 mb-8">Completed in {formatTime(timer)}</p>
+          
+          <div className="flex gap-4 justify-center">
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={initializeGame} 
+              className="px-6 py-2 bg-rose-500 text-white rounded-sm font-handwriting text-2xl shadow-sm">
+              Play Again
+            </motion.button>
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setGameStarted(false)} 
+              className="px-6 py-2 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-sm font-handwriting text-2xl transition-colors hover:bg-gray-300 dark:hover:bg-gray-700">
+              Settings
+            </motion.button>
           </div>
         </div>
       ) : (
-        /* Game Board */
+        
+        /* Game Board (Journal Paper) */
         <>
-          <div className="flex justify-center gap-8 mb-6">
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-1">{displayName} ❤️</p>
-              <p className="text-2xl font-bold text-love-red">{myPairs}</p>
+          <div className="flex justify-center gap-12 mb-8 relative z-10">
+            <div className="text-center bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 px-4 py-2 rounded-sm transform -rotate-2 shadow-sm">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-1">{displayName} ❤️</p>
+              <p className="text-3xl font-handwriting text-blue-500">{myPairs}</p>
             </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-1">{partnerName} ⭐</p>
-              <p className="text-2xl font-bold text-purple-500">{shairaPairs}</p>
+            <div className="text-center bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/50 px-4 py-2 rounded-sm transform rotate-2 shadow-sm">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400 mb-1">{partnerName} ⭐</p>
+              <p className="text-3xl font-handwriting text-rose-500">{shairaPairs}</p>
             </div>
           </div>
-          <div className={`grid ${getGridCols()} gap-3 max-w-2xl mx-auto`}>
-            {cards.map((card, index) => (
-              <motion.button key={card.id}
-                whileHover={!card.isFlipped && !card.isMatched ? { scale: 1.05 } : {}}
-                whileTap={!card.isFlipped && !card.isMatched ? { scale: 0.95 } : {}}
-                onClick={() => handleCardClick(index)}
-                className={`aspect-square rounded-xl transition-all duration-300 ${
-                  card.isMatched ? 'opacity-60 cursor-default' : 'cursor-pointer shadow-md hover:shadow-lg'
-                }`}
-                disabled={card.isFlipped || card.isMatched || flippedIndexes.length === 2}
-              >
-                <AnimatePresence mode="wait">
-                  {card.isFlipped || card.isMatched ? (
-                    <motion.div key="front" initial={{ rotateY: 90 }} animate={{ rotateY: 0 }} exit={{ rotateY: 90 }} transition={{ duration: 0.3 }}
-                      className="w-full h-full rounded-xl overflow-hidden">
-                      <img src={card.image} alt={card.title} className="w-full h-full object-cover" />
-                    </motion.div>
-                  ) : (
-                    <motion.div key="back" initial={{ rotateY: -90 }} animate={{ rotateY: 0 }} exit={{ rotateY: -90 }} transition={{ duration: 0.3 }}
-                      className="w-full h-full bg-gradient-to-br from-love-red to-romantic-red rounded-xl flex items-center justify-center">
-                      <Heart className="w-8 h-8 text-white fill-current" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            ))}
+
+          <div 
+            className="p-6 md:p-8 rounded-sm bg-[#faf8f5] dark:bg-[#151515] border border-gray-200 dark:border-gray-800 shadow-inner mb-8"
+            style={{
+              backgroundImage: theme === 'dark' ? 'radial-gradient(#333 1px, transparent 1px)' : 'radial-gradient(#d1d5db 1px, transparent 1px)',
+              backgroundSize: '20px 20px'
+            }}
+          >
+            <div className={`grid ${getGridCols()} gap-3 sm:gap-4 max-w-2xl mx-auto`}>
+              {cards.map((card, index) => (
+                <motion.button key={card.id}
+                  whileHover={!card.isFlipped && !card.isMatched ? { scale: 1.05, rotate: (index % 2 === 0 ? 2 : -2) } : {}}
+                  whileTap={!card.isFlipped && !card.isMatched ? { scale: 0.95 } : {}}
+                  onClick={() => handleCardClick(index)}
+                  className={`aspect-square transition-all duration-300 ${
+                    card.isMatched ? 'opacity-40 grayscale cursor-default scale-95' : 'cursor-pointer shadow-sm hover:shadow-md'
+                  }`}
+                  disabled={card.isFlipped || card.isMatched || flippedIndexes.length === 2}
+                >
+                  <AnimatePresence mode="wait">
+                    {card.isFlipped || card.isMatched ? (
+                      /* Card Front (Polaroid Style) */
+                      <motion.div key="front" initial={{ rotateY: 90 }} animate={{ rotateY: 0 }} exit={{ rotateY: 90 }} transition={{ duration: 0.2 }}
+                        className="w-full h-full bg-white dark:bg-gray-200 p-1 sm:p-2 pb-3 sm:pb-4 rounded-sm shadow-sm border border-gray-300 flex flex-col">
+                        <div className="flex-1 overflow-hidden bg-gray-100 dark:bg-gray-800">
+                          <img src={card.image} alt={card.title} className="w-full h-full object-cover filter contrast-105" />
+                        </div>
+                      </motion.div>
+                    ) : (
+                      /* Card Back (Textured Paper) */
+                      <motion.div key="back" initial={{ rotateY: -90 }} animate={{ rotateY: 0 }} exit={{ rotateY: -90 }} transition={{ duration: 0.2 }}
+                        className="w-full h-full bg-rose-50 dark:bg-[#2a2425] border border-rose-200 dark:border-rose-900/50 rounded-sm flex items-center justify-center shadow-sm relative overflow-hidden">
+                        <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-rose-300 dark:text-rose-800/80 fill-current opacity-50" />
+                        {/* Subtle pattern for card back */}
+                        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000)', backgroundSize: '10px 10px', backgroundPosition: '0 0, 5px 5px' }} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              ))}
+            </div>
           </div>
-          <div className="flex justify-center gap-3 mt-6">
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              onClick={() => { if (window.confirm('Quit current game?')) { setGameStarted(false); setIsTimerRunning(false); } }}
-              className="btn-soft text-sm">Quit Game</motion.button>
+
+          <div className="flex justify-center">
+            <motion.button 
+              whileHover={{ scale: 1.05 }} 
+              whileTap={{ scale: 0.95 }}
+              onClick={() => { if (window.confirm('Pack up the cards and quit?')) { setGameStarted(false); setIsTimerRunning(false); } }}
+              className="font-handwriting text-2xl text-gray-500 hover:text-red-500 transition-colors border-b border-transparent hover:border-red-300"
+            >
+              Quit Game
+            </motion.button>
           </div>
         </>
       )}
 
-      {/* Reset Score Confirmation Modal */}
       <DeleteConfirmModal
         isOpen={showResetModal}
         onClose={() => setShowResetModal(false)}
         onConfirm={confirmReset}
-        title="Reset Score"
-        message="This will reset the score to 0-0. This action cannot be undone."
+        title="Erase Ledger"
+        message="This will wipe the ledger clean and reset the score to 0-0. Are you sure?"
         loading={false}
       />
     </motion.div>

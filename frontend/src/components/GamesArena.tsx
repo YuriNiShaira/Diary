@@ -1,22 +1,22 @@
-// frontend/src/components/GamesArena.tsx
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Heart,
   RotateCcw,
   Crown,
   Grid3x3,
-  User,
   Image as ImageIcon,
+  ArrowLeft,
+  Trophy
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
 import MemoryMatchGame from './MemoryMatchGame';
 import DeleteConfirmModal from './DeleteConfirmModal';
-
 
 interface GameScore {
   id: number;
@@ -43,8 +43,13 @@ type GameType = 'tictactoe' | 'memorymatch' | 'menu';
 const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
   const [activeGame, setActiveGame] = useState<GameType>('menu');
   const [resetTarget, setResetTarget] = useState<string | null>(null);
+  
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { theme } = useTheme();
+
+  const displayName = user?.display_name || 'You';
+  const partnerName = user?.partner_name || 'Partner';
 
   const { data: leaderboard } = useQuery<LeaderboardData>({
     queryKey: ['leaderboard', yearId],
@@ -68,9 +73,9 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
 
       if (variables.winner === 'me') {
         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        toast.success('You won! 🎉', { icon: '🏆' });
+        toast.success(`${displayName} won! 🎉`, { icon: '🏆' });
       } else {
-        toast.success(`${user?.partner_name || 'Partner'} won! 💕`, { icon: '👑' });
+        toast.success(`${partnerName} won! 💕`, { icon: '👑' });
       }
     },
   });
@@ -92,7 +97,7 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leaderboard', yearId] });
-      toast.success('Score reset! 🔄');
+      toast.success('Scoreboard erased! 🔄');
       setResetTarget(null);
     },
   });
@@ -106,120 +111,163 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
       id: 'tictactoe' as GameType,
       name: 'Tic Tac Toe',
       icon: Grid3x3,
-      color: 'from-pink-400 to-rose-400',
-      description: "Classic game of X's and O's... but make it romantic! 💕",
+      color: 'text-rose-500',
+      bg: 'bg-rose-100 dark:bg-rose-900/30',
+      border: 'border-rose-200 dark:border-rose-800',
+      description: "The classic game of X's and O's... but make it romantic! 💕",
     },
     {
       id: 'memorymatch' as GameType,
       name: 'Memory Match',
       icon: ImageIcon,
-      color: 'from-blue-400 to-cyan-400',
-      description: 'Match your favorite photos! Test your memory with your special moments! 📸',
+      color: 'text-blue-500',
+      bg: 'bg-blue-100 dark:bg-blue-900/30',
+      border: 'border-blue-200 dark:border-blue-800',
+      description: 'Test your memory using your favorite moments together! 📸',
     },
   ];
 
+  const bgMain = theme === 'dark' ? 'bg-[#1a1a1a]' : 'bg-[#fdfbf7]';
+  const textMain = theme === 'dark' ? 'text-gray-100' : 'text-gray-800';
+  const textSub = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+  const cardBg = theme === 'dark' ? 'bg-[#222] border-gray-700' : 'bg-white border-gray-200';
+
   return (
-    <div className="space-y-6">
-      {/* Header with Scoreboard */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+    <div className={`space-y-8 max-w-5xl mx-auto p-4 sm:p-8 ${bgMain} rounded-sm min-h-screen transition-colors duration-300 shadow-sm border border-gray-200/50 relative overflow-hidden`}>
+      
+      {/* Soft glowing ambient background */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-96 bg-gradient-to-b from-rose-100/40 via-amber-100/20 to-transparent dark:from-rose-900/10 dark:via-amber-900/5 dark:to-transparent blur-3xl -z-10 pointer-events-none" />
+
+      {/* Header & Overall Scoreboard */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-8 border-b border-gray-300 dark:border-gray-800">
         <div>
-          <h2 className="text-3xl font-serif text-gray-800">Games Arena {yearNumber} 🎮</h2>
-          <p className="text-gray-500 mt-1">Simple games to play if you're together</p>
+          <p className={`text-xs font-bold uppercase tracking-widest ${textSub} mb-1`}>Playful Moments</p>
+          <h2 className={`text-4xl sm:text-5xl font-serif tracking-tight ${textMain}`}>
+            Games & Wagers <span className="text-rose-500/80 font-light italic">{yearNumber}</span>
+          </h2>
         </div>
 
-        <div className="glass-card rounded-2xl px-6 py-3 flex items-center gap-6">
-          <div className="text-center">
-            <p className="text-sm text-gray-500 flex items-center gap-1">
-              <User className="w-3 h-3" /> {user?.display_name || 'You'}
-            </p>
-            <p className="text-2xl font-bold text-love-red">{leaderboard?.my_total || 0}</p>
+        {/* Journal Ledger Scoreboard */}
+        <div className={`flex items-center gap-6 px-8 py-4 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border ${cardBg}`}>
+          <div className="text-center relative">
+            {leaderboard?.leader === 'me' && <Crown className="absolute -top-5 left-1/2 -translate-x-1/2 w-4 h-4 text-yellow-500" />}
+            <p className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-1`}>{displayName}</p>
+            <p className="text-4xl font-handwriting text-blue-500">{leaderboard?.my_total || 0}</p>
           </div>
-          <div className="text-center">
-            <p className="text-xs text-gray-400">VS</p>
-            {leaderboard?.leader === 'me' && <Crown className="w-4 h-4 text-yellow-500 mx-auto" />}
+          
+          <div className="flex flex-col items-center px-4 border-x border-dashed border-gray-300 dark:border-gray-700">
+            <Trophy className={`w-5 h-5 mb-1 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`} />
+            <span className={`text-xs font-serif italic ${textSub}`}>Total Score</span>
           </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-500 flex items-center gap-1">
-              <Heart className="w-3 h-3" /> {user?.partner_name || 'Partner'}
-            </p>
-            <p className="text-2xl font-bold text-purple-500">{leaderboard?.shaira_total || 0}</p>
+          
+          <div className="text-center relative">
+            {leaderboard?.leader === 'shaira' && <Crown className="absolute -top-5 left-1/2 -translate-x-1/2 w-4 h-4 text-yellow-500" />}
+            <p className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-1`}>{partnerName}</p>
+            <p className="text-4xl font-handwriting text-rose-500">{leaderboard?.shaira_total || 0}</p>
           </div>
-          {leaderboard?.leader === 'shaira' && <Crown className="w-5 h-5 text-yellow-500" />}
         </div>
       </div>
 
-      {/* Game Menu */}
-      {activeGame === 'menu' ? (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {games.map((game) => {
-            const Icon = game.icon;
-            const score = leaderboard?.games?.find((g) => g.game_name === game.id);
-            return (
-              <motion.div key={game.id} whileHover={{ scale: 1.02 }} className="glass-card rounded-2xl p-8 cursor-pointer" onClick={() => setActiveGame(game.id)}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`p-4 rounded-2xl bg-linear-to-r ${game.color}`}><Icon className="w-8 h-8 text-white" /></div>
-                  {score && (
-                    <div className="text-right">
-                      <p className="text-xs text-gray-500">Current Score</p>
-                      <p className="text-lg font-bold">
-                        <span className="text-love-red">{score.my_score}</span>
-                        <span className="text-gray-400 mx-2">-</span>
-                        <span className="text-purple-500">{score.shaira_score}</span>
-                      </p>
+      {/* Game Area */}
+      <AnimatePresence mode="wait">
+        {activeGame === 'menu' ? (
+          <motion.div 
+            key="menu"
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -20 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4"
+          >
+            {games.map((game) => {
+              const Icon = game.icon;
+              const score = leaderboard?.games?.find((g) => g.game_name === game.id);
+              
+              return (
+                <motion.div 
+                  key={game.id} 
+                  whileHover={{ scale: 1.02, y: -4 }} 
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setActiveGame(game.id)}
+                  className={`p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-md cursor-pointer transition-all border group ${cardBg}`}
+                >
+                  <div className="flex items-start justify-between mb-6">
+                    <div className={`p-4 rounded-2xl ${game.bg} ${game.border} border shadow-inner transform group-hover:rotate-6 transition-transform`}>
+                      <Icon className={`w-8 h-8 ${game.color}`} />
                     </div>
-                  )}
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">{game.name}</h3>
-                <p className="text-gray-500 text-sm mb-4">{game.description}</p>
-                <div className="flex items-center text-love-red text-sm font-medium">Play Now →</div>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-      ) : activeGame === 'tictactoe' ? (
-        <TicTacToeGame
-          onBack={() => setActiveGame('menu')}
-          onWin={(winner) => recordWinMutation.mutate({ gameName: 'tictactoe', winner })}
-          currentScore={leaderboard?.games?.find((g) => g.game_name === 'tictactoe')}
-          onReset={() => handleResetScore('tictactoe')}
-          user={user}
-        />
-      ) : activeGame === 'memorymatch' ? (
-        <MemoryMatchGame
-          yearId={yearId}
-          yearNumber={yearNumber}
-          onBack={() => setActiveGame('menu')}
-          onWin={(winner) => recordWinMutation.mutate({ gameName: 'memorymatch', winner })}
-          currentScore={leaderboard?.games?.find((g) => g.game_name === 'memorymatch')}
-          onReset={() => handleResetScore('memorymatch')}
-        />
-      ) : null}
+                    
+                    {score && (
+                      <div className={`px-4 py-2 rounded-xl text-right border border-dashed ${theme === 'dark' ? 'bg-[#1a1a1a] border-gray-700' : 'bg-[#faf8f5] border-gray-300'}`}>
+                        <p className={`text-[9px] uppercase font-bold tracking-widest ${textSub} mb-1`}>Ledger</p>
+                        <p className="text-2xl font-handwriting">
+                          <span className="text-blue-500">{score.my_score}</span>
+                          <span className={textSub}> - </span>
+                          <span className="text-rose-500">{score.shaira_score}</span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <h3 className={`text-2xl font-serif mb-2 ${textMain}`}>{game.name}</h3>
+                  <p className={`text-sm leading-relaxed mb-6 ${textSub}`}>{game.description}</p>
+                  
+                  <div className={`inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest transition-colors ${game.color}`}>
+                    Play Now <span className="text-lg leading-none">→</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        ) : activeGame === 'tictactoe' ? (
+          <TicTacToeGame
+            key="tictactoe"
+            onBack={() => setActiveGame('menu')}
+            onWin={(winner) => recordWinMutation.mutate({ gameName: 'tictactoe', winner })}
+            currentScore={leaderboard?.games?.find((g) => g.game_name === 'tictactoe')}
+            onReset={() => handleResetScore('tictactoe')}
+            theme={theme}
+            displayName={displayName}
+            partnerName={partnerName}
+          />
+        ) : activeGame === 'memorymatch' ? (
+          <motion.div key="memorymatch" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <MemoryMatchGame
+              yearId={yearId}
+              yearNumber={yearNumber}
+              onBack={() => setActiveGame('menu')}
+              onWin={(winner) => recordWinMutation.mutate({ gameName: 'memorymatch', winner })}
+              currentScore={leaderboard?.games?.find((g) => g.game_name === 'memorymatch')}
+              onReset={() => handleResetScore('memorymatch')}
+            />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmModal
         isOpen={!!resetTarget}
         onClose={() => setResetTarget(null)}
         onConfirm={() => {
           if (resetTarget) resetGameMutation.mutate(resetTarget);
         }}
-        title="Reset Score"
-        message="This will reset the score to 0-0. This action cannot be undone."
+        title="Erase Scoreboard"
+        message="This will wipe the ledger clean and reset the score to 0-0. Are you sure?"
         loading={resetGameMutation.isPending}
       />
     </div>
   );
 };
 
-// TicTacToe
+// --- Tic Tac Toe Component ---
 interface TicTacToeProps {
   onBack: () => void;
   onWin: (winner: string) => void;
   currentScore?: GameScore;
   onReset: () => void;
-  user?: any;
+  theme: string;
+  displayName: string;
+  partnerName: string;
 }
 
-const TicTacToeGame: React.FC<TicTacToeProps> = ({ onBack, onWin, currentScore, onReset, user }) => {
+const TicTacToeGame: React.FC<TicTacToeProps> = ({ onBack, onWin, currentScore, onReset, theme, displayName, partnerName }) => {
   const [board, setBoard] = useState<(string | null)[]>(Array(9).fill(null));
   const [isXNext, setIsXNext] = useState(true);
   const [winner, setWinner] = useState<string | null>(null);
@@ -244,6 +292,7 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({ onBack, onWin, currentScore, 
     const newBoard = [...board];
     newBoard[index] = isXNext ? '❤️' : '⭐';
     setBoard(newBoard);
+    
     const gameWinner = calculateWinner(newBoard);
     if (gameWinner && !hasRecordedWin) {
       setWinner(gameWinner);
@@ -263,60 +312,101 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({ onBack, onWin, currentScore, 
     setHasRecordedWin(false);
   };
 
+  const textMain = theme === 'dark' ? 'text-gray-100' : 'text-gray-800';
+  const textSub = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+  const paperBg = theme === 'dark' ? 'bg-[#2a2a2a]' : 'bg-[#faf8f5]';
+
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card rounded-2xl p-8">
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-        <button onClick={onBack} className="text-gray-500 hover:text-gray-700">← Back to Games</button>
-        <div className="flex items-center gap-4">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }} 
+      animate={{ opacity: 1, scale: 1 }} 
+      exit={{ opacity: 0, scale: 0.95 }}
+      className={`rounded-2xl p-6 sm:p-10 shadow-sm border ${theme === 'dark' ? 'bg-[#222] border-gray-700' : 'bg-white border-gray-200'}`}
+    >
+      <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
+        <button onClick={onBack} className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors ${textSub} hover:${textMain}`}>
+          <ArrowLeft className="w-4 h-4" /> Back to Games
+        </button>
+        
+        <div className={`flex items-center gap-6 px-6 py-2 rounded-xl border border-dashed ${theme === 'dark' ? 'bg-[#1a1a1a] border-gray-700' : 'bg-[#faf8f5] border-gray-300'}`}>
           <div className="text-center">
-            <p className="text-sm text-gray-500">{user?.display_name || 'You'} ❤️</p>
-            <p className="text-xl font-bold text-love-red">{currentScore?.my_score || 0}</p>
+            <p className={`text-[10px] uppercase font-bold tracking-widest ${textSub}`}>{displayName}</p>
+            <p className="text-3xl font-handwriting text-blue-500">{currentScore?.my_score || 0}</p>
           </div>
-          <button onClick={() => setShowResetModal(true)} className="p-2 text-gray-400 hover:text-gray-600" title="Reset Score">
+          
+          <button onClick={() => setShowResetModal(true)} className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-500' : 'hover:bg-gray-200 text-gray-400'}`} title="Erase Ledger">
             <RotateCcw className="w-4 h-4" />
           </button>
+          
           <div className="text-center">
-            <p className="text-sm text-gray-500">{user?.partner_name || 'Partner'} ⭐</p>
-            <p className="text-xl font-bold text-purple-500">{currentScore?.shaira_score || 0}</p>
+            <p className={`text-[10px] uppercase font-bold tracking-widest ${textSub}`}>{partnerName}</p>
+            <p className="text-3xl font-handwriting text-rose-500">{currentScore?.shaira_score || 0}</p>
           </div>
         </div>
       </div>
 
-      <div className="text-center mb-6">
-        <h3 className="text-2xl font-serif text-gray-800 mb-2">
+      <div className="text-center mb-8">
+        <h3 className={`text-3xl font-serif ${textMain}`}>
           {winner
-            ? `${winner === '❤️' ? user?.display_name || 'You' : user?.partner_name || 'Partner'} Won! 🎉`
-            : `Turn: ${isXNext ? user?.display_name || 'You' : user?.partner_name || 'Partner'}'s turn ${isXNext ? '❤️' : '⭐'}`}
+            ? `${winner === '❤️' ? displayName : partnerName} claims victory! 🎉`
+            : `It's ${isXNext ? displayName : partnerName}'s turn ${isXNext ? '❤️' : '⭐'}`}
         </h3>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto mb-6">
-        {board.map((cell, index) => (
-          <motion.button key={index}
-            whileHover={!cell && !winner ? { scale: 1.05 } : {}}
-            whileTap={!cell && !winner ? { scale: 0.95 } : {}}
-            onClick={() => handleClick(index)}
-            className={`w-24 h-24 rounded-2xl text-4xl flex items-center justify-center transition-all duration-200 ${
-              winningLine?.includes(index) ? 'bg-linear-to-r from-yellow-400 to-amber-400 shadow-lg' : 'bg-white/60 backdrop-blur-sm hover:bg-white/80'
-            } ${!cell && !winner ? 'cursor-pointer' : 'cursor-default'} border border-pink-100`}>
-            {cell}
-          </motion.button>
-        ))}
+      {/* Journal Paper Dotted Background for the Board */}
+      <div className={`max-w-md mx-auto p-8 rounded-sm ${paperBg} border border-gray-200 dark:border-gray-800 shadow-inner`}
+        style={{
+          backgroundImage: theme === 'dark' ? 'radial-gradient(#444 1px, transparent 1px)' : 'radial-gradient(#d1d5db 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        }}
+      >
+        {/* The Grid lines are created by the gap and the background color of the container */}
+        <div className={`grid grid-cols-3 gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}>
+          {board.map((cell, index) => (
+            <motion.button 
+              key={index}
+              whileHover={!cell && !winner ? { scale: 1.05 } : {}}
+              whileTap={!cell && !winner ? { scale: 0.95 } : {}}
+              onClick={() => handleClick(index)}
+              className={`w-full aspect-square text-5xl sm:text-6xl flex items-center justify-center transition-colors
+                ${winningLine?.includes(index) 
+                  ? 'bg-yellow-100 dark:bg-yellow-900/40' 
+                  : theme === 'dark' ? 'bg-[#222] hover:bg-[#2a2a2a]' : 'bg-white hover:bg-gray-50'
+                } 
+                ${!cell && !winner ? 'cursor-pointer' : 'cursor-default'}
+              `}
+            >
+              {cell && (
+                <motion.span 
+                  initial={{ scale: 0, rotate: -45 }} 
+                  animate={{ scale: 1, rotate: 0 }} 
+                  transition={{ type: "spring" }}
+                >
+                  {cell}
+                </motion.span>
+              )}
+            </motion.button>
+          ))}
+        </div>
       </div>
 
-      <div className="text-center">
-        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={resetGame} className="btn-soft">
-          New Game
+      <div className="text-center mt-10">
+        <motion.button 
+          whileHover={{ scale: 1.05 }} 
+          whileTap={{ scale: 0.95 }} 
+          onClick={resetGame} 
+          className="px-8 py-3 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-xl font-semibold shadow-md hover:opacity-90 transition-opacity"
+        >
+          Draw a new grid
         </motion.button>
       </div>
 
-      {/* TicTacToe Reset Modal */}
       <DeleteConfirmModal
         isOpen={showResetModal}
         onClose={() => setShowResetModal(false)}
         onConfirm={() => { onReset(); setShowResetModal(false); }}
-        title="Reset Score"
-        message="This will reset the Tic Tac Toe score to 0-0."
+        title="Erase Tic Tac Toe Ledger"
+        message="This will reset the Tic Tac Toe score to 0-0. Continue?"
       />
     </motion.div>
   );

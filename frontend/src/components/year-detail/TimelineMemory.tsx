@@ -13,6 +13,11 @@ interface TimelineMemoryProps {
   onDelete: () => void;
 }
 
+// Helper for the scrapbook tape
+const WashiTape = ({ rotate = '-rotate-2', color = 'bg-white/50' }) => (
+  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 ${color} backdrop-blur-md shadow-sm border border-black/5 ${rotate} z-10`} />
+);
+
 const TimelineMemory: React.FC<TimelineMemoryProps> = ({
   memory,
   index,
@@ -25,164 +30,163 @@ const TimelineMemory: React.FC<TimelineMemoryProps> = ({
   const formattedDate = formatDate(memory.date);
   const fullDate = new Date(memory.date);
   
+  // Create a slightly randomized rotation for that messy scrapbook feel
+  const paperRotation = isEven ? 'rotate-1' : '-rotate-1';
+  const polaroidRotation = isEven ? '-rotate-2' : 'rotate-2';
+
   return (
     <motion.div
-      initial={{ opacity: 0, x: isEven ? -50 : 50, y: 30 }}
+      initial={{ opacity: 0, x: isEven ? -20 : 20, y: 30 }}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
-      viewport={{ once: true, margin: '-100px' }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="relative mb-16"
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.6, delay: index * 0.1, type: "spring", stiffness: 100 }}
+      className="relative mb-24 group"
     >
-      {/* Timeline connection line */}
-      <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-pink-300 via-rose-400 to-pink-300" />
+      {/* Hand-drawn dashed timeline connection line */}
+      <div className="absolute left-1/2 transform -translate-x-1/2 w-0 h-full border-l-2 border-dashed border-gray-300 -z-10 mt-10" />
       
-      {/* Date marker circle */}
+      {/* Scrapbook pinned Date marker */}
       <motion.div 
-        className="absolute left-1/2 transform -translate-x-1/2 -top-3 z-20"
-        whileHover={{ scale: 1.2 }}
+        className="absolute left-1/2 transform -translate-x-1/2 -top-4 z-20"
+        whileHover={{ scale: 1.1, rotate: 5 }}
       >
         <div className="relative">
-          <div className="w-14 h-14 rounded-full bg-white dark:bg-gray-800 border-4 border-rose-400 shadow-lg flex items-center justify-center">
-            <Calendar className="w-6 h-6 text-rose-500" />
+          <div className="w-12 h-12 rounded-full bg-[#faf8f5] shadow-[0_2px_8px_rgba(0,0,0,0.1)] border-2 border-gray-200 flex items-center justify-center transform rotate-3">
+            {/* The "Pin" */}
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-red-400 shadow-sm border border-red-500 z-30" />
+            <Calendar className="w-5 h-5 text-gray-600 mt-1" />
           </div>
-          <div className="absolute inset-0 rounded-full bg-rose-400/20 animate-ping" />
         </div>
       </motion.div>
       
-      {/* Month indicator */}
-      <div className={`absolute ${isEven ? 'right-[52%]' : 'left-[52%]'} top-0 whitespace-nowrap`}>
-        <div className="inline-block px-4 py-2 bg-rose-100/90 dark:bg-rose-950/80 backdrop-blur-sm rounded-full text-sm font-semibold text-rose-600 dark:text-rose-400 shadow-sm border border-rose-200 dark:border-rose-900/50">
+      {/* Month indicator sticker */}
+      <div className={`absolute ${isEven ? 'right-[54%]' : 'left-[54%]'} top-1 whitespace-nowrap z-20`}>
+        <div className="inline-block px-3 py-1 bg-yellow-100 shadow-sm border border-yellow-200 text-sm font-handwriting text-gray-700 text-xl transform -rotate-2">
           {fullDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </div>
       </div>
       
-      <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-12`}>
-        {/* Content side */}
-        <div className={`${isEven ? 'md:order-1' : 'md:order-2'} pl-0 md:pl-0`}>
-          <div className={`max-w-lg ${isEven ? 'md:ml-auto md:pr-8' : 'md:mr-auto md:pl-8'}`}>
-            {/* Memory Type Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-pink-100 to-rose-100 dark:from-pink-950/40 dark:to-rose-950/40 rounded-full mb-4">
-              <span className="text-lg">{memoryIcon}</span>
-              <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wide">
-                {memory.memory_type}
-              </span>
-            </div>
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-10 items-center pt-16`}>
+        {/* Content Side - Notebook Paper */}
+        <div className={`${isEven ? 'md:order-1' : 'md:order-2'} pl-0 md:pl-0 z-10`}>
+          <div className={`w-full max-w-lg ${isEven ? 'md:ml-auto md:pr-10' : 'md:mr-auto md:pl-10'}`}>
             
-            {/* Title */}
-            <h3 className="text-3xl md:text-4xl font-serif text-gray-800 dark:text-gray-100 mb-3 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
-              {memory.title}
-            </h3>
-            
-            {/* Date */}
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-4">
-              <Clock className="w-4 h-4" />
-              <span>{formattedDate}</span>
-              {memory.is_favorite && (
-                <>
-                  <span className="mx-2">•</span>
-                  <Star className="w-4 h-4 text-amber-500 fill-current" />
-                  <span className="text-amber-600 dark:text-amber-400">Favorite Memory</span>
-                </>
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              className={`bg-[#faf8f5] p-6 sm:p-8 rounded-sm shadow-md border-l-4 border-red-300 relative transform ${paperRotation}`}
+              style={{
+                backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)',
+                backgroundAttachment: 'local'
+              }}
+            >
+              <WashiTape rotate={isEven ? '-rotate-3' : 'rotate-2'} color="bg-blue-100/50" />
+
+              {/* Memory Type Badge (Sticker) */}
+              <div className="inline-flex items-center gap-2 px-2 py-1 bg-white border border-gray-200 shadow-sm rounded-sm mb-4 transform -rotate-1">
+                <span className="text-lg">{memoryIcon}</span>
+                <span className="text-sm font-handwriting text-gray-700 tracking-wide">
+                  {memory.memory_type}
+                </span>
+              </div>
+              
+              {/* Title */}
+              <h3 className="text-3xl md:text-4xl font-handwriting text-gray-800 mb-2 mt-[-8px] leading-[32px]">
+                {memory.title}
+              </h3>
+              
+              {/* Meta Date & Favorite */}
+              <div className="flex items-center gap-2 text-gray-600 font-handwriting text-xl mb-4 leading-[32px]">
+                <Clock className="w-4 h-4" />
+                <span>{formattedDate}</span>
+                {memory.is_favorite && (
+                  <>
+                    <span className="mx-1">•</span>
+                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                    <span className="text-yellow-600">Favorite</span>
+                  </>
+                )}
+              </div>
+              
+              {/* Location Stamp */}
+              {memory.location && (
+                <div className="flex items-center gap-2 mb-2 bg-red-50/50 w-max px-2 border border-red-100 border-dashed transform rotate-1">
+                  <MapPin className="w-4 h-4 text-red-500" />
+                  <span className="text-gray-700 font-handwriting text-xl">{memory.location}</span>
+                </div>
               )}
-            </div>
-            
-            {/* Location – boosted contrast */}
-            {memory.location && (
-              <div className="flex items-center gap-2 mb-4 p-2 bg-white/50 dark:bg-gray-800/60 rounded-lg inline-flex border border-transparent dark:border-gray-700/50">
-                <MapPin className="w-4 h-4 text-rose-500" />
-                <span className="text-gray-600 dark:text-gray-200 text-sm font-medium">{memory.location}</span>
-              </div>
-            )}
-            
-            {/* Description preview – brighter in dark mode */}
-            <p className="text-gray-600 dark:text-gray-200 leading-relaxed mb-4 line-clamp-3">
-              {memory.description}
-            </p>
-            
-            {/* Quote if exists */}
-            {memory.favorite_quote && (
-              <div className="border-l-4 border-rose-300 dark:border-rose-500 pl-4 py-2 mb-4 bg-rose-50/50 dark:bg-rose-950/20 rounded-r-lg">
-                <p className="text-gray-600 dark:text-gray-300 text-sm italic">"{memory.favorite_quote}"</p>
-              </div>
-            )}
-            
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onView}
-                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-medium shadow-md hover:shadow-lg transition-all"
-              >
-                Read Full Story
-              </motion.button>
               
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onEdit}
-                className="px-6 py-2.5 rounded-full bg-white/80 dark:bg-gray-800/90 backdrop-blur text-gray-700 dark:text-gray-200 font-medium shadow-md hover:shadow-lg transition-all border border-pink-200 dark:border-gray-700"
-              >
-                Edit Memory
-              </motion.button>
+              {/* Description */}
+              <p className="text-gray-800 font-handwriting text-2xl leading-[32px] line-clamp-4 mt-[-4px]">
+                {memory.description}
+              </p>
               
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onDelete}
-                className="px-6 py-2.5 rounded-full bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 font-medium shadow-md hover:shadow-lg transition-all border border-red-200 dark:border-red-900/50"
-              >
-                Delete
-              </motion.button>
-            </div>
+              {/* Quote Note */}
+              {memory.favorite_quote && (
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 shadow-sm transform rotate-1">
+                  <p className="text-gray-700 font-handwriting text-2xl text-center">
+                    "{memory.favorite_quote}"
+                  </p>
+                </div>
+              )}
+              
+              {/* Action Buttons - Label style */}
+              <div className="flex flex-wrap gap-4 mt-6 pt-2">
+                <button
+                  onClick={onView}
+                  className="font-handwriting text-2xl text-blue-600 hover:text-blue-800 border-b-2 border-blue-300 transition-colors"
+                >
+                  Read Full Story
+                </button>
+                <button
+                  onClick={onEdit}
+                  className="font-handwriting text-2xl text-gray-500 hover:text-gray-700 border-b-2 border-gray-300 transition-colors"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={onDelete}
+                  className="font-handwriting text-2xl text-red-500 hover:text-red-700 border-b-2 border-red-300 transition-colors"
+                >
+                  Tear out
+                </button>
+              </div>
+            </motion.div>
           </div>
         </div>
         
-        {/* Image side */}
-        <div className={`${isEven ? 'md:order-2' : 'md:order-1'}`}>
+        {/* Image Side - Polaroid */}
+        <div className={`${isEven ? 'md:order-2' : 'md:order-1'} z-10`}>
           <motion.div
-            whileHover={{ scale: 1.02, rotate: isEven ? 1 : -1 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-            className="relative rounded-2xl overflow-hidden shadow-xl group cursor-pointer min-h-[320px]"
+            whileHover={{ scale: 1.03, rotate: 0, zIndex: 30 }}
+            className={`relative bg-white p-4 pb-16 shadow-[0_15px_35px_rgba(0,0,0,0.1)] border border-gray-100 max-w-sm mx-auto cursor-pointer transform ${polaroidRotation} transition-all duration-300`}
             onClick={onView}
           >
+            <WashiTape rotate={isEven ? 'rotate-2' : '-rotate-3'} color="bg-pink-100/70" />
+            
             {memory.image ? (
-              <>
+              <div className="bg-gray-100 aspect-square overflow-hidden border border-gray-200">
                 <img 
                   src={memory.image} 
                   alt={memory.title} 
-                  className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-full object-cover filter contrast-[1.05] sepia-[.1]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </>
-            ) : (
-              <div className="w-full h-80 bg-gradient-to-br from-pink-100 to-rose-100 dark:from-gray-800 dark:to-gray-900 flex flex-col items-center justify-center">
-                <motion.div
-                  animate={{ 
-                    scale: [1, 1.1, 1],
-                    rotate: [0, 5, -5, 0]
-                  }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
-                  <Heart className="w-20 h-20 text-pink-300/60 dark:text-gray-700 mb-4" />
-                </motion.div>
-                <p className="text-rose-400/70 dark:text-rose-400/50 text-sm italic">A beautiful moment waiting to be captured 📸</p>
-                <p className="text-gray-400 dark:text-gray-500 text-xs mt-2">Click to add a photo</p>
               </div>
-            )}
-            
-            {/* Decorative corner accents */}
-            <div className="absolute top-0 left-0 w-20 h-20 border-t-4 border-l-4 border-white/60 rounded-tl-2xl" />
-            <div className="absolute bottom-0 right-0 w-20 h-20 border-b-4 border-r-4 border-white/60 rounded-br-2xl" />
-            
-            {/* Add photo overlay when no image */}
-            {!memory.image && (
-              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <div className="bg-white/90 dark:bg-gray-800 backdrop-blur rounded-full p-3">
-                  <Camera className="w-6 h-6 text-rose-500 dark:text-rose-400" />
+            ) : (
+              <div className="bg-[#f0ece1] aspect-square flex flex-col items-center justify-center border border-dashed border-gray-300">
+                <Heart className="w-12 h-12 text-gray-300 mb-2" />
+                <p className="font-handwriting text-2xl text-gray-500">Waiting for a photo...</p>
+                <div className="mt-4 p-2 rounded-full bg-white/50 border border-gray-200 shadow-sm">
+                  <Camera className="w-5 h-5 text-gray-600" />
                 </div>
               </div>
             )}
+            
+            {/* Polaroid caption area */}
+            <div className="absolute bottom-4 left-0 w-full text-center px-4">
+              <p className="font-handwriting text-3xl text-gray-800 truncate">
+                {memory.title}
+              </p>
+            </div>
           </motion.div>
         </div>
       </div>

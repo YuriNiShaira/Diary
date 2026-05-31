@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, MapPin, Heart, Upload, Quote, Trash2, Save } from 'lucide-react';
+import { X, Calendar, MapPin, Heart, Upload, Quote, Trash2, Save, Image as ImageIcon } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
+import DeleteConfirmModal from './DeleteConfirmModal';
 
 interface Memory {
   id: number;
@@ -31,8 +32,15 @@ const memoryTypes = [
   { value: 'travel', label: 'Travel' },
   { value: 'everyday', label: 'Everyday Magic' },
   { value: 'special', label: 'Special Moment' },
-  { value: 'special', label: 'Sad Moment' },
+  { value: 'sad', label: 'Sad Moment' },
 ];
+
+// Helper: Torn tape
+const WashiTape = ({ rotate = '-rotate-2', color = 'bg-red-100/50 dark:bg-red-900/30' }) => (
+  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-8 ${color} backdrop-blur-md shadow-sm border border-black/5 dark:border-white/5 ${rotate} z-20`} 
+       style={{ clipPath: 'polygon(2% 0%, 98% 2%, 100% 100%, 0% 96%)' }} 
+  />
+);
 
 const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memory, yearId }) => {
   const [title, setTitle] = useState('');
@@ -45,10 +53,12 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>('');
   const [keepExistingImage, setKeepExistingImage] = useState(true);
+  
+  // ✅ Added state for the custom delete modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const queryClient = useQueryClient();
 
-  // Load memory data when modal opens
   useEffect(() => {
     if (memory) {
       setTitle(memory.title);
@@ -66,9 +76,7 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
   const updateMemoryMutation = useMutation({
     mutationFn: async (formData: FormData) => {
       const response = await api.put(`/memories/${memory?.id}/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       return response.data;
     },
@@ -77,7 +85,7 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
       queryClient.invalidateQueries({ queryKey: ['year', yearId.toString()] });
       queryClient.invalidateQueries({ queryKey: ['years'] });
       queryClient.invalidateQueries({ queryKey: ['stats'] });
-      toast.success('Memory updated! 💕');
+      toast.success('Journal entry updated! ✍️');
       onClose();
     },
     onError: () => {
@@ -94,7 +102,8 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
       queryClient.invalidateQueries({ queryKey: ['year', yearId.toString()] });
       queryClient.invalidateQueries({ queryKey: ['years'] });
       queryClient.invalidateQueries({ queryKey: ['stats'] });
-      toast.success('Memory deleted 💔');
+      toast.success('Memory torn out. 💔');
+      setShowDeleteModal(false);
       onClose();
     },
     onError: () => {
@@ -123,7 +132,6 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!title || !date || !description) {
       toast.error('Please fill in the required fields 💝');
       return;
@@ -142,245 +150,265 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
     if (image) {
       formData.append('image', image);
     } else if (!keepExistingImage) {
-      // Clear the image if user removed it
       formData.append('image', '');
     }
 
     updateMemoryMutation.mutate(formData);
   };
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this memory? This cannot be undone. 💔')) {
-      deleteMemoryMutation.mutate();
-    }
-  };
-
   return (
     <AnimatePresence>
       {isOpen && memory && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-          onClick={onClose}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
           <motion.div
-            initial={{ scale: 0.9, y: 20 }}
-            animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.9, y: 20 }}
-            className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm"
+            onClick={onClose}
+          />
+          
+          <motion.div
+            initial={{ scale: 0.95, y: 20, rotate: -1 }}
+            animate={{ scale: 1, y: 0, rotate: 0 }}
+            exit={{ scale: 0.95, y: 20, rotate: 1 }}
+            className="relative w-full max-w-3xl bg-[#faf8f5] dark:bg-[#1a1a1a] shadow-2xl overflow-hidden rounded-sm border border-gray-200 dark:border-gray-800 my-auto z-10 flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-serif text-gray-800">
-                Edit Memory 💕
+            <WashiTape rotate="rotate-1" />
+
+            {/* Header */}
+            <div className="flex justify-between items-center px-8 pt-8 pb-4 border-b border-gray-300 dark:border-gray-700 shrink-0">
+              <h2 className="text-3xl font-serif text-gray-800 dark:text-gray-100">
+                Rewrite Memory
               </h2>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
+              <button onClick={onClose} className="p-2 text-gray-500 hover:text-rose-500 transition-colors">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Title Input */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Title *
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-2 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
-                  placeholder="Our first date, Beach trip, etc."
-                  required
-                />
-              </div>
-
-              {/* Date Input */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date *
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Memory Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Memory Type
-                </label>
-                <select
-                  value={memoryType}
-                  onChange={(e) => setMemoryType(e.target.value)}
-                  className="w-full px-4 py-2 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
-                >
-                  {memoryTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Story *
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                  className="w-full px-4 py-2 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent resize-none"
-                  placeholder="Tell the story of this beautiful moment..."
-                  required
-                />
-              </div>
-
-              {/* Location */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Location (Optional)
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent"
-                    placeholder="Where did this happen?"
-                  />
-                </div>
-              </div>
-
-              {/* Favorite Quote */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Favorite Quote (Optional)
-                </label>
-                <div className="relative">
-                  <Quote className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
-                  <textarea
-                    value={favoriteQuote}
-                    onChange={(e) => setFavoriteQuote(e.target.value)}
-                    rows={2}
-                    className="w-full pl-10 pr-4 py-2 border border-pink-200 rounded-xl focus:ring-2 focus:ring-love-red focus:border-transparent resize-none"
-                    placeholder="Something special you said or I said..."
-                  />
-                </div>
-              </div>
-
-              {/* Image Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Photo (Optional)
-                </label>
-                {preview ? (
-                  <div className="relative h-48 rounded-xl overflow-hidden">
-                    <img
-                      src={preview}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleRemoveImage}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                      id="edit-memory-image"
-                    />
-                    <label htmlFor="edit-memory-image" className="cursor-pointer block">
-                      <div className="h-48 border-2 border-dashed border-pink-200 rounded-xl flex flex-col items-center justify-center hover:border-love-red transition-colors">
-                        <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                        <p className="text-gray-500">Click to upload a photo</p>
-                        <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 10MB</p>
-                      </div>
+            {/* Scrollable Form Area with Bullet Journal Dot Pattern */}
+            <div 
+              className="flex-1 overflow-y-auto p-8 custom-scrollbar"
+              style={{
+                backgroundImage: 'radial-gradient(rgba(156, 163, 175, 0.3) 1px, transparent 1px)',
+                backgroundSize: '20px 20px'
+              }}
+            >
+              <form id="edit-memory-form" onSubmit={handleSubmit} className="space-y-8">
+                
+                {/* Core Details (Title, Date, Type) */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/60 dark:bg-black/40 backdrop-blur-sm p-6 rounded-sm border border-gray-200 dark:border-gray-700 shadow-sm">
+                  
+                  <div className="md:col-span-12">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">
+                      Memory Title *
                     </label>
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="w-full bg-transparent border-b-2 border-dashed border-gray-300 dark:border-gray-600 outline-none font-handwriting text-3xl text-gray-800 dark:text-gray-200 focus:border-rose-400 transition-colors pb-1"
+                      placeholder="What happened?"
+                      required
+                    />
                   </div>
-                )}
-              </div>
 
-              {/* Favorite Toggle */}
-              <div className="flex items-center">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={isFavorite}
-                    onChange={(e) => setIsFavorite(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-love-red/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-love-red"></div>
-                  <span className="ms-3 text-sm font-medium text-gray-700 flex items-center">
-                    Mark as Favorite
-                    <Heart className={`w-4 h-4 ml-1 ${isFavorite ? 'text-love-red fill-current' : 'text-gray-400'}`} />
-                  </span>
-                </label>
-              </div>
+                  <div className="md:col-span-6">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">
+                      Date *
+                    </label>
+                    <div className="relative">
+                      <Calendar className="absolute left-0 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <input
+                        type="date"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        className="w-full bg-transparent border-b-2 border-dashed border-gray-300 dark:border-gray-600 outline-none font-handwriting text-2xl text-gray-800 dark:text-gray-200 focus:border-rose-400 transition-colors pl-6 pb-1 cursor-pointer"
+                        required
+                      />
+                    </div>
+                  </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  <div className="md:col-span-6">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">
+                      Category
+                    </label>
+                    <select
+                      value={memoryType}
+                      onChange={(e) => setMemoryType(e.target.value)}
+                      className="w-full bg-transparent border-b-2 border-dashed border-gray-300 dark:border-gray-600 outline-none font-handwriting text-2xl text-gray-800 dark:text-gray-200 focus:border-rose-400 transition-colors pb-1 cursor-pointer appearance-none"
+                    >
+                      {memoryTypes.map((type) => (
+                        <option key={type.value} value={type.value} className="font-sans text-base">
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Two Column Layout for Desktop */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  
+                  {/* Left Column: Image & Location */}
+                  <div className="lg:col-span-5 space-y-6">
+                    {/* Polaroid Image Upload */}
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">
+                        Photo Memory
+                      </label>
+                      <div className="bg-white dark:bg-gray-200 p-2 pb-8 shadow-md transform -rotate-1 relative group w-full max-w-[250px] mx-auto sm:mx-0">
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-4 bg-yellow-100/80 shadow-sm transform rotate-3 z-10" />
+                        
+                        {preview ? (
+                          <div className="relative aspect-square w-full bg-gray-100 overflow-hidden border border-gray-200">
+                            <img src={preview} alt="Preview" className="w-full h-full object-cover filter contrast-[1.05] sepia-[.1]" />
+                            <button
+                              type="button"
+                              onClick={handleRemoveImage}
+                              className="absolute top-2 right-2 bg-red-500/90 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors shadow-sm opacity-0 group-hover:opacity-100"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="cursor-pointer block aspect-square w-full border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center hover:bg-gray-100 transition-colors">
+                            <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                            <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
+                            <p className="font-handwriting text-xl text-gray-500">Paste photo here...</p>
+                          </label>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Location */}
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">
+                        Location
+                      </label>
+                      <div className="relative">
+                        <MapPin className="absolute left-0 top-1/2 transform -translate-y-1/2 text-rose-400 w-5 h-5" />
+                        <input
+                          type="text"
+                          value={location}
+                          onChange={(e) => setLocation(e.target.value)}
+                          className="w-full bg-transparent border-b-2 border-dashed border-gray-300 dark:border-gray-600 outline-none font-handwriting text-2xl text-gray-800 dark:text-gray-200 focus:border-rose-400 transition-colors pl-7 pb-1"
+                          placeholder="Where did this happen?"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Favorite Stamp */}
+                    <div className="pt-2">
+                      <label className="flex items-center gap-3 cursor-pointer w-max group">
+                        <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                          isFavorite 
+                            ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20' 
+                            : 'border-gray-400 bg-transparent group-hover:border-rose-300'
+                        }`}>
+                          <Heart className={`w-4 h-4 ${isFavorite ? 'text-rose-500 fill-current' : 'text-gray-400'}`} />
+                        </div>
+                        <input type="checkbox" checked={isFavorite} onChange={(e) => setIsFavorite(e.target.checked)} className="hidden" />
+                        <span className="font-handwriting text-2xl text-gray-700 dark:text-gray-300 select-none">
+                          Mark as Favorite
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Story & Quote */}
+                  <div className="lg:col-span-7 space-y-6">
+                    
+                    {/* Story */}
+                    <div className="bg-white/60 dark:bg-black/40 backdrop-blur-sm p-6 rounded-sm border border-gray-200 dark:border-gray-700 shadow-sm h-full flex flex-col">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-4">
+                        The Story *
+                      </label>
+                      <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        rows={7}
+                        className="w-full flex-1 bg-transparent resize-none outline-none font-handwriting text-2xl text-gray-800 dark:text-gray-200 leading-8"
+                        style={{
+                          backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, rgba(156, 163, 175, 0.2) 31px, rgba(156, 163, 175, 0.2) 32px)',
+                          backgroundAttachment: 'local',
+                          lineHeight: '32px'
+                        }}
+                        placeholder="Start writing..."
+                        required
+                      />
+                    </div>
+
+                    {/* Quote */}
+                    <div className="bg-amber-50/80 dark:bg-amber-900/10 p-4 border border-amber-200 dark:border-amber-900/30 transform rotate-1">
+                      <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-500 mb-2">
+                        <Quote className="w-3 h-3" /> Memorable Quote
+                      </label>
+                      <textarea
+                        value={favoriteQuote}
+                        onChange={(e) => setFavoriteQuote(e.target.value)}
+                        rows={2}
+                        className="w-full bg-transparent resize-none outline-none font-handwriting text-2xl text-gray-800 dark:text-gray-200 text-center"
+                        placeholder="Something special that was said..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="px-8 py-4 bg-gray-100 dark:bg-[#111] border-t border-gray-300 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4 shrink-0">
+              
+              {/*  Now opens the actual custom modal instead of window.confirm */}
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(true)}
+                disabled={deleteMemoryMutation.isPending}
+                className="font-handwriting text-2xl text-red-500 hover:text-red-700 transition-colors flex items-center gap-2 border-b border-transparent hover:border-red-300 disabled:opacity-50"
+              >
+                <Trash2 className="w-5 h-5" /> Tear out page
+              </button>
+
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="font-handwriting text-2xl text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                >
+                  Nevermind
+                </button>
+                
+                <button
                   type="submit"
+                  form="edit-memory-form"
                   disabled={updateMemoryMutation.isPending}
-                  className="flex-1 bg-gradient-to-r from-love-red to-romantic-red text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="px-6 py-2 bg-rose-500 text-white rounded-sm font-handwriting text-2xl shadow-sm hover:bg-rose-600 transition-colors flex items-center gap-2 disabled:opacity-50 transform -rotate-1"
                 >
                   {updateMemoryMutation.isPending ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
-                      <Save className="w-4 h-4" />
-                      Save Changes
+                      <Save className="w-5 h-5" /> Tape to Diary
                     </>
                   )}
-                </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={deleteMemoryMutation.isPending}
-                  className="px-6 py-3 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
-                >
-                  {deleteMemoryMutation.isPending ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <>
-                      <Trash2 className="w-4 h-4" />
-                      Delete
-                    </>
-                  )}
-                </motion.button>
+                </button>
               </div>
-            </form>
+            </div>
           </motion.div>
-        </motion.div>
+
+          {/* Delete Confirmation Modal Integration */}
+          <DeleteConfirmModal
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={() => deleteMemoryMutation.mutate()}
+            title="Tear out this page?"
+            message="Are you sure you want to discard this memory? It will be gone forever."
+            itemName={memory.title}
+            loading={deleteMemoryMutation.isPending}
+          />
+        </div>
       )}
     </AnimatePresence>
   );
