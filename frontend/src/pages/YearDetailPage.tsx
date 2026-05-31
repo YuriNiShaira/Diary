@@ -3,13 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Plus,
-  Camera,
-  Star,
-  Gamepad2,
-  Coffee,
-  Music,
-  Heart,
+  Plus, Camera, Star, Gamepad2, Coffee, Music, Heart,
 } from 'lucide-react';
 import { api } from '../services/api';
 import CreateMemoryModal from '../components/CreateMemoryModal';
@@ -31,12 +25,12 @@ import {
   YearStats,
   MemoriesControls,
 } from '../components/year-detail';
-import type { Memory } from '../components/year-detail';  // ✅ Keep this for the type
+import type { Memory } from '../components/year-detail';
 import toast from 'react-hot-toast';
 
 interface Year {
   id: number;
-  year: number;
+  year_number: number;  // ✅ anniversary‑based year number
   cover_image?: string;
   description?: string;
 }
@@ -55,9 +49,9 @@ const YearDetailPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [layoutStyle, setLayoutStyle] = useState<LayoutStyle>('timeline');
   const [isCreateMemoryModalOpen, setIsCreateMemoryModalOpen] = useState(false);
-  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);  // ✅ Memory instead of MemoryType
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedMemoryForView, setSelectedMemoryForView] = useState<Memory | null>(null);  // ✅ Memory
+  const [selectedMemoryForView, setSelectedMemoryForView] = useState<Memory | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
   const [showDeleteYearModal, setShowDeleteYearModal] = useState(false);
@@ -71,7 +65,7 @@ const YearDetailPage: React.FC = () => {
     enabled: !!yearId,
   });
 
-  const { data: memoriesData, isLoading: memoriesLoading } = useQuery<Memory[]>({  // ✅ Memory[]
+  const { data: memoriesData, isLoading: memoriesLoading } = useQuery<Memory[]>({
     queryKey: ['memories', yearId],
     queryFn: async () => {
       const response = await api.get(`/memories/?year=${yearId}`);
@@ -165,7 +159,7 @@ const YearDetailPage: React.FC = () => {
       
       <div className="max-w-7xl mx-auto relative z-10">
         <YearHeader
-          year={year.year}
+          year={year.year_number}  // ✅ Fixed: use year_number
           description={year.description}
           onDeleteYear={() => setShowDeleteYearModal(true)}
         />
@@ -225,7 +219,7 @@ const YearDetailPage: React.FC = () => {
                     <div ref={timelineRef} className="relative">
                       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12 pb-8 border-b border-pink-200">
                         <h2 className="text-2xl md:text-3xl font-serif text-gray-700 mb-3">Our Love Story Timeline</h2>
-                        <p className="text-gray-500">A journey through {memories.length} beautiful moments in {year.year}</p>
+                        <p className="text-gray-500">A journey through {memories.length} beautiful moments</p>
                       </motion.div>
                       <div className="relative">
                         <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-pink-200 via-rose-300 to-pink-200 rounded-full hidden md:block" />
@@ -254,10 +248,6 @@ const YearDetailPage: React.FC = () => {
 
                   {layoutStyle === 'scattered' && (
                     <div className="relative min-h-[600px]">
-                      <div className="absolute inset-0 pointer-events-none">
-                        <div className="absolute top-10 left-10 w-32 h-32 bg-pink-200/20 rounded-full blur-3xl animate-pulse" />
-                        <div className="absolute bottom-20 right-10 w-40 h-40 bg-rose-200/20 rounded-full blur-3xl animate-pulse delay-1000" />
-                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 gap-y-12">
                         {memories.map((memory, index) => (
                           <ScatteredPolaroidCard
@@ -298,22 +288,22 @@ const YearDetailPage: React.FC = () => {
 
           {activeTab === 'anime' && (
             <motion.div key="anime" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <AnimeRatingSection yearId={parseInt(yearId!)} yearNumber={year.year} />
+              <AnimeRatingSection yearId={parseInt(yearId!)} yearNumber={year.year_number} />
             </motion.div>
           )}
           {activeTab === 'funfacts' && (
             <motion.div key="funfacts" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <FunFactsSection yearId={parseInt(yearId!)} yearNumber={year.year} />
+              <FunFactsSection yearId={parseInt(yearId!)} yearNumber={year.year_number} />
             </motion.div>
           )}
           {activeTab === 'playlist' && (
             <motion.div key="playlist" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <PlaylistSection yearId={parseInt(yearId!)} yearNumber={year.year} />
+              <PlaylistSection yearId={parseInt(yearId!)} yearNumber={year.year_number} />
             </motion.div>
           )}
           {activeTab === 'games' && (
             <motion.div key="games" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <GamesArena yearId={parseInt(yearId!)} yearNumber={year.year} />
+              <GamesArena yearId={parseInt(yearId!)} yearNumber={year.year_number} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -324,7 +314,7 @@ const YearDetailPage: React.FC = () => {
       <MemoryDetailModal isOpen={isViewModalOpen} onClose={() => { setIsViewModalOpen(false); setSelectedMemoryForView(null); }} memory={selectedMemoryForView} onEdit={(memory) => { setIsViewModalOpen(false); setSelectedMemoryForView(null); setSelectedMemory(memory); setIsEditModalOpen(true); }} />
       
       <DeleteConfirmModal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={() => { if (deleteTarget) { deleteMutation.mutate(deleteTarget.id); setDeleteTarget(null); } }} title="Delete Memory" itemName={deleteTarget?.name} message="This action cannot be undone. All data will be permanently removed." loading={deleteMutation.isPending} />
-      <DeleteConfirmModal isOpen={showDeleteYearModal} onClose={() => setShowDeleteYearModal(false)} onConfirm={() => { deleteYearMutation.mutate(); setShowDeleteYearModal(false); }} title="Delete Year" itemName={year?.year?.toString()} message="This will permanently delete this year and ALL memories inside it. This cannot be undone!" loading={deleteYearMutation.isPending} />
+      <DeleteConfirmModal isOpen={showDeleteYearModal} onClose={() => setShowDeleteYearModal(false)} onConfirm={() => { deleteYearMutation.mutate(); setShowDeleteYearModal(false); }} title="Delete Year" itemName={year?.year_number?.toString()} message="This will permanently delete this year and ALL memories inside it. This cannot be undone!" loading={deleteYearMutation.isPending} />
     </div>
   );
 };
