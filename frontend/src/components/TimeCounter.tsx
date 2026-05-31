@@ -26,8 +26,7 @@ interface TimeTogether {
   seconds: number;
 }
 
-// --- SVG COMPONENTS ---
-
+// --- SVG COMPONENTS (lightened to float on the background) ---
 const BoySVG = ({ color }: { color: string }) => (
   <motion.svg
     width="45"
@@ -38,11 +37,11 @@ const BoySVG = ({ color }: { color: string }) => (
     animate={{ y: [0, -2, 0] }}
     transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
   >
-    <circle cx="16" cy="10" r="7" fill="currentColor" />
-    <path d="M16 18 V36" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
-    <path d="M16 35 L8 48 M16 35 L24 48" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
-    <path d="M16 23 L32 21" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
-    <path d="M16 23 L8 32" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+    <circle cx="16" cy="10" r="7" fill="currentColor" opacity="0.85" />
+    <path d="M16 18 V36" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" opacity="0.85" />
+    <path d="M16 35 L8 48 M16 35 L24 48" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" opacity="0.85" />
+    <path d="M16 23 L32 21" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" opacity="0.85" />
+    <path d="M16 23 L8 32" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" opacity="0.85" />
   </motion.svg>
 );
 
@@ -56,16 +55,15 @@ const GirlSVG = ({ color }: { color: string }) => (
     animate={{ y: [0, -2, 0] }}
     transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
   >
-    <circle cx="16" cy="10" r="7" fill="currentColor" />
-    <path d="M16 17 L7 37 H25 Z" fill="currentColor" stroke="currentColor" strokeWidth="2" />
-    <path d="M13 37 L13 48 M19 37 L19 48" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
-    <path d="M16 23 L0 21" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
-    <path d="M16 23 L24 32" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+    <circle cx="16" cy="10" r="7" fill="currentColor" opacity="0.85" />
+    <path d="M16 17 L7 37 H25 Z" fill="currentColor" stroke="currentColor" strokeWidth="2" opacity="0.85" />
+    <path d="M13 37 L13 48 M19 37 L19 48" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" opacity="0.85" />
+    <path d="M16 23 L0 21" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" opacity="0.85" />
+    <path d="M16 23 L24 32" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" opacity="0.85" />
   </motion.svg>
 );
 
 // --- MAIN COMPONENT ---
-
 const TimeCounter: React.FC<TimeCounterProps> = ({ anniversaryDate }) => {
   const { theme } = useTheme();
   const [timeTogether, setTimeTogether] = useState<TimeTogether>({
@@ -73,7 +71,17 @@ const TimeCounter: React.FC<TimeCounterProps> = ({ anniversaryDate }) => {
   });
   const [isDateValid, setIsDateValid] = useState(true);
 
-  const brandColor = theme === 'dark' ? '#f472b6' : '#e11d48';
+  const isDark = theme === 'dark';
+  
+  // Soft watercolor palette that harmonizes with RomanticBackground
+  const brandColor    = isDark ? '#f9a8d4' : '#e11d48';
+  const cardBg        = isDark ? 'bg-purple-950/30' : 'bg-white/40';
+  const innerPanelBg  = isDark ? 'bg-purple-900/20' : 'bg-white/30';
+  const mainBorder    = isDark ? 'border-purple-400/15' : 'border-rose-200/40';
+  const headingText   = isDark ? 'text-purple-50' : 'text-rose-950';
+  const subText       = isDark ? 'text-purple-300/70' : 'text-rose-800/60';
+  const numberText    = isDark ? 'text-purple-200' : 'text-rose-900';
+  const separatorDot  = isDark ? 'bg-purple-400' : 'bg-rose-400';
 
   useEffect(() => {
     const start = new Date(anniversaryDate);
@@ -124,84 +132,42 @@ const TimeCounter: React.FC<TimeCounterProps> = ({ anniversaryDate }) => {
 
   if (!isDateValid) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        className={`rounded-[2rem] border p-8 text-center shadow-xl backdrop-blur-sm ${
-          theme === 'dark'
-            ? 'bg-purple-900/40 border-purple-700/40'
-            : 'bg-white/85 border-rose-200/80'
-        }`}
-      >
-        <h3 className={`text-2xl font-serif mb-2 ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
-          Our Beautiful Journey Together 💕
-        </h3>
-        <p className={theme === 'dark' ? 'text-purple-300' : 'text-rose-500'}>
-          Invalid anniversary date. Check the date value first.
-        </p>
-      </motion.div>
+      <div className={`p-8 rounded-[2rem] border backdrop-blur-sm text-center font-serif shadow-lg ${cardBg} ${mainBorder}`}>
+        <p className={`${subText} italic`}>This page of our story is waiting for a valid date...</p>
+      </div>
     );
   }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.97 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.45, ease: 'easeOut' }}
-      className={`relative overflow-visible rounded-[2.5rem] border p-6 shadow-2xl backdrop-blur-md md:p-10 ${
-        theme === 'dark'
-          ? 'bg-gradient-to-br from-purple-900/40 via-purple-800/30 to-purple-900/40 border-purple-700/40 shadow-[0_20px_70px_rgba(80,40,100,0.3)]'
-          : 'bg-gradient-to-br from-white/80 via-rose-50/70 to-pink-100/60 border-rose-200/70 shadow-[0_20px_70px_rgba(244,114,182,0.18)]'
-      }`}
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`relative overflow-visible rounded-[2.5rem] border backdrop-blur-md p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.06)] md:p-10 ${cardBg} ${mainBorder}`}
     >
-      {/* Background Decor Layers */}
-      <div className={`absolute -left-16 top-10 h-40 w-40 rounded-full blur-3xl ${
-        theme === 'dark' ? 'bg-purple-500/20' : 'bg-pink-200/30'
-      }`} />
-      <div className={`absolute -right-16 bottom-8 h-40 w-40 rounded-full blur-3xl ${
-        theme === 'dark' ? 'bg-rose-500/20' : 'bg-rose-200/30'
-      }`} />
-
-      {/* Floating Accent Hearts */}
-      <Heart className={`absolute left-8 top-8 h-5 w-5 fill-current ${
-        theme === 'dark' ? 'text-purple-500/50' : 'text-rose-200/70'
-      }`} />
-      <Heart className={`absolute right-10 top-10 h-4 w-4 fill-current ${
-        theme === 'dark' ? 'text-purple-500/40' : 'text-pink-200/70'
-      }`} />
-
       <div className="relative">
+        
         {/* Header Section */}
-        <div className="text-center mb-16">
-          <motion.h3
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`text-3xl font-serif md:text-5xl ${
-              theme === 'dark' ? 'text-purple-50' : 'text-gray-800'
-            }`}
-          >
+        <div className="text-center mb-12">
+          <h3 className={`text-3xl font-serif italic md:text-4xl ${headingText}`}>
             Our Beautiful Journey Together
-          </motion.h3>
-          <p className={`mt-3 text-sm md:text-lg font-medium ${
-            theme === 'dark' ? 'text-purple-300' : 'text-gray-500'
-          }`}>
-            Our story grows every second.
+          </h3>
+          <p className={`mt-2 text-xs md:text-sm font-serif tracking-widest italic ${subText}`}>
+            Every second is a newly written line.
           </p>
+          <div className={`h-px w-20 mx-auto mt-4 opacity-25 ${separatorDot}`} />
         </div>
 
-        {/* Inner Timer Panel */}
-        <div className={`relative mt-12 rounded-[2rem] border px-4 py-8 md:px-8 md:py-12 ${
-          theme === 'dark'
-            ? 'border-purple-500/30 bg-purple-950/40 shadow-[inset_0_1px_0_rgba(150,120,170,0.2)]'
-            : 'border-white/60 bg-white/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]'
-        }`}>
+        {/* Inner Timer Panel – airy, glassy */}
+        <div className={`relative mt-10 rounded-[2rem] border backdrop-blur-sm px-4 py-10 md:px-8 md:py-12 ${innerPanelBg} ${mainBorder}`}>
           
-          {/* Boy - Top Left */}
+          {/* Faint inner dashed frame */}
+          <div className={`absolute inset-2 rounded-[1.6rem] border border-dashed pointer-events-none opacity-30 ${mainBorder}`} />
+          
+          {/* Boy & Girl */}
           <div className="absolute -top-[63px] left-4 md:left-12 z-30">
             <BoySVG color={brandColor} />
           </div>
-
-          {/* Girl - Top Right */}
           <div className="absolute -top-[63px] right-4 md:right-12 z-30">
             <GirlSVG color={brandColor} />
           </div>
@@ -213,53 +179,49 @@ const TimeCounter: React.FC<TimeCounterProps> = ({ anniversaryDate }) => {
                 d="M0,5 Q50,35 100,5"
                 fill="none"
                 stroke={brandColor}
-                strokeWidth="2.5"
+                strokeWidth="2"
                 strokeLinecap="round"
-                className="opacity-60"
+                className="opacity-40"
               />
             </svg>
             <div className="absolute left-1/2 top-[28px] -translate-x-1/2 -translate-y-1/2">
               <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
+                animate={{ scale: [1, 1.15, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <Heart className="w-7 h-7 fill-current drop-shadow-md" style={{ color: brandColor }} />
+                <Heart
+                  className="w-6 h-6 fill-current drop-shadow-[0_2px_4px_rgba(0,0,0,0.05)]"
+                  style={{ color: brandColor }}
+                />
               </motion.div>
             </div>
           </div>
 
           {/* Timer Grid */}
-          <div className="grid grid-cols-2 gap-y-12 md:grid-cols-3 xl:grid-cols-6 relative z-10">
+          <div className="grid grid-cols-2 gap-y-10 md:grid-cols-3 xl:grid-cols-6 relative z-10">
             {timeItems.map((item, index) => (
-              <motion.div
+              <div
                 key={item.label}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
                 className="relative flex flex-col items-center justify-center text-center"
               >
-                <div className={`text-5xl font-bold leading-none tracking-tighter sm:text-6xl md:text-7xl ${
-                  theme === 'dark' ? 'text-purple-300' : 'text-rose-500'
-                }`}>
+                <motion.div
+                  key={item.value}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className={`text-4xl sm:text-5xl md:text-6xl font-serif font-medium tracking-tight ${numberText}`}
+                >
                   {formatNumber(item.value)}
-                </div>
+                </motion.div>
 
-                <div className={`mt-3 text-xs font-bold uppercase tracking-[0.2em] md:text-sm ${
-                  theme === 'dark' ? 'text-purple-300/80' : 'text-gray-500'
-                }`}>
+                <div className={`mt-2 text-[10px] md:text-xs font-serif italic tracking-[0.15em] ${subText}`}>
                   {item.label}
                 </div>
 
-                <div className={`mt-4 h-1 w-10 rounded-full ${
-                  theme === 'dark' ? 'bg-purple-500/40' : 'bg-rose-300/50'
-                }`} />
-
+                {/* Soft separator dot */}
                 {index !== timeItems.length - 1 && (
-                  <div className={`absolute right-0 top-1/2 hidden h-16 w-px -translate-y-1/2 xl:block ${
-                    theme === 'dark' ? 'bg-purple-500/20' : 'bg-gray-200/60'
-                  }`} />
+                  <div className={`absolute right-0 top-1/2 hidden h-2 w-2 -translate-y-1/2 translate-x-1/2 rounded-full opacity-25 xl:block ${separatorDot}`} />
                 )}
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
