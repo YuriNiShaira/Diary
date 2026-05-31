@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import toast from 'react-hot-toast';
 
 type Theme = 'light' | 'dark';
 
@@ -30,6 +31,21 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
+    
+    // ✅ Show gentle warning when switching to dark mode
+    if (newTheme === 'dark') {
+      toast('Light mode looks better here! Please use Lightmode', {
+        icon: '💡',
+        style: {
+          background: '#fff9b0',
+          color: '#292524',
+          border: '2px solid #fbbf24',
+          fontWeight: 500,
+          fontSize: '14px',
+        },
+        duration: 3000,
+      });
+    }
   };
 
   return (
