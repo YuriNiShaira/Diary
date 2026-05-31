@@ -197,7 +197,7 @@ def contact(request):
     name = request.data.get('name', 'Anonymous')
     email = request.data.get('email', '')
     message = request.data.get('message', '')
-
+    
     if not message:
         return Response({'error': 'Message is required'}, status=400)
     
@@ -212,8 +212,5 @@ def contact(request):
         )
     except Exception:
         pass
-
-    return Response({
-        'success': True,
-        'message': f'Thanks {name}! Your message has been sent. We\'ll get back to you soon! 💕'
-    })
+    
+    return Response({'success': True,'message': f'Thanks {name}! Your message has been saved. We\'ll get back to you soon! 💕'})
