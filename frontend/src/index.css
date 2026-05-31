@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 /* Custom theme variables for Tailwind v4 */
@@ -180,6 +181,54 @@
     background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.8) 0%, transparent 70%);
   }
 
+  .notebook-page {
+    background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.85), transparent 35%), linear-gradient(180deg, #fff9f7 0%, #ffe9f4 100%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(10px);
+  }
+
+  .notebook-card {
+    background: linear-gradient(180deg, #ffffff 0%, #fff7f9 100%);
+    border: 1px solid rgba(251, 207, 232, 0.85);
+    box-shadow: 0 20px 40px rgba(255, 112, 157, 0.12);
+  }
+
+  .notebook-lines {
+    background-image: linear-gradient(rgba(255, 107, 139, 0.14) 1px, transparent 1px);
+    background-size: 100% 2.6rem;
+  }
+
+  .notebook-rings {
+    position: relative;
+  }
+
+  .notebook-rings::before,
+  .notebook-rings::after {
+    content: '';
+    position: absolute;
+    left: -1.3rem;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 9999px;
+    background: rgba(255, 107, 139, 0.22);
+    border: 1px solid rgba(255, 107, 139, 0.45);
+  }
+
+  .notebook-rings::before {
+    top: 1.5rem;
+  }
+
+  .notebook-rings::after {
+    top: 4.5rem;
+  }
+
+  .notebook-label {
+    mix-blend-mode: multiply;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
   /* Heartbeat animation */
   .heartbeat {
     animation: heartBeat 1.5s ease-in-out infinite;
@@ -215,8 +264,6 @@
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 15c-2-3-5-5-9-5-6 0-10 4-10 10 0 8 10 15 19 20 9-5 19-12 19-20 0-6-4-10-10-10-4 0-7 2-9 5z' fill='%23FFB7C5' fill-opacity='0.2'/%3E%3C/svg%3E");
   background-repeat: repeat;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap');
 
 .font-handwriting {
   font-family: 'Caveat', cursive;
@@ -377,4 +424,22 @@
 .dark .modal-card {
   background-color: #111827 !important; 
   color: #e5e7eb !important;
+}
+
+/* =======================================================
+   CUSTOM SCROLLBAR STYLES
+   ======================================================= */
+.custom-scrollbar-light::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar-light::-webkit-scrollbar-thumb {
+  background-color: #fce7f3;
+  border-radius: 10px;
+}
+.custom-scrollbar-dark::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+  background-color: #4c1d95;
+  border-radius: 10px;
 }
