@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, MapPin, Heart, Upload, Quote, Trash2, Save, Image as ImageIcon } from 'lucide-react';
+import { X, Calendar, MapPin, Heart, Quote, Trash2, Save, Image as ImageIcon } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';

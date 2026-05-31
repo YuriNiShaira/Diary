@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Music, Plus, Edit, Trash2, X, CheckCircle,
-  Star, Heart, Volume2, Play, Disc
+  Star, Play, Disc
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
