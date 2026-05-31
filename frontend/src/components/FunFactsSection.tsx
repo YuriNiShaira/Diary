@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Music, MapPin, Heart, Smile, Edit, Save,
-  X, Camera, Utensils, Tv, Home, Sparkles
+  Camera, Utensils, Tv, Home, Sparkles
 } from 'lucide-react';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
