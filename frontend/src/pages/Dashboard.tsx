@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
   Heart,
   Calendar,
   Image as ImageIcon,
-  Star,
   Sparkles,
   Users,
+  BookOpen,
+  X,
+  Copy,
+  Check
 } from 'lucide-react';
 import { api } from '../services/api';
 import Envelope from '../components/Envelope';
@@ -25,7 +28,7 @@ import toast from 'react-hot-toast';
 
 interface Year {
   id: number;
-  year_number: number;          // ✅ anniversary‑based year number
+  year_number: number; 
   cover_image?: string;
   description?: string;
   memory_count?: number;
@@ -53,6 +56,7 @@ const Dashboard: React.FC = () => {
 
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const { data: yearsData, isLoading } = useQuery<Year[]>({
     queryKey: ['years'],
@@ -91,140 +95,115 @@ const Dashboard: React.FC = () => {
   };
 
   const copyInviteCode = () => {
-    if (inviteCode) {
-      navigator.clipboard.writeText(inviteCode);
-      toast.success('Invite code copied! Share it with your partner 💕');
-    }
+    if (!inviteCode) return;
+    navigator.clipboard.writeText(inviteCode);
+    setCopied(true);
+    toast.success('Invite code copied! Share it with your partner 💕');
+
+    // reset copied state after a moment
+    window.setTimeout(() => setCopied(false), 2500);
   };
 
   const years = Array.isArray(yearsData) ? yearsData : [];
 
   return (
-    <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${
-      theme === 'dark' ? 'bg-gray-950' : ''
-    }`}>
+    <div
+      className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${
+        theme === 'dark' ? 'bg-gray-950' : ''
+      }`}
+    >
+      <style dangerouslySetInnerHTML={{__html: `
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+        .font-handwriting { font-family: 'Caveat', cursive; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+      `}} />
+
       <RomanticBackground />
       <Navbar />
 
       <div className="max-w-7xl mx-auto relative z-10 px-6 py-6">
         {/* Welcome Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-12 relative"
-        >
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-12 relative">
+          
+          {/* Re-designed Invite Partner Button (Diary/Ticket Style) */}
           {user && !user.has_partner && (
-            <div className="absolute right-0 top-0">
+            <div className="absolute right-0 top-0 hidden md:block">
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.05, rotate: 2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowInviteModal(true)}
-                className="btn-soft flex items-center gap-2 text-purple-600 border-purple-300"
+                className={`px-5 py-2.5 rounded-lg border-2 border-dashed flex items-center gap-2 shadow-sm font-serif italic transition-colors ${
+                  theme === 'dark' 
+                    ? 'bg-[#2a2626] border-stone-700 text-rose-300 hover:border-rose-900' 
+                    : 'bg-[#fcfbf7] border-rose-200 text-rose-600 hover:bg-rose-50'
+                }`}
               >
-                <Users className="w-4 h-4" />
-                <span className="text-sm">Invite Partner</span>
+                <Heart className="w-4 h-4 fill-current" />
+                <span className="text-sm font-bold">Invite Partner</span>
               </motion.button>
             </div>
           )}
 
           <div className="text-center">
-            <h1 className={`text-5xl md:text-6xl font-serif mb-4 ${
-              theme === 'dark' ? 'text-purple-100' : 'text-gray-800'
-            }`}>
-              <span className="text-gradient-love">
-                Welcome, {user?.display_name || 'Love'}
-              </span>
-              <motion.span
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="inline-block ml-3"
-              >
+            <h1
+              className={`text-5xl md:text-6xl font-serif mb-4 ${
+                theme === 'dark' ? 'text-purple-100' : 'text-gray-800'
+              }`}
+            >
+              <span className="text-gradient-love">Welcome, {user?.display_name || 'Love'}</span>
+              <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }} className="inline-block ml-3">
                 💕
               </motion.span>
             </h1>
-            <p className={`text-xl font-light italic ${
-              theme === 'dark' ? 'text-purple-200' : 'text-gray-600'
-            }`}>
+            <p className={`text-xl font-light italic ${theme === 'dark' ? 'text-purple-200' : 'text-gray-600'}`}>
               Turn moments into memories. One entry at a time
             </p>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '180px' }}
-              transition={{ delay: 0.5, duration: 1 }}
-              className="h-0.5 bg-gradient-to-r from-transparent via-love-red to-transparent mx-auto mt-4"
-            />
+            <motion.div initial={{ width: 0 }} animate={{ width: '180px' }} transition={{ delay: 0.5, duration: 1 }} className="h-0.5 bg-gradient-to-r from-transparent via-love-red to-transparent mx-auto mt-4" />
           </div>
+
+          {/* Mobile Invite Button */}
+          {user && !user.has_partner && (
+            <div className="mt-6 flex justify-center md:hidden">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowInviteModal(true)}
+                className={`px-5 py-2.5 rounded-lg border-2 border-dashed flex items-center gap-2 shadow-sm font-serif italic transition-colors ${
+                  theme === 'dark' 
+                    ? 'bg-[#2a2626] border-stone-700 text-rose-300' 
+                    : 'bg-[#fcfbf7] border-rose-200 text-rose-600'
+                }`}
+              >
+                <Heart className="w-4 h-4 fill-current" />
+                <span className="text-sm font-bold">Invite Partner</span>
+              </motion.button>
+            </div>
+          )}
         </motion.div>
 
         {/* Time Counter */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="mb-12"
-        >
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }} className="mb-12">
           <TimeCounter anniversaryDate={user?.anniversary_date || '2024-01-01'} />
         </motion.div>
 
         {/* Stats Grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12"
-        >
-          <StatsCard
-            icon={<Calendar className="w-6 h-6" />}
-            label="Days Together"
-            value={stats.days_together}
-            color="from-love-red to-romantic-red"
-          />
-          <StatsCard
-            icon={<Star className="w-6 h-6" />}
-            label="Years of Love"
-            value={stats.total_years}
-            color="from-romantic-red to-deep-pink"
-          />
-          <StatsCard
-            icon={<ImageIcon className="w-6 h-6" />}
-            label="Precious Memories"
-            value={stats.total_memories}
-            color="from-cherry-blossom to-love-red"
-          />
-          <StatsCard
-            icon={<Heart className="w-6 h-6" />}
-            label="Favorite Moments"
-            value={stats.favorite_memories}
-            color="from-love-red to-cherry-blossom"
-          />
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          <StatsCard icon={<Calendar className="w-6 h-6" />} label="Days Together" value={stats.days_together} color="from-love-red to-romantic-red" />
+          <StatsCard icon={<BookOpen className="w-6 h-6" />} label="Years of Love" value={stats.total_years} color="from-romantic-red to-deep-pink" />
+          <StatsCard icon={<ImageIcon className="w-6 h-6" />} label="Precious Memories" value={stats.total_memories} color="from-cherry-blossom to-love-red" />
+          <StatsCard icon={<Heart className="w-6 h-6" />} label="Favorite Moments" value={stats.favorite_memories} color="from-love-red to-cherry-blossom" />
         </motion.div>
 
         {/* Envelope */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mb-16"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-16">
           <Envelope />
         </motion.div>
 
         {/* Years Grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <h2 className={`text-4xl font-serif text-center mb-8 ${
-            theme === 'dark' ? 'text-purple-100' : 'text-gray-800'
-          }`}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+          <h2 className={`text-4xl font-serif text-center mb-8 ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
             <span className="text-gradient-soft">Our Journey Through The Years</span>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '120px' }}
-              transition={{ delay: 0.5, duration: 1 }}
-              className="h-0.5 bg-gradient-to-r from-transparent via-love-red to-transparent mx-auto mt-2"
-            />
+            <motion.div initial={{ width: 0 }} animate={{ width: '120px' }} transition={{ delay: 0.5, duration: 1 }} className="h-0.5 bg-gradient-to-r from-transparent via-love-red to-transparent mx-auto mt-2" />
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -237,41 +216,15 @@ const Dashboard: React.FC = () => {
                 </div>
               ))
             ) : years.length > 0 ? (
-              years.map((year: Year) => (
-                <YearCard
-                  key={year.id}
-                  year={year}
-                  onClick={() => navigate(`/year/${year.id}`)}
-                />
-              ))
+              years.map((year: Year) => <YearCard key={year.id} year={year} onClick={() => navigate(`/year/${year.id}`)} />)
             ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="col-span-full text-center py-16"
-              >
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="col-span-full text-center py-16">
+                <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
                   <Heart className="w-20 h-20 text-cherry-blossom/50 mx-auto mb-6" />
                 </motion.div>
-                <h3 className={`text-2xl font-serif mb-3 ${
-                  theme === 'dark' ? 'text-purple-200' : 'text-gray-600'
-                }`}>
-                  Start Your Love Story
-                </h3>
-                <p className={`mb-8 font-light ${
-                  theme === 'dark' ? 'text-purple-300' : 'text-gray-500'
-                }`}>
-                  Create your first year to begin capturing beautiful memories together
-                </p>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsCreateYearModalOpen(true)}
-                  className="btn-romantic"
-                >
+                <h3 className={`text-2xl font-serif mb-3 ${theme === 'dark' ? 'text-purple-200' : 'text-gray-600'}`}>Start Your Love Story</h3>
+                <p className={`mb-8 font-light ${theme === 'dark' ? 'text-purple-300' : 'text-gray-500'}`}>Create your first year to begin capturing beautiful memories together</p>
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setIsCreateYearModalOpen(true)} className="btn-romantic">
                   Create First Year ✨
                 </motion.button>
               </motion.div>
@@ -279,18 +232,8 @@ const Dashboard: React.FC = () => {
           </div>
 
           {years.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="mt-12 text-center"
-            >
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="btn-romantic"
-                onClick={() => setIsCreateYearModalOpen(true)}
-              >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="mt-12 text-center">
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="btn-romantic" onClick={() => setIsCreateYearModalOpen(true)}>
                 <span className="flex items-center gap-2">
                   Add New Year
                   <Sparkles className="w-4 h-4" />
@@ -301,24 +244,11 @@ const Dashboard: React.FC = () => {
         </motion.div>
 
         {/* Footer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="mt-16 text-center"
-        >
-          <p className={`font-light italic text-sm ${
-            theme === 'dark' ? 'text-purple-300' : 'text-gray-500'
-          }`}>
-            "Forever is composed of nows" — Emily Dickinson
-          </p>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-16 text-center">
+          <p className={`font-light italic text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-gray-500'}`}>"Forever is composed of nows" — Emily Dickinson</p>
           <div className="flex justify-center gap-1 mt-2">
             {[...Array(3)].map((_, i) => (
-              <motion.div
-                key={i}
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.3 }}
-              >
+              <motion.div key={i} animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.3 }}>
                 <Heart className="w-3 h-3 text-love-red/30 fill-current" />
               </motion.div>
             ))}
@@ -326,65 +256,105 @@ const Dashboard: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Modals */}
-      <CreateYearModal
-        isOpen={isCreateYearModalOpen}
-        onClose={() => setIsCreateYearModalOpen(false)}
-      />
-
+      <CreateYearModal isOpen={isCreateYearModalOpen} onClose={() => setIsCreateYearModalOpen(false)} />
       <LoveLetterManager />
 
-      {/* Invite Code Modal */}
-      {showInviteModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-          onClick={() => setShowInviteModal(false)}
-        >
-          <motion.div
-            initial={{ scale: 0.9, y: 20 }}
-            animate={{ scale: 1, y: 0 }}
-            className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center"
-            onClick={(e) => e.stopPropagation()}
+      {/* Redesigned Invite Code Modal (Diary / Washi Tape style) */}
+      <AnimatePresence>
+        {showInviteModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
+            onClick={() => setShowInviteModal(false)}
           >
-            <div className="text-6xl mb-4">💌</div>
-            <h3 className="text-2xl font-serif text-gray-800 mb-2">Invite Your Partner</h3>
-            <p className="text-gray-600 mb-6">
-              Share this code with your partner so they can join your diary
-            </p>
-            
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 mb-6 border-2 border-dashed border-purple-300">
-              <p className="text-4xl font-mono font-bold text-purple-600 tracking-[0.3em] select-all">
-                {inviteCode || 'Loading...'}
-              </p>
-            </div>
-            
-            <div className="flex gap-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+            <motion.div
+              initial={{ scale: 0.9, y: 20, rotate: -2 }}
+              animate={{ scale: 1, y: 0, rotate: 0 }}
+              exit={{ scale: 0.95, y: 10, rotate: 2 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className={`relative w-full max-w-sm rounded-xl p-8 shadow-2xl ${
+                theme === 'dark' ? 'bg-[#262222] border border-stone-800' : 'bg-[#fffdfa] border border-stone-200'
+              }`}
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+            >
+              {/* Washi Tape */}
+              <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-6 opacity-90 backdrop-blur-md z-10 shadow-sm rotate-2 ${
+                theme === 'dark' ? 'bg-stone-600/60' : 'bg-rose-200/70'
+              }`} />
+              
+              <button 
+                onClick={() => setShowInviteModal(false)} 
+                className={`absolute top-4 right-4 p-2 rounded-full transition-colors ${
+                  theme === 'dark' ? 'text-stone-400 hover:bg-stone-800' : 'text-stone-400 hover:bg-stone-100'
+                }`}
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="text-center mt-2 mb-6">
+                <div className="flex justify-center mb-3">
+                  <div className={`p-3 rounded-full border-2 border-dashed ${theme === 'dark' ? 'border-rose-900/50 bg-rose-900/20' : 'border-rose-200 bg-rose-50'}`}>
+                    <Users className={`w-6 h-6 ${theme === 'dark' ? 'text-rose-300' : 'text-rose-500'}`} />
+                  </div>
+                </div>
+                <h3 className={`text-4xl font-serif font-bold italic mb-2 ${theme === 'dark' ? 'text-rose-200' : 'text-rose-600'}`}>
+                  Invitation
+                </h3>
+                <p className={`font-serif text-sm px-2 ${theme === 'dark' ? 'text-stone-400' : 'text-stone-500'}`}>
+                  Share this secret code with your partner so they can join your diary.
+                </p>
+              </div>
+
+              {/* Code Display Area */}
+              <div 
                 onClick={copyInviteCode}
-                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold"
+                className={`cursor-pointer group relative p-6 rounded-lg border-2 border-dashed text-center transition-all ${
+                  theme === 'dark' 
+                    ? 'border-stone-700 bg-stone-800/50 hover:border-rose-500/50 hover:bg-stone-800' 
+                    : 'border-stone-300 bg-stone-50 hover:border-rose-300 hover:bg-rose-50/50'
+                }`}
+                title="Click to copy"
               >
-                📋 Copy Code
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setShowInviteModal(false)}
-                className="flex-1 btn-soft py-3"
-              >
-                Close
-              </motion.button>
-            </div>
-            
-            <p className="text-xs text-gray-400 mt-4">
-              Share this code to your partner to connect 
-            </p>
+                <span className={`font-mono text-3xl tracking-[0.25em] font-bold ${theme === 'dark' ? 'text-stone-200' : 'text-stone-700'}`}>
+                  {inviteCode || '...'}
+                </span>
+                
+                {/* Tooltip badge */}
+                <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300 ${
+                  copied 
+                    ? 'opacity-100 bg-emerald-500 text-white shadow-md transform -translate-y-1' 
+                    : 'opacity-0 group-hover:opacity-100 bg-stone-200 text-stone-600 transform translate-y-0'
+                }`}>
+                  {copied ? 'Copied!' : 'Click to copy'}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-8 flex gap-3">
+                <button 
+                  onClick={() => setShowInviteModal(false)} 
+                  className={`flex-1 py-3 rounded-lg font-serif font-bold transition-colors ${
+                    theme === 'dark' ? 'bg-stone-800 text-stone-300 hover:bg-stone-700' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                  }`}
+                >
+                  Close
+                </button>
+                <button 
+                  onClick={copyInviteCode} 
+                  className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-serif font-bold shadow-md hover:shadow-lg transition-all flex justify-center items-center gap-2"
+                >
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied ? 'Copied' : 'Copy Code'}
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 };
