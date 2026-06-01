@@ -11,7 +11,6 @@ import {
   ArrowLeft,
   Calendar as CalendarIcon,
   Clock,
-  Image as ImageIcon,
   BookOpen
 } from 'lucide-react';
 import BookModal from '../components/BookModal';
