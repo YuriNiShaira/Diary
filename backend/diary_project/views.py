@@ -254,12 +254,16 @@ class AnimeRatingViewSet(CoupleFilteredViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         year_id = self.request.query_params.get('year', None)
-        media_type = self.request.query_params.get('media_type', None)  
-        
+        media_type = self.request.query_params.get('media_type', None)
+
         if year_id:
-            queryset = queryset.filter(year_id=year_id)
-        if media_type and media_type != 'all':
-            queryset = queryset.filter(media_type=media_type)  
+            try:
+                queryset = queryset.filter(year_id=int(year_id))
+            except (TypeError, ValueError):
+                pass
+
+        if media_type and media_type.strip().lower() != 'all':
+            queryset = queryset.filter(media_type__iexact=media_type.strip())
 
         return queryset
 
@@ -271,13 +275,17 @@ class AnimeCategoryViewSet(CoupleFilteredViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         year_id = self.request.query_params.get('year', None)
-        media_type = self.request.query_params.get('media_type', None)  
-        
+        media_type = self.request.query_params.get('media_type', None)
+
         if year_id:
-            queryset = queryset.filter(year_id=year_id)
-        if media_type:
-            queryset = queryset.filter(media_type=media_type) 
-        
+            try:
+                queryset = queryset.filter(year_id=int(year_id))
+            except (TypeError, ValueError):
+                pass
+
+        if media_type and media_type.strip().lower() != 'all':
+            queryset = queryset.filter(media_type__iexact=media_type.strip())
+
         return queryset
 
 
