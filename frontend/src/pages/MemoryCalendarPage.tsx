@@ -1,6 +1,6 @@
 // frontend/src/pages/MemoryCalendarPage.tsx
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
@@ -9,10 +9,10 @@ import {
   ChevronRight,
   Heart,
   ArrowLeft,
-  Sparkles,
   Calendar as CalendarIcon,
   Clock,
   Image as ImageIcon,
+  BookOpen
 } from 'lucide-react';
 import BookModal from '../components/BookModal';
 import { useTheme } from '../contexts/ThemeContext';
@@ -38,13 +38,38 @@ interface CalendarData {
   total_memories: number;
 }
 
+const PinNote = ({ count, label, bg, rotate, theme }: { count: number | string, label: string, bg: string, rotate: string, theme: string }) => (
+  <div className={`relative ${theme === 'dark' ? 'bg-[#2a2626] border border-stone-700' : bg} p-4 w-[140px] flex flex-col items-center justify-center rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${rotate} transition-transform hover:scale-105`}>
+    <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#f96a7b] rounded-full border border-[#e55365] shadow-sm z-10" />
+    <span className={`font-handwriting text-4xl mt-1 ${theme === 'dark' ? 'text-stone-200' : 'text-gray-800'}`}>{count}</span>
+    <span className={`text-[10px] font-bold uppercase tracking-wider text-center mt-1 ${theme === 'dark' ? 'text-stone-400' : 'text-gray-500'}`}>{label}</span>
+  </div>
+);
+
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 30 : -30,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 30 : -30,
+    opacity: 0,
+  }),
+};
+
 const MemoryCalendarPage: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { user } = useAuth();
   const today = new Date();
+  
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [direction, setDirection] = useState(0); // 1 for next, -1 for prev
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedMemories, setSelectedMemories] = useState<CalendarMemory[]>([]);
   const [viewMode, setViewMode] = useState<'calendar' | 'timeline'>('calendar');
@@ -89,6 +114,7 @@ const MemoryCalendarPage: React.FC = () => {
   );
 
   const jumpToYear = (year: number) => {
+    setDirection(year > currentYear ? 1 : -1);
     setCurrentYear(year);
     setCurrentMonth(year === today.getFullYear() ? today.getMonth() : 0);
     setSelectedDate(null);
@@ -97,6 +123,7 @@ const MemoryCalendarPage: React.FC = () => {
   };
 
   const prevMonth = () => {
+    setDirection(-1);
     if (currentMonth === 0) {
       setCurrentMonth(11);
       setCurrentYear(currentYear - 1);
@@ -109,6 +136,7 @@ const MemoryCalendarPage: React.FC = () => {
   };
 
   const nextMonth = () => {
+    setDirection(1);
     if (currentMonth === 11) {
       setCurrentMonth(0);
       setCurrentYear(currentYear + 1);
@@ -158,383 +186,266 @@ const MemoryCalendarPage: React.FC = () => {
         .flatMap(([date, memories]) => memories.map(m => ({ ...m, date })))
     : [];
 
+  const isDark = theme === 'dark';
+
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-[#fdfbf7] dark:bg-[#1a1a1a]">
+      <style dangerouslySetInnerHTML={{__html: `
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+        .font-handwriting { font-family: 'Caveat', cursive; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        
+        .bg-dotted-paper {
+          background-image: radial-gradient(${isDark ? '#333' : '#e5e1d8'} 1px, transparent 1px);
+          background-size: 20px 20px;
+        }
+      `}} />
+
       <RomanticBackground />
+      <div className="bg-dotted-paper absolute inset-0 pointer-events-none opacity-50" />
       <Navbar />
 
-      <div className="max-w-6xl mx-auto relative z-10 px-6 py-6">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
+      <div className="max-w-6xl mx-auto relative z-10 px-6 py-10">
+        
+        {/* Navigation & Header */}
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
           <button
             onClick={() => navigate('/dashboard')}
-            className={`flex items-center transition-colors mb-4 group ${
-              theme === 'dark'
-                ? 'text-purple-200 hover:text-pink-400'
-                : 'text-gray-600 hover:text-rose-500'
+            className={`font-handwriting text-2xl flex items-center transition-colors mb-6 group ${
+              isDark ? 'text-stone-400 hover:text-rose-400' : 'text-stone-500 hover:text-rose-600'
             }`}
           >
             <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-            Back to Dashboard
+            Flip back to Dashboard
           </button>
 
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
-              <h1 className="text-4xl md:text-5xl font-serif text-gray-800 dark:text-purple-100 mb-2">
-                <span className="text-gradient-love">Memory Calendar</span>
+              <h1 className={`text-5xl md:text-6xl font-serif italic font-bold mb-2 ${isDark ? 'text-stone-200' : 'text-stone-800'}`}>
+                Calendar of <span className="text-rose-500">Us</span>
               </h1>
-              <p className={`text-lg ${theme === 'dark' ? 'text-purple-200' : 'text-gray-600'}`}>
-                Every special day, remembered forever
+              <p className={`text-2xl font-handwriting ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                Every special day, remembered forever...
               </p>
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className={`flex items-center gap-2 p-1.5 rounded-2xl backdrop-blur-sm ${
-                theme === 'dark'
-                  ? 'bg-purple-900/30 border border-purple-800/50'
-                  : 'bg-white/40 border border-white/30'
-              }`}>
-                <button
-                  onClick={() => {
-                    const newYear = Math.max(startYear, currentYear - 1);
-                    jumpToYear(newYear);
-                  }}
-                  className={`p-2 rounded-xl transition-colors ${
-                    theme === 'dark'
-                      ? 'text-purple-300 hover:bg-purple-900/40'
-                      : 'text-gray-600 hover:bg-white/50'
-                  }`}
-                  title="Previous year"
-                >
-                  <ChevronLeft className="w-4 h-4" />
+            <div className="flex items-center gap-4 flex-wrap">
+              {/* Year Navigation Tab */}
+              <div className={`flex items-center gap-2 p-2 rounded-lg border-2 border-dashed ${isDark ? 'border-stone-700 bg-stone-800/50' : 'border-stone-300 bg-white/60'}`}>
+                <button onClick={() => jumpToYear(Math.max(startYear, currentYear - 1))} className={`p-1.5 rounded-md hover:bg-black/5 transition-colors ${isDark ? 'text-stone-400' : 'text-stone-600'}`}>
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
-
                 <select
                   value={currentYear}
                   onChange={(e) => jumpToYear(parseInt(e.target.value))}
-                  className={`px-3 py-2 bg-transparent font-semibold text-lg outline-none cursor-pointer appearance-none text-center ${
-                    theme === 'dark' ? 'text-purple-100' : 'text-gray-800'
-                  }`}
+                  className={`bg-transparent font-serif font-bold text-xl outline-none cursor-pointer appearance-none text-center ${isDark ? 'text-stone-200' : 'text-stone-700'}`}
                 >
                   {availableYears.map((year) => (
-                    <option key={year} value={year} className={`${
-                      theme === 'dark' ? 'bg-gray-800 text-purple-100' : 'bg-white text-gray-800'
-                    }`}>
-                      {year}
-                    </option>
+                    <option key={year} value={year} className={isDark ? 'bg-stone-800' : 'bg-white'}>{year}</option>
                   ))}
                 </select>
-
-                <button
-                  onClick={() => {
-                    const newYear = Math.min(today.getFullYear(), currentYear + 1);
-                    jumpToYear(newYear);
-                  }}
-                  className={`p-2 rounded-xl transition-colors ${
-                    theme === 'dark'
-                      ? 'text-purple-300 hover:bg-purple-900/40'
-                      : 'text-gray-600 hover:bg-white/50'
-                  }`}
-                  title="Next year"
-                >
-                  <ChevronRight className="w-4 h-4" />
+                <button onClick={() => jumpToYear(Math.min(today.getFullYear(), currentYear + 1))} className={`p-1.5 rounded-md hover:bg-black/5 transition-colors ${isDark ? 'text-stone-400' : 'text-stone-600'}`}>
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className={`flex gap-1 p-1 rounded-xl backdrop-blur-sm ${
-                theme === 'dark'
-                  ? 'bg-purple-900/30 border border-purple-800/50'
-                  : 'bg-white/40 border border-white/30'
-              }`}>
-                <button
-                  onClick={() => setViewMode('calendar')}
-                  className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-1 ${
+              {/* View Toggle Tabs */}
+              <div className="flex gap-1 bg-black/5 p-1 rounded-lg">
+                <button onClick={() => setViewMode('calendar')}
+                  className={`px-4 py-2 rounded-md font-serif font-bold text-sm transition-all flex items-center gap-2 ${
                     viewMode === 'calendar'
-                      ? 'bg-gradient-to-r from-love-red to-romantic-red text-white shadow-md'
-                      : theme === 'dark'
-                      ? 'text-purple-200 hover:bg-purple-900/40'
-                      : 'text-gray-600 hover:bg-white/50'
-                  }`}
-                >
-                  <CalendarIcon className="w-4 h-4" />
-                  Calendar
+                      ? 'bg-white text-rose-600 shadow-sm dark:bg-stone-800 dark:text-rose-400'
+                      : 'text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200'
+                  }`}>
+                  <CalendarIcon className="w-4 h-4" /> Calendar
                 </button>
-                <button
-                  onClick={() => setViewMode('timeline')}
-                  className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-1 ${
+                <button onClick={() => setViewMode('timeline')}
+                  className={`px-4 py-2 rounded-md font-serif font-bold text-sm transition-all flex items-center gap-2 ${
                     viewMode === 'timeline'
-                      ? 'bg-gradient-to-r from-love-red to-romantic-red text-white shadow-md'
-                      : theme === 'dark'
-                      ? 'text-purple-200 hover:bg-purple-900/40'
-                      : 'text-gray-600 hover:bg-white/50'
-                  }`}
-                >
-                  <Clock className="w-4 h-4" />
-                  Timeline
+                      ? 'bg-white text-rose-600 shadow-sm dark:bg-stone-800 dark:text-rose-400'
+                      : 'text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200'
+                  }`}>
+                  <Clock className="w-4 h-4" /> Timeline
                 </button>
               </div>
             </div>
           </div>
-
-          <div className="flex items-center gap-2 mt-4 flex-wrap">
-            <span className={`text-xs mr-1 ${theme === 'dark' ? 'text-purple-300' : 'text-gray-500'}`}>Jump to:</span>
-            {availableYears.map((year) => (
-              <motion.button
-                key={year}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => jumpToYear(year)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  currentYear === year
-                    ? 'bg-gradient-to-r from-love-red to-romantic-red text-white shadow-md'
-                    : theme === 'dark'
-                    ? 'bg-purple-900/30 text-purple-200 hover:bg-purple-800/50 border border-purple-800/50'
-                    : 'bg-white/40 text-gray-600 hover:bg-white/50'
-                }`}
-              >
-                {year}
-              </motion.button>
-            ))}
-          </div>
         </motion.div>
 
-        {/* Stats Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12"
-        >
-          {/* ... stats remain identical to your original code ... */}
-          <div className={`rounded-2xl p-5 text-center backdrop-blur-sm transition-all ${
-            theme === 'dark'
-              ? 'bg-purple-900/30 border border-purple-800/50'
-              : 'bg-white/40 border border-white/30'
-          }`}>
-            <CalendarIcon className="w-6 h-6 text-love-red mx-auto mb-2" />
-            <p className={`text-3xl font-bold ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
-              {calendarData?.total_dates || 0}
-            </p>
-            <p className={`text-sm ${theme === 'dark' ? 'text-purple-200' : 'text-gray-600'}`}>Memory Days</p>
-          </div>
-          <div className={`rounded-2xl p-5 text-center backdrop-blur-sm transition-all ${
-            theme === 'dark'
-              ? 'bg-purple-900/30 border border-purple-800/50'
-              : 'bg-white/40 border border-white/30'
-          }`}>
-            <ImageIcon className="w-6 h-6 text-purple-500 dark:text-purple-400 mx-auto mb-2" />
-            <p className={`text-3xl font-bold ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
-              {calendarData?.total_memories || 0}
-            </p>
-            <p className={`text-sm ${theme === 'dark' ? 'text-purple-200' : 'text-gray-600'}`}>Total Memories</p>
-          </div>
-          <div className={`rounded-2xl p-5 text-center backdrop-blur-sm transition-all ${
-            theme === 'dark'
-              ? 'bg-purple-900/30 border border-purple-800/50'
-              : 'bg-white/40 border border-white/30'
-          }`}>
-            <Sparkles className="w-6 h-6 text-yellow-500 dark:text-yellow-400 mx-auto mb-2" />
-            <p className={`text-3xl font-bold ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
-              {daysInMonth}
-            </p>
-            <p className={`text-sm ${theme === 'dark' ? 'text-purple-200' : 'text-gray-600'}`}>
-              Days in {monthNames[currentMonth]}
-            </p>
-          </div>
-          <div className={`rounded-2xl p-5 text-center backdrop-blur-sm transition-all ${
-            theme === 'dark'
-              ? 'bg-purple-900/30 border border-purple-800/50'
-              : 'bg-white/40 border border-white/30'
-          }`}>
-            <Heart className="w-6 h-6 text-rose-500 dark:text-rose-400 mx-auto mb-2" />
-            <p className={`text-3xl font-bold ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
-              {calendarData
-                ? Object.values(calendarData.memories)
-                    .flat()
-                    .filter(m => m.is_favorite).length
-                : 0}
-            </p>
-            <p className={`text-sm ${theme === 'dark' ? 'text-purple-200' : 'text-gray-600'}`}>Favorites</p>
-          </div>
+        {/* Divider */}
+        <div className={`border-b-2 border-dashed my-8 ${isDark ? 'border-stone-700' : 'border-stone-300'}`} />
+
+        {/* Stats Pinned Notes */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-wrap gap-6 justify-start md:justify-center mb-12 pl-2 md:pl-0">
+          <PinNote count={calendarData?.total_dates || 0} label="Memory Days" bg="bg-[#eef5fb]" rotate="-rotate-2" theme={theme} />
+          <PinNote count={calendarData?.total_memories || 0} label="Total Entries" bg="bg-[#fbf0f6]" rotate="rotate-1" theme={theme} />
+          <PinNote count={daysInMonth} label={`Days in ${monthNames[currentMonth].substring(0,3)}`} bg="bg-[#eafbf3]" rotate="-rotate-1" theme={theme} />
+          <PinNote count={calendarData ? Object.values(calendarData.memories).flat().filter(m => m.is_favorite).length : 0} label="Favorites" bg="bg-[#fbfce5]" rotate="rotate-2" theme={theme} />
         </motion.div>
 
-        {/* Calendar View */}
+        {/* CALENDAR VIEW */}
         {viewMode === 'calendar' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className={`rounded-3xl p-6 md:p-8 backdrop-blur-sm transition-all ${
-              theme === 'dark'
-                ? 'bg-purple-900/30 border border-purple-800/50'
-                : 'bg-white/40 border border-white/30'
-            }`}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className={`relative rounded-sm p-6 md:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.04)] ${isDark ? 'bg-[#262222] border border-stone-800' : 'bg-white border border-stone-200'}`}
           >
-            <div className="flex items-center justify-between mb-8">
-              <button
-                onClick={prevMonth}
-                className={`p-3 rounded-xl transition-colors ${
-                  theme === 'dark'
-                    ? 'text-purple-300 hover:bg-purple-900/40'
-                    : 'text-gray-600 hover:bg-white/50'
-                }`}
-              >
-                <ChevronLeft className="w-6 h-6" />
+            <div className="flex items-center justify-between mb-8 overflow-hidden">
+              <button onClick={prevMonth} className={`font-handwriting text-2xl transition-colors hover:text-rose-500 z-10 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                &larr; Prev
               </button>
-              <h3 className={`text-2xl md:text-3xl font-serif ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
-                {monthNames[currentMonth]} {currentYear}
-              </h3>
-              <button
-                onClick={nextMonth}
-                className={`p-3 rounded-xl transition-colors ${
-                  theme === 'dark'
-                    ? 'text-purple-300 hover:bg-purple-900/40'
-                    : 'text-gray-600 hover:bg-white/50'
-                }`}
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-7 gap-2 mb-4">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
-                <div
-                  key={day}
-                  className={`text-center text-sm font-medium py-2 ${
-                    i === 0 || i === 6
-                      ? 'text-love-red'
-                      : theme === 'dark'
-                      ? 'text-purple-200'
-                      : 'text-gray-600'
-                  }`}
+              <AnimatePresence mode="wait" custom={direction}>
+                <motion.h3 
+                  key={`${currentYear}-${currentMonth}-title`}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className={`text-4xl font-serif font-bold italic ${isDark ? 'text-stone-200' : 'text-stone-800'}`}
                 >
-                  {day}
+                  {monthNames[currentMonth]} {currentYear}
+                </motion.h3>
+              </AnimatePresence>
+              <button onClick={nextMonth} className={`font-handwriting text-2xl transition-colors hover:text-rose-500 z-10 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                Next &rarr;
+              </button>
+            </div>
+
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={`${currentYear}-${currentMonth}-grid`}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+              >
+                {/* Calendar Grid Headers */}
+                <div className={`grid grid-cols-7 gap-2 mb-4 border-b-2 border-dashed pb-2 ${isDark ? 'border-stone-700' : 'border-stone-300'}`}>
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
+                    <div key={day} className={`text-center font-handwriting text-2xl ${i === 0 || i === 6 ? 'text-rose-500' : (isDark ? 'text-stone-400' : 'text-stone-600')}`}>
+                      {day}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <div className="grid grid-cols-7 gap-2">
-              {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-                <div key={`empty-${i}`} className="aspect-square" />
-              ))}
+                {/* Calendar Days */}
+                <div className="grid grid-cols-7 gap-3 md:gap-4">
+                  {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+                    <div key={`empty-${i}`} className="aspect-square" />
+                  ))}
 
-              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-                const hasMemory = hasMemories(day);
-                const isTodayDate = isToday(day);
-                const memoriesForDay = getMemoriesForDate(day);
+                  {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
+                    const hasMemory = hasMemories(day);
+                    const isTodayDate = isToday(day);
 
-                return (
-                  <motion.button
-                    key={day}
-                    whileHover={hasMemory ? { scale: 1.05 } : {}}
-                    whileTap={hasMemory ? { scale: 0.95 } : {}}
-                    onClick={() => handleDateClick(day)}
-                    disabled={!hasMemory}
-                    className={`
-                      relative aspect-square rounded-2xl flex flex-col items-center justify-center
-                      transition-all text-lg font-semibold
-                      ${hasMemory
-                        ? theme === 'dark'
-                          ? 'bg-purple-800/50 hover:bg-purple-700/50 text-pink-400 cursor-pointer hover:shadow-lg'
-                          : 'bg-pink-100 hover:bg-pink-200 text-rose-500 cursor-pointer hover:shadow-lg'
-                        : theme === 'dark'
-                        ? 'text-gray-600 cursor-default'
-                        : 'text-gray-400 cursor-default'
-                      }
-                      ${isTodayDate && hasMemory ? 'ring-2 ring-love-red ring-offset-2 dark:ring-offset-gray-900' : ''}
-                    `}
-                  >
-                    <span className="text-2xl">{day}</span>
-                    {hasMemory && (
-                      <div className="flex gap-0.5 mt-1">
-                        {memoriesForDay.slice(0, 3).map((_, idx) => (
-                          <div
-                            key={idx}
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              theme === 'dark' ? 'bg-pink-400' : 'bg-rose-500'
-                            }`}
-                          />
-                        ))}
-                        {memoriesForDay.length > 3 && (
-                          <span className={`text-xs ml-0.5 ${
-                            theme === 'dark' ? 'text-pink-400' : 'text-rose-500'
-                          }`}>+</span>
+                    return (
+                      <motion.button
+                        key={day}
+                        whileHover={hasMemory ? { scale: 1.05, rotate: isTodayDate ? 0 : 2 } : {}}
+                        whileTap={hasMemory ? { scale: 0.95 } : {}}
+                        onClick={() => handleDateClick(day)}
+                        disabled={!hasMemory}
+                        className={`
+                          relative aspect-square flex flex-col items-center justify-center transition-all
+                          ${hasMemory ? 'cursor-pointer' : 'cursor-default opacity-60'}
+                          ${hasMemory && !isDark ? 'bg-[#fff5f5] border-2 border-dashed border-rose-300 shadow-sm' : ''}
+                          ${hasMemory && isDark ? 'bg-stone-800/80 border-2 border-dashed border-rose-900 shadow-sm' : ''}
+                          ${!hasMemory && !isDark ? 'bg-stone-50 border border-stone-200 rounded-sm' : ''}
+                          ${!hasMemory && isDark ? 'bg-stone-900/50 border border-stone-800 rounded-sm' : ''}
+                        `}
+                        style={{ borderRadius: hasMemory ? '8px 4px 8px 4px' : '4px' }}
+                      >
+                        {isTodayDate && (
+                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center shadow-md rotate-12 z-10">
+                            <span className="text-white text-[10px] font-bold">★</span>
+                          </div>
                         )}
-                      </div>
-                    )}
-                  </motion.button>
-                );
-              })}
-            </div>
+                        <span className={`font-handwriting text-3xl md:text-4xl ${hasMemory ? (isDark ? 'text-rose-300' : 'text-rose-600') : (isDark ? 'text-stone-600' : 'text-stone-400')}`}>
+                          {day}
+                        </span>
+                        {hasMemory && (
+                          <Heart className={`w-4 h-4 mt-1 ${isDark ? 'text-rose-400 fill-rose-900/50' : 'text-rose-400 fill-rose-200'}`} />
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
         )}
 
-        {/* Timeline View */}
+        {/* TIMELINE VIEW */}
         {viewMode === 'timeline' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className={`rounded-3xl p-6 md:p-8 backdrop-blur-sm transition-all ${
-              theme === 'dark'
-                ? 'bg-purple-900/30 border border-purple-800/50'
-                : 'bg-white/40 border border-white/30'
-            }`}
-          >
-            <h3 className={`text-2xl font-serif mb-6 ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
-              This Month's Memories
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl mx-auto mt-8">
+            <h3 className={`text-4xl font-handwriting text-center mb-10 ${isDark ? 'text-stone-300' : 'text-stone-600'}`}>
+              Clippings from {monthNames[currentMonth]}
             </h3>
 
             {thisMonthMemories.length === 0 ? (
-              <div className="text-center py-12">
-                <CalendarIcon className={`w-16 h-16 mx-auto mb-4 ${
-                  theme === 'dark' ? 'text-purple-600' : 'text-gray-300'
-                }`} />
-                <p className={theme === 'dark' ? 'text-purple-200' : 'text-gray-500'}>No memories this month</p>
+              <div className={`text-center py-16 border-2 border-dashed rounded-sm ${isDark ? 'border-stone-700 bg-[#262222]' : 'border-stone-300 bg-white/50'}`}>
+                <BookOpen className={`w-12 h-12 mx-auto mb-4 opacity-50 ${isDark ? 'text-stone-500' : 'text-stone-400'}`} />
+                <p className={`font-serif italic text-xl ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>No entries torn out for this month yet...</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {thisMonthMemories.map((memory: any, index: number) => (
-                  <motion.div
-                    key={memory.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className={`flex gap-4 p-4 rounded-2xl cursor-pointer hover:shadow-md transition-all backdrop-blur-sm ${
-                      theme === 'dark'
-                        ? 'bg-purple-900/30 border border-purple-800/50 hover:bg-purple-800/40'
-                        : 'bg-white/40 border border-white/30 hover:bg-white/50'
-                    }`}
-                    onClick={() => navigate(`/year/${memory.year_id}`)}
-                  >
-                    <div className="text-center min-w-15">
-                      <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-pink-400' : 'text-rose-500'}`}>
-                        {new Date(memory.date + 'T00:00:00').getDate()}
-                      </p>
-                      <p className={`text-xs uppercase ${
-                        theme === 'dark' ? 'text-purple-200' : 'text-gray-500'
-                      }`}>
-                        {new Date(memory.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' })}
-                      </p>
-                    </div>
-                    <div className="flex-1">
-                      <h5 className={`font-semibold ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
-                        {memory.title}
-                      </h5>
-                      <p className={`text-sm line-clamp-1 ${theme === 'dark' ? 'text-purple-200' : 'text-gray-500'}`}>
-                        {memory.description}
-                      </p>
-                    </div>
-                    {memory.image && (
-                      <img
-                        src={memory.image}
-                        alt={memory.title}
-                        className="w-16 h-16 rounded-xl object-cover"
-                      />
-                    )}
-                  </motion.div>
-                ))}
+              <div className={`relative border-l-2 border-dashed ml-4 md:ml-8 pl-8 md:pl-12 space-y-12 pb-8 ${isDark ? 'border-stone-700' : 'border-stone-300'}`}>
+                {thisMonthMemories.map((memory: any, index: number) => {
+                  const memDate = new Date(memory.date + 'T00:00:00');
+                  return (
+                    <motion.div
+                      key={memory.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="relative group"
+                    >
+                      {/* Timeline Node */}
+                      <div className={`absolute -left-[43px] md:-left-[59px] top-4 w-5 h-5 rounded-full border-4 shadow-sm z-10 ${isDark ? 'bg-stone-900 border-rose-900' : 'bg-white border-rose-300'}`} />
+
+                      {/* Polaroid / Clipped Note Card */}
+                      <div 
+                        onClick={() => navigate(`/year/${memory.year_id}`)}
+                        className={`relative p-5 md:p-6 rounded-sm shadow-md cursor-pointer transition-all hover:scale-[1.02] ${
+                          isDark ? 'bg-[#2a2626] border border-stone-700' : 'bg-white border border-stone-200'
+                        } ${index % 2 === 0 ? 'rotate-1' : '-rotate-1'}`}
+                      >
+                        {/* Washi Tape */}
+                        <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 opacity-80 backdrop-blur-sm z-10 ${
+                          index % 2 === 0 ? 'bg-rose-200/70 -rotate-2' : 'bg-stone-200/70 rotate-2'
+                        } ${isDark ? 'brightness-75' : ''}`} />
+
+                        <div className="flex flex-col sm:flex-row gap-5">
+                          {/* Image or Date Block */}
+                          {memory.image ? (
+                            <div className="relative shrink-0">
+                              <img src={memory.image} alt={memory.title} className="w-24 h-24 object-cover rounded-sm border border-stone-200 shadow-sm" />
+                              <div className="absolute -bottom-3 -right-3 bg-white px-2 py-0.5 rounded shadow border border-stone-200 font-handwriting text-xl text-stone-800 rotate-[-10deg]">
+                                {memDate.getDate()} {monthNames[memDate.getMonth()].substring(0,3)}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className={`w-24 h-24 shrink-0 rounded-sm flex flex-col items-center justify-center border-2 border-dashed ${isDark ? 'border-stone-700 bg-stone-800/50' : 'border-stone-300 bg-stone-50'}`}>
+                              <span className={`text-4xl font-serif font-bold ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>{memDate.getDate()}</span>
+                              <span className={`font-handwriting text-xl ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>{monthNames[memDate.getMonth()].substring(0,3)}</span>
+                            </div>
+                          )}
+
+                          {/* Content */}
+                          <div className="flex-1">
+                            <h5 className={`text-2xl font-serif font-bold leading-tight mb-2 ${isDark ? 'text-stone-200' : 'text-stone-800'}`}>
+                              {memory.title}
+                            </h5>
+                            <p className={`font-handwriting text-xl line-clamp-2 ${isDark ? 'text-stone-400' : 'text-stone-600'}`}>
+                              {memory.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             )}
           </motion.div>
@@ -542,12 +453,11 @@ const MemoryCalendarPage: React.FC = () => {
 
         {isLoading && (
           <div className="text-center py-12">
-            <div className="w-8 h-8 border-3 border-love-red border-t-transparent rounded-full animate-spin mx-auto" />
+            <span className={`font-handwriting text-3xl ${isDark ? 'text-stone-500' : 'text-stone-400'}`}>Flipping pages...</span>
           </div>
         )}
       </div>
 
-      {/* BookModal – now uses merged memories and direct onDateChange */}
       <BookModal
         isOpen={isBookOpen}
         onClose={() => setIsBookOpen(false)}
