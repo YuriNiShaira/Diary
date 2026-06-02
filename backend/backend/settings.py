@@ -19,8 +19,8 @@ else:
         'localhost',
         '127.0.0.1',
         'diary-backend-pcy8.onrender.com',
-        'logofus.azurewebsites.net',   
-        '.azurewebsites.net',          
+        'logofus-ehbbh2bhb4hrc7gv.southeastasia-01.azurewebsites.net',
+        '*.azurewebsites.net',  
     ]
 
 INSTALLED_APPS = [
