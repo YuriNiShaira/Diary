@@ -32,7 +32,7 @@ const BucketListFilters: React.FC<BucketListFiltersProps> = ({
       {/* Elegant Label */}
       <div className={`flex items-center gap-2 mr-2 ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>
         <SlidersHorizontal className="w-3.5 h-3.5" />
-        <span className="text-[10px] uppercase font-serif tracking-[0.3em] font-semibold">
+        <span className="text-2.5 uppercase font-serif tracking-[0.3em] font-semibold">
           Filter Entries
         </span>
       </div>

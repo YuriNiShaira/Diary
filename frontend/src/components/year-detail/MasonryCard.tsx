@@ -68,19 +68,19 @@ const MasonryCard: React.FC<MasonryCardProps> = ({
         {/* Card Footer (Title & Actions) */}
         <div className="mt-4 px-1 flex flex-col justify-between shrink-0">
           <div>
-            <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">{formattedDate}</p>
+            <p className="text-2.25 font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">{formattedDate}</p>
             <h3 className="font-serif text-lg leading-tight line-clamp-1 text-gray-800 dark:text-gray-200">{memory.title}</h3>
           </div>
 
           {/* Minimalist Action Buttons (Appear on hover) */}
           <div className="flex gap-3 mt-3 pt-3 border-t border-gray-200 dark:border-gray-800 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors">
+            <button className="flex items-center gap-1 text-2.5 uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors">
               <Maximize2 className="w-3 h-3" /> View
             </button>
-            <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+            <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="flex items-center gap-1 text-2.5 uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
               <Edit2 className="w-3 h-3" /> Edit
             </button>
-            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors ml-auto">
+            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="flex items-center gap-1 text-2.5 uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors ml-auto">
               <Trash className="w-3 h-3" />
             </button>
           </div>

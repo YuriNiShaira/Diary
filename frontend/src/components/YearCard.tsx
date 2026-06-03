@@ -100,7 +100,7 @@ const YearCard: React.FC<YearCardProps> = ({ year, onClick }) => {
           )}
 
           {/* Gradients to ensure text is ALWAYS readable */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-90" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent opacity-90" />
           
           {/* Prominent, Readable Top Badge */}
           <div className="absolute top-5 left-5 z-20">
@@ -114,7 +114,7 @@ const YearCard: React.FC<YearCardProps> = ({ year, onClick }) => {
 
           {/* Large Watermark Number behind the title */}
           <div className="absolute -bottom-4 right-4 z-10 pointer-events-none select-none">
-            <span className="text-[120px] font-serif font-black text-white/10 dark:text-white/5 leading-none">
+            <span className="text-30 font-serif font-black text-white/10 dark:text-white/5 leading-none">
               {displayVol}
             </span>
           </div>

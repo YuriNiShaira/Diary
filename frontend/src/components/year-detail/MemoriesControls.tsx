@@ -19,7 +19,7 @@ const MemoriesControls: React.FC<MemoriesControlsProps> = ({
       
       {/* Sorting Control */}
       <div className="flex items-center gap-3">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Sort Index</span>
+        <span className="text-2.5 font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Sort Index</span>
         <select
           value={sortOrder}
           onChange={(e) => onSortChange(e.target.value as 'newest' | 'oldest')}
@@ -32,7 +32,7 @@ const MemoriesControls: React.FC<MemoriesControlsProps> = ({
 
       {/* View Layout Controls */}
       <div className="flex items-center gap-4">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mr-2 hidden sm:block">Layout</span>
+        <span className="text-2.5 font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mr-2 hidden sm:block">Layout</span>
         
         <button
           onClick={() => onLayoutChange('timeline')}

@@ -240,7 +240,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
             <motion.div 
               key={i} 
               whileHover={{ scale: 1.05, zIndex: 10 }}
-              className={`relative ${stat.bg} ${stat.rotate} p-4 rounded-sm shadow-md min-w-[140px] text-center flex-1 sm:flex-none border ${
+              className={`relative ${stat.bg} ${stat.rotate} p-4 rounded-sm shadow-md min-w-35 text-center flex-1 sm:flex-none border ${
                 theme === 'dark' ? 'border-slate-700' : 'border-black/5'
               }`}
             >
@@ -460,12 +460,12 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
                   {/* Title & Artist - Aligning with notebook lines roughly */}
                   <div className="space-y-4">
                     <input type="text" required placeholder="Song Title..." value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className={`w-full bg-transparent border-none outline-none font-handwriting text-3xl leading-[40px] h-[40px] ${
+                      className={`w-full bg-transparent border-none outline-none font-handwriting text-3xl leading-[40px] h-10 ${
                         theme === 'dark' ? 'text-slate-100 placeholder:text-slate-500' : 'text-gray-800 placeholder:text-gray-400'
                       }`} />
                     
                     <input type="text" required placeholder="Artist..." value={formData.artist} onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
-                      className={`w-full bg-transparent border-none outline-none font-handwriting text-3xl leading-[40px] h-[40px] ${
+                      className={`w-full bg-transparent border-none outline-none font-handwriting text-3xl leading-[40px] h-10 ${
                         theme === 'dark' ? 'text-slate-100 placeholder:text-slate-500' : 'text-gray-800 placeholder:text-gray-400'
                       }`} />
                   </div>
@@ -507,12 +507,12 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
                   {/* Links */}
                   <div className="space-y-4">
                     <input type="url" placeholder="YouTube Link (optional)" value={formData.youtube_link} onChange={(e) => setFormData({ ...formData, youtube_link: e.target.value })}
-                      className={`w-full bg-transparent border-none outline-none font-handwriting text-2xl leading-[40px] h-[40px] ${
+                      className={`w-full bg-transparent border-none outline-none font-handwriting text-2xl leading-[40px] h-10 ${
                         theme === 'dark' ? 'text-blue-400 placeholder:text-slate-500' : 'text-blue-600 placeholder:text-gray-400'
                       }`} />
                     
                     <input type="url" placeholder="Spotify Link (optional)" value={formData.spotify_link} onChange={(e) => setFormData({ ...formData, spotify_link: e.target.value })}
-                      className={`w-full bg-transparent border-none outline-none font-handwriting text-2xl leading-[40px] h-[40px] ${
+                      className={`w-full bg-transparent border-none outline-none font-handwriting text-2xl leading-[40px] h-10 ${
                         theme === 'dark' ? 'text-emerald-400 placeholder:text-slate-500' : 'text-emerald-600 placeholder:text-gray-400'
                       }`} />
                   </div>

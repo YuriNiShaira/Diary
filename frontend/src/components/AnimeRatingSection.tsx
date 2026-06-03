@@ -63,7 +63,7 @@ const RatingProgress = ({ label, myScore, partnerScore, theme }: {
         initial={{ width: 0 }}
         animate={{ width: `${(myScore / 10) * 50}%` }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="absolute left-0 top-0 bottom-0 bg-rose-400/90 flex items-center justify-end pr-2 text-[10px] text-white font-bold"
+        className="absolute left-0 top-0 bottom-0 bg-rose-400/90 flex items-center justify-end pr-2 text-2.5 text-white font-bold"
         style={{ borderRadius: '2px 0 0 2px' }}
       >
         {myScore > 0 && myScore}
@@ -73,7 +73,7 @@ const RatingProgress = ({ label, myScore, partnerScore, theme }: {
         initial={{ width: 0 }}
         animate={{ width: `${(partnerScore / 10) * 50}%` }}
         transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
-        className="absolute right-0 top-0 bottom-0 bg-indigo-400/90 flex items-center justify-start pl-2 text-[10px] text-white font-bold"
+        className="absolute right-0 top-0 bottom-0 bg-indigo-400/90 flex items-center justify-start pl-2 text-2.5 text-white font-bold"
         style={{ borderRadius: '0 2px 2px 0' }}
       >
         {partnerScore > 0 && partnerScore}
@@ -317,7 +317,7 @@ const AnimeRatingSection: React.FC<AnimeRatingSectionProps> = ({ yearId, yearNum
                   className="px-5 py-2 bg-stone-800 text-stone-100 font-serif rounded shadow-sm hover:shadow-md hover:bg-stone-900 disabled:opacity-50 transition-all">Add</button>
               </div>
               
-              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-3 max-h-75 overflow-y-auto pr-2 custom-scrollbar">
                 {categories?.map((cat) => (
                   <div key={cat.id} className={`flex items-center justify-between p-3 rounded-md border border-dashed transition-colors ${theme === 'dark' ? 'bg-stone-800/40 border-stone-700 hover:border-stone-600' : 'bg-[#fffdfa] border-stone-300 hover:border-stone-400'}`}>
                     <span className={`font-serif text-lg ${theme === 'dark' ? 'text-stone-300' : 'text-stone-700'}`}>{cat.name}</span>
@@ -486,7 +486,7 @@ const AnimeRatingSection: React.FC<AnimeRatingSectionProps> = ({ yearId, yearNum
               onClick={(e) => e.stopPropagation()}>
               
               {/* Book spine decoration - refined with stronger gradient */}
-              <div className={`absolute top-0 bottom-0 left-0 w-8 md:w-12 border-r-2 shadow-inner ${theme === 'dark' ? 'bg-gradient-to-r from-[#111] to-[#1a1717] border-stone-800' : 'bg-gradient-to-r from-[#d3cbb5] to-[#e5dfce] border-[#d3cbb5]'}`} />
+              <div className={`absolute top-0 bottom-0 left-0 w-8 md:w-12 border-r-2 shadow-inner ${theme === 'dark' ? 'bg-linear-to-r from-[#111] to-[#1a1717] border-stone-800' : 'bg-linear-to-r from-[#d3cbb5] to-[#e5dfce] border-[#d3cbb5]'}`} />
               
               <div className="pl-14 md:pl-20 pr-6 md:pr-10 py-8 md:py-10">
                 <div className="flex justify-between items-start mb-8 border-b-2 border-dashed border-stone-300/50 pb-6">
@@ -559,7 +559,7 @@ const AnimeRatingSection: React.FC<AnimeRatingSectionProps> = ({ yearId, yearNum
                           Scoring Metrics
                         </h3>
                         {categories && categories.length > 0 ? (
-                          <div className="space-y-8 max-h-[350px] overflow-y-auto pr-4 custom-scrollbar">
+                          <div className="space-y-8 max-h-87.5 overflow-y-auto pr-4 custom-scrollbar">
                             {categories.map((cat) => (
                               <div key={cat.id}>
                                 <p className={`font-serif text-xl font-bold border-b border-stone-200/50 pb-2 mb-4 ${theme === 'dark' ? 'text-stone-300' : 'text-stone-700'}`}>{cat.name}</p>

@@ -76,7 +76,7 @@ export const CompleteModal: React.FC<CompleteModalProps> = ({
 
           <div className="space-y-8 relative z-10">
             <div>
-              <label className={`block text-[10px] font-serif uppercase tracking-[0.2em] font-bold mb-3 text-center ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>
+              <label className={`block text-2.5 font-serif uppercase tracking-[0.2em] font-bold mb-3 text-center ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>
                 Who completed this?
               </label>
               <div className="grid grid-cols-3 gap-3">
@@ -97,7 +97,7 @@ export const CompleteModal: React.FC<CompleteModalProps> = ({
             </div>
 
             <div>
-              <label className={`block text-[10px] font-serif uppercase tracking-[0.2em] font-bold mb-1 ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>
+              <label className={`block text-2.5 font-serif uppercase tracking-[0.2em] font-bold mb-1 ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>
                 Journal Entry
               </label>
               <textarea
@@ -173,7 +173,7 @@ export const AddEditBucketListModal: React.FC<AddEditModalProps> = ({
             <form onSubmit={onSubmit} className="space-y-6 relative z-10">
               {/* Title */}
               <div>
-                <label className={`block text-[9px] font-serif uppercase tracking-[0.2em] font-bold mb-1 ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>Title *</label>
+                <label className={`block text-2.25 font-serif uppercase tracking-[0.2em] font-bold mb-1 ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>Title *</label>
                 <input
                   type="text"
                   value={formData.title}
@@ -188,7 +188,7 @@ export const AddEditBucketListModal: React.FC<AddEditModalProps> = ({
 
               {/* Description */}
               <div>
-                <label className={`block text-[9px] font-serif uppercase tracking-[0.2em] font-bold mb-1 ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>Description</label>
+                <label className={`block text-2.25 font-serif uppercase tracking-[0.2em] font-bold mb-1 ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>Description</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -203,7 +203,7 @@ export const AddEditBucketListModal: React.FC<AddEditModalProps> = ({
               {/* Category + Priority */}
               <div className="grid grid-cols-2 gap-6 pt-2">
                 <div>
-                  <label className={`block text-[9px] font-serif uppercase tracking-[0.2em] font-bold mb-1 ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>Category</label>
+                  <label className={`block text-2.25 font-serif uppercase tracking-[0.2em] font-bold mb-1 ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>Category</label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
@@ -221,7 +221,7 @@ export const AddEditBucketListModal: React.FC<AddEditModalProps> = ({
                 
                 {/* Priority Selector */}
                 <div>
-                  <label className={`block text-[9px] font-serif uppercase tracking-[0.2em] font-bold mb-1 ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>Priority</label>
+                  <label className={`block text-2.25 font-serif uppercase tracking-[0.2em] font-bold mb-1 ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>Priority</label>
                   <select
                     value={formData.priority}
                     onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) })}
@@ -238,7 +238,7 @@ export const AddEditBucketListModal: React.FC<AddEditModalProps> = ({
 
               {/* Target Date */}
               <div className="pt-2">
-                <label className={`block text-[9px] font-serif uppercase tracking-[0.2em] font-bold mb-1 ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>Target Date</label>
+                <label className={`block text-2.25 font-serif uppercase tracking-[0.2em] font-bold mb-1 ${isDark ? 'text-rose-400/80' : 'text-rose-500/80'}`}>Target Date</label>
                 <input
                   type="date"
                   value={formData.target_date}
@@ -256,7 +256,7 @@ export const AddEditBucketListModal: React.FC<AddEditModalProps> = ({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
-                  className={`w-full py-4 rounded-full font-serif uppercase tracking-widest text-[11px] font-bold transition-all border shadow-md ${
+                  className={`w-full py-4 rounded-full font-serif uppercase tracking-widest text-2.75 font-bold transition-all border shadow-md ${
                     isDark
                       ? 'bg-rose-900 border-rose-800 text-rose-50 hover:bg-rose-800 shadow-[0_4px_15px_rgba(159,18,57,0.3)]'
                       : 'bg-rose-950 border-rose-950 text-rose-50 hover:bg-rose-900 shadow-[0_4px_15px_rgba(136,19,55,0.25)]'

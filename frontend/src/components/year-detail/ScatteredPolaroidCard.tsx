@@ -42,14 +42,14 @@ const ScatteredPolaroidCard: React.FC<ScatteredPolaroidCardProps> = ({
     >
       {/* CHANGED: */}
       <div className="polaroid-bg bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 p-3 pb-6" onClick={onView}>
-        <div className="relative aspect-square rounded-md overflow-hidden mb-3 bg-gradient-to-br from-pink-50 to-rose-50">
+        <div className="relative aspect-square rounded-md overflow-hidden mb-3 bg-linear-to-br from-pink-50 to-rose-50">
           {memory.image ? (
             <>
               <img src={memory.image} alt={memory.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </>
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-pink-100 to-rose-100">
+            <div className="w-full h-full flex flex-col items-center justify-center bg-linear-to-br from-pink-100 to-rose-100">
               <Image className="w-16 h-16 text-pink-300/60 mb-2" />
               <span className="text-xs text-pink-400/80">No photo yet</span>
             </div>
@@ -65,7 +65,7 @@ const ScatteredPolaroidCard: React.FC<ScatteredPolaroidCardProps> = ({
             <div className="absolute top-2 right-2">
               <div className="relative">
                 <div className="absolute inset-0 bg-rose-500 rounded-full blur-md opacity-50" />
-                <div className="relative w-8 h-8 rounded-full bg-gradient-to-r from-amber-400 to-rose-500 shadow-lg flex items-center justify-center">
+                <div className="relative w-8 h-8 rounded-full bg-linear-to-r from-amber-400 to-rose-500 shadow-lg flex items-center justify-center">
                   <Star className="w-4 h-4 text-white fill-current" />
                 </div>
               </div>
@@ -97,7 +97,7 @@ const ScatteredPolaroidCard: React.FC<ScatteredPolaroidCardProps> = ({
           </p>
           
           {/* CHANGED: Added 'polaroid-subtext' to lock hover tooltip color */}
-          <div className="polaroid-subtext mt-2 text-[10px] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="polaroid-subtext mt-2 text-2.5 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">
             click to read full story ✨
           </div>
         </div>

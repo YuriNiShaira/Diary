@@ -68,7 +68,7 @@ const BucketListCard: React.FC<BucketListCardProps> = ({
         isDark ? 'bg-[#2a0815] border-rose-900/50 text-rose-300' : 'bg-white border-rose-100 text-rose-600'
       }`}>
         <span className={`inline-flex h-1.5 w-1.5 rounded-full ${isDark ? 'bg-rose-400' : 'bg-rose-400'}`} />
-        <span className="text-[9px] uppercase font-serif tracking-[0.2em] font-semibold pt-px">
+        <span className="text-2.25 uppercase font-serif tracking-[0.2em] font-semibold pt-px">
           {category?.label}
         </span>
       </div>
@@ -117,7 +117,7 @@ const BucketListCard: React.FC<BucketListCardProps> = ({
           </div>
 
           {item.target_date && (
-            <div className={`flex items-center gap-2 text-[10px] font-serif uppercase tracking-widest px-3 py-1 rounded-sm border ${
+            <div className={`flex items-center gap-2 text-2.5 font-serif uppercase tracking-widest px-3 py-1 rounded-sm border ${
               isDark ? 'bg-[#110307] border-rose-900/50 text-rose-300' : 'bg-white border-rose-200/60 text-rose-600'
             }`}>
               <CalendarDays className="w-3 h-3" />
@@ -135,7 +135,7 @@ const BucketListCard: React.FC<BucketListCardProps> = ({
                 : 'bg-white/60 border-rose-200/50 text-rose-800'
             }`}>
               {/* Small "Achieved" watermark */}
-              <div className="absolute top-2 right-2 text-[8px] uppercase tracking-[0.3em] font-serif font-bold opacity-30">
+              <div className="absolute top-2 right-2 text-2 uppercase tracking-[0.3em] font-serif font-bold opacity-30">
                 Achieved
               </div>
               <p className="text-sm italic font-serif leading-relaxed pr-10">
@@ -152,7 +152,7 @@ const BucketListCard: React.FC<BucketListCardProps> = ({
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => onComplete(item)}
-              className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-[10px] font-serif uppercase tracking-widest font-bold transition-colors border shadow-sm ${
+              className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-2.5 font-serif uppercase tracking-widest font-bold transition-colors border shadow-sm ${
                 isDark
                   ? 'bg-rose-900 border-rose-800 text-rose-50 hover:bg-rose-800'
                   : 'bg-rose-900 border-rose-950 text-rose-50 hover:bg-rose-800'
@@ -167,7 +167,7 @@ const BucketListCard: React.FC<BucketListCardProps> = ({
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onEdit(item)}
-            className={`rounded-full px-5 py-2 text-[10px] font-serif uppercase tracking-widest font-bold transition-colors border ${
+            className={`rounded-full px-5 py-2 text-2.5 font-serif uppercase tracking-widest font-bold transition-colors border ${
               isDark
                 ? 'bg-transparent border-rose-800/60 text-rose-300 hover:bg-rose-900/40 hover:border-rose-700'
                 : 'bg-transparent border-rose-200 text-rose-600 hover:bg-white hover:border-rose-300'
@@ -180,7 +180,7 @@ const BucketListCard: React.FC<BucketListCardProps> = ({
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onDelete(item)}
-            className={`rounded-full px-5 py-2 text-[10px] font-serif uppercase tracking-widest font-bold transition-colors border ${
+            className={`rounded-full px-5 py-2 text-2.5 font-serif uppercase tracking-widest font-bold transition-colors border ${
               isDark
                 ? 'bg-transparent border-rose-950 text-rose-500/70 hover:bg-rose-950/50 hover:text-rose-400 hover:border-rose-900'
                 : 'bg-transparent border-rose-100 text-rose-400 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200'

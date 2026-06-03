@@ -142,7 +142,7 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
       {/* Header & Overall Scoreboard */}
       <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-10 border-b border-rose-200/50 dark:border-rose-900/50">
         <div>
-          <p className={`text-[11px] font-bold uppercase tracking-[0.2em] ${textSub} mb-2 flex items-center gap-2`}>
+          <p className={`text-2.75 font-bold uppercase tracking-[0.2em] ${textSub} mb-2 flex items-center gap-2`}>
             <Sparkles className="w-3 h-3" /> Playful Moments
           </p>
           <h2 className={`text-4xl sm:text-5xl font-serif tracking-wide ${textMain}`}>
@@ -154,18 +154,18 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
         <div className={`flex items-center gap-8 px-10 py-5 rounded-sm shadow-sm border ${cardBg}`}>
           <div className="text-center relative">
             {leaderboard?.leader === 'me' && <Crown className="absolute -top-6 left-1/2 -translate-x-1/2 w-4 h-4 text-amber-500" />}
-            <p className={`text-[10px] font-serif uppercase tracking-widest ${textSub} mb-1`}>{displayName}</p>
+            <p className={`text-2.5 font-serif uppercase tracking-widest ${textSub} mb-1`}>{displayName}</p>
             <p className={`text-4xl font-handwriting ${isDark ? 'text-rose-300' : 'text-rose-700'}`}>{leaderboard?.my_total || 0}</p>
           </div>
           
           <div className="flex flex-col items-center px-6 border-x border-dashed border-rose-200 dark:border-rose-900/50">
             <Trophy className={`w-5 h-5 mb-1 ${isDark ? 'text-rose-900' : 'text-rose-200'}`} />
-            <span className={`text-[11px] font-serif italic uppercase tracking-wider ${textSub}`}>The Ledger</span>
+            <span className={`text-2.75 font-serif italic uppercase tracking-wider ${textSub}`}>The Ledger</span>
           </div>
           
           <div className="text-center relative">
             {leaderboard?.leader === 'shaira' && <Crown className="absolute -top-6 left-1/2 -translate-x-1/2 w-4 h-4 text-amber-500" />}
-            <p className={`text-[10px] font-serif uppercase tracking-widest ${textSub} mb-1`}>{partnerName}</p>
+            <p className={`text-2.5 font-serif uppercase tracking-widest ${textSub} mb-1`}>{partnerName}</p>
             <p className={`text-4xl font-handwriting ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>{leaderboard?.shaira_total || 0}</p>
           </div>
         </div>
@@ -200,7 +200,7 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
                     
                     {score && (
                       <div className={`px-5 py-3 rounded-sm text-right border ${isDark ? 'bg-[#2a0815] border-rose-900/50' : 'bg-[#FFFAF0] border-rose-100'}`}>
-                        <p className={`text-[9px] uppercase font-serif tracking-widest ${textSub} mb-1`}>Score</p>
+                        <p className={`text-2.25 uppercase font-serif tracking-widest ${textSub} mb-1`}>Score</p>
                         <p className="text-2xl font-handwriting flex items-center gap-2">
                           <span className={isDark ? 'text-rose-300' : 'text-rose-700'}>{score.my_score}</span>
                           <span className={`${textSub} text-sm`}>—</span>
@@ -213,7 +213,7 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
                   <h3 className={`text-3xl font-serif mb-3 tracking-wide ${textMain}`}>{game.name}</h3>
                   <p className={`text-sm leading-relaxed mb-8 font-serif italic ${textSub}`}>{game.description}</p>
                   
-                  <div className={`inline-flex items-center gap-3 text-[11px] font-serif uppercase tracking-[0.2em] transition-colors ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>
+                  <div className={`inline-flex items-center gap-3 text-2.75 font-serif uppercase tracking-[0.2em] transition-colors ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>
                     Play Now <span className="text-lg leading-none transform group-hover:translate-x-2 transition-transform">→</span>
                   </div>
                 </motion.div>
@@ -329,14 +329,14 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({ onBack, onWin, currentScore, 
       <div className="flex items-center justify-between mb-12 flex-wrap gap-6">
         <button 
           onClick={onBack} 
-          className={`flex items-center gap-2 text-[10px] font-serif uppercase tracking-widest transition-colors ${textSub} hover:${textMain}`}
+          className={`flex items-center gap-2 text-2.5 font-serif uppercase tracking-widest transition-colors ${textSub} hover:${textMain}`}
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Menu
         </button>
         
         <div className={`flex items-center gap-8 px-8 py-3 rounded-sm border ${isDark ? 'bg-[#1a050f]/60 border-rose-900/50' : 'bg-white/60 border-rose-200/60'}`}>
           <div className="text-center">
-            <p className={`text-[9px] uppercase font-serif tracking-widest ${textSub} mb-1`}>{displayName}</p>
+            <p className={`text-2.25 uppercase font-serif tracking-widest ${textSub} mb-1`}>{displayName}</p>
             <p className={`text-3xl font-handwriting ${isDark ? 'text-rose-300' : 'text-rose-700'}`}>{currentScore?.my_score || 0}</p>
           </div>
           
@@ -349,7 +349,7 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({ onBack, onWin, currentScore, 
           </button>
           
           <div className="text-center">
-            <p className={`text-[9px] uppercase font-serif tracking-widest ${textSub} mb-1`}>{partnerName}</p>
+            <p className={`text-2.25 uppercase font-serif tracking-widest ${textSub} mb-1`}>{partnerName}</p>
             <p className={`text-3xl font-handwriting ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>{currentScore?.shaira_score || 0}</p>
           </div>
         </div>
@@ -364,7 +364,7 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({ onBack, onWin, currentScore, 
       </div>
 
       {/* Hand-drawn style Tic Tac Toe Board */}
-      <div className="max-w-[350px] sm:max-w-[400px] mx-auto p-4 sm:p-8">
+      <div className="max-w-87.5 sm:max-w-100 mx-auto p-4 sm:p-8">
         <div className="grid grid-cols-3">
           {board.map((cell, index) => {
             // Logic to create the classic # drawn shape instead of full borders

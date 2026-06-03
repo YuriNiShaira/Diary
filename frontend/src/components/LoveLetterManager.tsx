@@ -139,7 +139,7 @@ const LoveLetterManager: React.FC = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-40 bg-gradient-to-br from-rose-600 to-rose-900 text-white p-4 rounded-full shadow-[0_4px_15px_rgba(159,18,57,0.4)] border-2 border-rose-400 hover:shadow-[0_6px_20px_rgba(159,18,57,0.6)] transition-all duration-300 flex items-center justify-center group"
+        className="fixed bottom-6 right-6 z-40 bg-linear-to-br from-rose-600 to-rose-900 text-white p-4 rounded-full shadow-[0_4px_15px_rgba(159,18,57,0.4)] border-2 border-rose-400 hover:shadow-[0_6px_20px_rgba(159,18,57,0.6)] transition-all duration-300 flex items-center justify-center group"
         title="Open Love Letters"
       >
         <div className="absolute inset-1 rounded-full border border-rose-400/50"></div>
@@ -163,7 +163,7 @@ const LoveLetterManager: React.FC = () => {
               exit={{ scale: 0.95, y: 30, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               /* Premium Ivory Stationery Styling */
-              className="relative bg-[#FFFAF0] rounded-sm w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-[0_0_40px_rgba(0,0,0,0.3)] border-[8px] border-white ring-1 ring-rose-900/10"
+              className="relative bg-[#FFFAF0] rounded-sm w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-[0_0_40px_rgba(0,0,0,0.3)] border-8 border-white ring-1 ring-rose-900/10"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Subtle paper texture overlay */}
@@ -266,7 +266,7 @@ const LoveLetterManager: React.FC = () => {
 
                 {/* Letters Archive */}
                 <div>
-                  <h3 className="font-serif text-2xl text-rose-900/80 italic mb-8 flex items-center gap-4 before:content-[''] before:flex-1 before:h-[1px] before:bg-rose-200/60 after:content-[''] after:flex-1 after:h-[1px] after:bg-rose-200/60">
+                  <h3 className="font-serif text-2xl text-rose-900/80 italic mb-8 flex items-center gap-4 before:content-[''] before:flex-1 before:h-px before:bg-rose-200/60 after:content-[''] after:flex-1 after:h-px after:bg-rose-200/60">
                     Archive of Affection
                   </h3>
                   
@@ -287,7 +287,7 @@ const LoveLetterManager: React.FC = () => {
                           className="group relative bg-white p-6 shadow-sm hover:shadow-md transition-all duration-300 border-x border-b border-rose-100 rounded-b-md"
                         >
                           {/* Envelope Flap Illusion */}
-                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-200 via-rose-300 to-rose-200"></div>
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-rose-200 via-rose-300 to-rose-200"></div>
                           
                           {/* Wax Seal Indicator */}
                           {letter.is_active && (

@@ -61,7 +61,7 @@ const TimelineMemory: React.FC<TimelineMemoryProps> = ({
       
       {/* Month indicator sticker */}
       <div className={`absolute ${isEven ? 'right-[54%]' : 'left-[54%]'} top-1 whitespace-nowrap z-20`}>
-        <div className="inline-block px-3 py-1 bg-yellow-100 shadow-sm border border-yellow-200 text-sm font-handwriting text-gray-700 text-xl transform -rotate-2">
+        <div className="inline-block px-3 py-1 bg-yellow-100 shadow-sm border border-yellow-200 font-handwriting text-gray-700 text-xl transform -rotate-2">
           {fullDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </div>
       </div>
@@ -90,12 +90,12 @@ const TimelineMemory: React.FC<TimelineMemoryProps> = ({
               </div>
               
               {/* Title */}
-              <h3 className="text-3xl md:text-4xl font-handwriting text-gray-800 mb-2 mt-[-8px] leading-[32px]">
+              <h3 className="text-3xl md:text-4xl font-handwriting text-gray-800 mb-2 -mt-2 leading-8">
                 {memory.title}
               </h3>
               
               {/* Meta Date & Favorite */}
-              <div className="flex items-center gap-2 text-gray-600 font-handwriting text-xl mb-4 leading-[32px]">
+              <div className="flex items-center gap-2 text-gray-600 font-handwriting text-xl mb-4 leading-8">
                 <Clock className="w-4 h-4" />
                 <span>{formattedDate}</span>
                 {memory.is_favorite && (
@@ -116,7 +116,7 @@ const TimelineMemory: React.FC<TimelineMemoryProps> = ({
               )}
               
               {/* Description */}
-              <p className="text-gray-800 font-handwriting text-2xl leading-[32px] line-clamp-4 mt-[-4px]">
+              <p className="text-gray-800 font-handwriting text-2xl leading-8 line-clamp-4 -mt-1">
                 {memory.description}
               </p>
               

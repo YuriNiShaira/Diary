@@ -170,7 +170,7 @@ const FunFactsSection: React.FC<FunFactsSectionProps> = ({ yearId, yearNumber })
               animate={{ opacity: 1, scale: 1, rotate: card.rotate }}
               transition={{ delay: idx * 0.1, type: "spring" }}
               whileHover={{ scale: 1.02, rotate: 0, zIndex: 20 }}
-              className={`relative ${card.bg} w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-2rem)] max-w-[340px] p-6 rounded-bl-xl shadow-[4px_4px_15px_rgba(0,0,0,0.05)] aspect-square flex flex-col`}
+              className={`relative ${card.bg} w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-2rem)] max-w-85 p-6 rounded-bl-xl shadow-[4px_4px_15px_rgba(0,0,0,0.05)] aspect-square flex flex-col`}
             >
               <WashiTape rotate={idx % 2 === 0 ? 'rotate-2' : '-rotate-3'} />
               
@@ -228,10 +228,10 @@ const FunFactsSection: React.FC<FunFactsSectionProps> = ({ yearId, yearNumber })
                   onChange={(e) => setFormData(prev => ({ ...prev, [card.key]: e.target.value }))}
                   placeholder={card.placeholder}
                   rows={card.rows}
-                  className="w-full bg-transparent resize-none outline-none font-handwriting text-2xl text-gray-800 leading-[32px] mt-[-6px]"
+                  className="w-full bg-transparent resize-none outline-none font-handwriting text-2xl text-gray-800 leading-8 mt-[-6px]"
                 />
               ) : (
-                <p className="font-handwriting text-2xl text-gray-800 leading-[32px] whitespace-pre-line mt-[-6px]">
+                <p className="font-handwriting text-2xl text-gray-800 leading-8 whitespace-pre-line mt-[-6px]">
                   {displayValue || <span className="text-gray-400">Nothing written here yet...</span>}
                 </p>
               )}

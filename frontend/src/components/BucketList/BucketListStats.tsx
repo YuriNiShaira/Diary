@@ -71,7 +71,7 @@ const BucketListStats: React.FC<BucketListStatsProps> = ({ stats, theme }) => {
               <p className={`text-3xl sm:text-4xl font-serif tracking-tight mb-1 ${textColor}`}>
                 {card.value}
               </p>
-              <p className={`text-[10px] sm:text-xs font-serif uppercase tracking-[0.15em] ${subTextColor}`}>
+              <p className={`text-2.5 sm:text-xs font-serif uppercase tracking-[0.15em] ${subTextColor}`}>
                 {card.label}
               </p>
             </div>
@@ -94,7 +94,7 @@ const BucketListStats: React.FC<BucketListStatsProps> = ({ stats, theme }) => {
               <p className={`text-xs font-serif uppercase tracking-[0.2em] font-semibold ${textColor}`}>
                 Journey Progress
               </p>
-              <p className={`text-[11px] font-serif italic tracking-wide ${subTextColor}`}>
+              <p className={`text-2.75 font-serif italic tracking-wide ${subTextColor}`}>
                 {stats.completed} of {stats.total} dreams achieved ✨
               </p>
             </div>
@@ -105,7 +105,7 @@ const BucketListStats: React.FC<BucketListStatsProps> = ({ stats, theme }) => {
                 initial={{ width: 0 }}
                 animate={{ width: `${stats.completion_rate}%` }}
                 transition={{ duration: 1.5, ease: 'easeOut', delay: 0.2 }}
-                className={`h-full ${isDark ? 'bg-gradient-to-r from-rose-800 to-rose-400' : 'bg-gradient-to-r from-rose-300 to-rose-500'}`}
+                className={`h-full ${isDark ? 'bg-linear-to-r from-rose-800 to-rose-400' : 'bg-linear-to-r from-rose-300 to-rose-500'}`}
               />
             </div>
           </div>

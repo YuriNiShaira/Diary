@@ -187,7 +187,7 @@ const Envelope: React.FC = () => {
           disabled={!currentLetter || isAnimating}
           whileHover={!isAnimating ? { scale: 1.05, y: -8 } : {}}
           whileTap={!isAnimating ? { scale: 0.96 } : {}}
-          className="relative h-[240px] w-[350px] cursor-pointer border-0 bg-transparent p-0 outline-none focus:ring-2 focus:ring-pink-400/40 rounded-[32px]"
+          className="relative h-60 w-87.5 cursor-pointer border-0 bg-transparent p-0 outline-none focus:ring-2 focus:ring-pink-400/40 rounded-4xl"
         >
           <motion.div
             animate={
@@ -215,7 +215,7 @@ const Envelope: React.FC = () => {
                   ? { duration: 0.4 }
                   : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
               }
-              className={`absolute inset-0 rounded-[32px] blur-2xl transition-colors duration-500 ${
+              className={`absolute inset-0 rounded-4xl blur-2xl transition-colors duration-500 ${
                 theme === "dark" ? "bg-purple-500/20" : "bg-pink-400/20"
               }`}
             />
@@ -231,7 +231,7 @@ const Envelope: React.FC = () => {
                       animate={{ opacity: [0, 1, 0], y: -100, scale: [0.5, 1.2, 0.7] }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 1.1, delay: item.delay, ease: "easeOut" }}
-                      className="absolute top-[60px] z-50"
+                      className="absolute top-15 z-50"
                       style={{ left: item.left }}
                     >
                       <Heart className="h-4 w-4 fill-current text-red-400 drop-shadow-sm" />
@@ -243,7 +243,7 @@ const Envelope: React.FC = () => {
                     animate={{ opacity: [0, 1, 0], scale: [0.6, 1.2, 0.8], rotate: [-15, 10, 25] }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 1, delay: 0.1 }}
-                    className="absolute left-[25%] top-[65px] z-50"
+                    className="absolute left-[25%] top-16.25 z-50"
                   >
                     <Sparkles className="h-5 w-5 text-amber-300 drop-shadow-md" />
                   </motion.div>
@@ -253,7 +253,7 @@ const Envelope: React.FC = () => {
                     animate={{ opacity: [0, 1, 0], scale: [0.6, 1.2, 0.8], rotate: [15, -10, -25] }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 1, delay: 0.2 }}
-                    className="absolute right-[25%] top-[60px] z-50"
+                    className="absolute right-[25%] top-15 z-50"
                   >
                     <Sparkles className="h-4 w-4 text-red-300 drop-shadow-md" />
                   </motion.div>
@@ -262,8 +262,8 @@ const Envelope: React.FC = () => {
             </AnimatePresence>
 
             {/* Envelope back */}
-            <div className="absolute inset-0 z-10 rounded-[30px] bg-gradient-to-br from-rose-300 via-pink-300 to-fuchsia-400 shadow-[0_28px_70px_rgba(236,72,153,0.18)]" />
-            <div className="absolute inset-[2px] z-12 rounded-[28px] bg-gradient-to-b from-white/20 to-transparent" />
+            <div className="absolute inset-0 z-10 rounded-[30px] bg-linear-to-br from-rose-300 via-pink-300 to-fuchsia-400 shadow-[0_28px_70px_rgba(236,72,153,0.18)]" />
+            <div className="absolute inset-0.5 z-12 rounded-[28px] bg-linear-to-b from-white/20 to-transparent" />
 
             {/* Letter preview rising from envelope */}
             <AnimatePresence>
@@ -274,7 +274,7 @@ const Envelope: React.FC = () => {
                   animate={{ y: -120, scale: 1, opacity: 1, rotateX: 0 }}
                   exit={{ y: -150, scale: 0.9, opacity: 0 }}
                   transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                  className="absolute left-[5%] top-[45px] z-20 w-[90%]"
+                  className="absolute left-[5%] top-11.25 z-20 w-[90%]"
                   style={{ transformStyle: "preserve-3d" }}
                 >
                   <div className="paper-bg paper-edge rounded-lg overflow-hidden shadow-lg">
@@ -297,11 +297,11 @@ const Envelope: React.FC = () => {
             </AnimatePresence>
 
             {/* Front pocket */}
-            <div className="absolute bottom-0 left-0 z-30 h-[142px] w-full rounded-b-[30px] bg-gradient-to-br from-rose-100 via-pink-100 to-pink-200" />
+            <div className="absolute bottom-0 left-0 z-30 h-35.5 w-full rounded-b-[30px] bg-linear-to-br from-rose-100 via-pink-100 to-pink-200" />
 
             {/* Fold highlights */}
             <div
-              className="absolute bottom-0 left-0 z-32 h-[142px] w-1/2"
+              className="absolute bottom-0 left-0 z-32 h-35.5 w-1/2"
               style={{
                 clipPath: "polygon(0 0, 100% 50%, 100% 100%, 0 100%)",
                 background: "linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.1))",
@@ -309,7 +309,7 @@ const Envelope: React.FC = () => {
               }}
             />
             <div
-              className="absolute bottom-0 right-0 z-32 h-[142px] w-1/2"
+              className="absolute bottom-0 right-0 z-32 h-35.5 w-1/2"
               style={{
                 clipPath: "polygon(0 50%, 100% 0, 100% 100%, 0 100%)",
                 background: "linear-gradient(225deg, rgba(255,255,255,0.4), rgba(255,255,255,0.08))",
@@ -317,7 +317,7 @@ const Envelope: React.FC = () => {
               }}
             />
             <div
-              className="absolute bottom-0 left-1/2 z-33 h-[96px] w-[200px] -translate-x-1/2"
+              className="absolute bottom-0 left-1/2 z-33 h-24 w-50 -translate-x-1/2"
               style={{
                 clipPath: "polygon(50% 100%, 0 0, 100% 0)",
                 background: "rgba(255,255,255,0.2)",
@@ -329,7 +329,7 @@ const Envelope: React.FC = () => {
               initial={false}
               animate={isEnvelopeOpen ? { rotateX: -165, y: -2 } : { rotateX: 0, y: 0 }}
               transition={{ duration: 0.65, ease: [0.25, 1, 0.5, 1] }}
-              className="absolute left-0 top-0 z-35 h-[122px] w-full origin-top"
+              className="absolute left-0 top-0 z-35 h-30.5 w-full origin-top"
               style={{ transformStyle: "preserve-3d", perspective: 1000 }}
             >
               <div
@@ -386,7 +386,7 @@ const Envelope: React.FC = () => {
             animate={{ opacity: 1, backdropFilter: "blur(8px)" }}
             exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4"
+            className="fixed inset-0 z-100 flex items-center justify-center bg-slate-950/40 p-4"
             onClick={handleClose}
           >
             <motion.div
@@ -396,21 +396,21 @@ const Envelope: React.FC = () => {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Paper letter container */}
-              <div className="paper-bg paper-lines paper-edge rounded-[8px] shadow-2xl overflow-hidden relative">
+              <div className="paper-bg paper-lines paper-edge rounded-lg shadow-2xl overflow-hidden relative">
                 {/* Top red wax seal */}
                 <div className="absolute top-8 right-8 z-20">
                   <motion.div
                     initial={{ scale: 0, rotate: -20 }}
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ type: "spring", delay: 0.2, damping: 15 }}
-                    className="h-16 w-16 rounded-full bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center shadow-lg wax-seal border-2 border-red-800"
+                    className="h-16 w-16 rounded-full bg-linear-to-br from-red-600 to-red-700 flex items-center justify-center shadow-lg wax-seal border-2 border-red-800"
                   >
                     <Heart className="h-7 w-7 fill-red-300 text-red-200" />
                   </motion.div>
                 </div>
 
                 {/* Letter content */}
-                <div className="p-10 md:p-14 min-h-[600px] flex flex-col">
+                <div className="p-10 md:p-14 min-h-150 flex flex-col">
                   {/* Top spacing */}
                   <div className="h-6" />
 
@@ -426,7 +426,7 @@ const Envelope: React.FC = () => {
 
                   {/* Decorative line */}
                   <div className="flex justify-center mb-8">
-                    <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-amber-700/30 to-transparent" />
+                    <div className="w-20 h-px bg-linear-to-r from-transparent via-amber-700/30 to-transparent" />
                   </div>
 
                   {/* Letter body */}
@@ -434,7 +434,7 @@ const Envelope: React.FC = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.6 }}
-                    className="flex-1 max-h-[320px] overflow-y-auto custom-scrollbar"
+                    className="flex-1 max-h-80 overflow-y-auto custom-scrollbar"
                   >
                     <p className="letter-font text-base md:text-lg leading-8 md:leading-9 text-amber-900/80 whitespace-pre-wrap text-justify">
                       {currentLetter.content}
@@ -466,7 +466,7 @@ const Envelope: React.FC = () => {
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ delay: 0.4 }}
               onClick={handleClose}
-              className="absolute top-4 right-4 md:top-8 md:right-8 z-[101] rounded-full p-3 bg-white/90 hover:bg-white text-amber-900 transition-colors shadow-lg"
+              className="absolute top-4 right-4 md:top-8 md:right-8 z-101 rounded-full p-3 bg-white/90 hover:bg-white text-amber-900 transition-colors shadow-lg"
             >
               <X className="h-6 w-6" />
             </motion.button>

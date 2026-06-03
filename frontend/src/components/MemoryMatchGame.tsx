@@ -231,14 +231,14 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
       <div className="flex items-center justify-between mb-12 flex-wrap gap-6">
         <button 
           onClick={onBack} 
-          className={`flex items-center gap-2 text-[10px] font-serif uppercase tracking-widest transition-colors ${textSub} hover:${textMain}`}
+          className={`flex items-center gap-2 text-2.5 font-serif uppercase tracking-widest transition-colors ${textSub} hover:${textMain}`}
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Menu
         </button>
         
         <div className={`flex items-center gap-8 px-8 py-3 rounded-sm border ${isDark ? 'bg-[#1a050f]/60 border-rose-900/50' : 'bg-white/60 border-rose-200/60'}`}>
           <div className="text-center">
-            <p className={`text-[9px] uppercase font-serif tracking-widest ${textSub} mb-1`}>{displayName}</p>
+            <p className={`text-2.25 uppercase font-serif tracking-widest ${textSub} mb-1`}>{displayName}</p>
             <p className={`text-3xl font-handwriting ${isDark ? 'text-rose-300' : 'text-rose-700'}`}>{currentScore?.my_score || 0}</p>
           </div>
           
@@ -251,7 +251,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
           </button>
           
           <div className="text-center">
-            <p className={`text-[9px] uppercase font-serif tracking-widest ${textSub} mb-1`}>{partnerName}</p>
+            <p className={`text-2.25 uppercase font-serif tracking-widest ${textSub} mb-1`}>{partnerName}</p>
             <p className={`text-3xl font-handwriting ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>{currentScore?.shaira_score || 0}</p>
           </div>
         </div>
@@ -292,7 +292,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
           <h4 className={`text-2xl font-serif mb-2 ${textMain}`}>Not enough photos!</h4>
           <p className={`font-serif italic mb-6 ${textSub}`}>You need at least 2 photo memories in this chapter to play.</p>
           <div className="flex justify-center">
-            <div className={`px-4 py-1 rounded-full border text-[10px] font-serif uppercase tracking-widest ${isDark ? 'bg-black/20 border-rose-900 text-rose-400' : 'bg-white border-rose-100 text-rose-500'}`}>
+            <div className={`px-4 py-1 rounded-full border text-2.5 font-serif uppercase tracking-widest ${isDark ? 'bg-black/20 border-rose-900 text-rose-400' : 'bg-white border-rose-100 text-rose-500'}`}>
               Current photos: {memoriesWithImages.length}
             </div>
           </div>
@@ -307,7 +307,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
           <div className="flex gap-4 justify-center mb-12 flex-wrap">
             {(['easy', 'medium', 'hard'] as const).map((d) => (
               <button key={d} onClick={() => setDifficulty(d)}
-                className={`px-6 py-2.5 rounded-full font-serif uppercase tracking-widest text-[11px] transition-all border ${
+                className={`px-6 py-2.5 rounded-full font-serif uppercase tracking-widest text-2.75 transition-all border ${
                   difficulty === d 
                     ? (isDark ? 'bg-[#4c0519]/60 border-rose-800 text-rose-200 transform scale-105' : 'bg-rose-50 border-rose-300 text-rose-800 transform scale-105') 
                     : (isDark ? 'bg-transparent border-rose-900/50 text-rose-400/60 hover:text-rose-300 hover:border-rose-700' : 'bg-transparent border-rose-200 text-rose-600/70 hover:text-rose-800 hover:border-rose-300')
@@ -343,12 +343,12 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
           
           <div className={`flex justify-center gap-12 mb-8 border px-8 py-5 rounded-sm max-w-sm mx-auto shadow-inner ${isDark ? 'bg-[#1a050f]/60 border-rose-900/50' : 'bg-white/60 border-rose-200/60'}`}>
             <div>
-              <p className={`text-[10px] font-serif uppercase tracking-widest mb-1 ${textSub}`}>{displayName}</p>
+              <p className={`text-2.5 font-serif uppercase tracking-widest mb-1 ${textSub}`}>{displayName}</p>
               <p className={`text-4xl font-handwriting ${isDark ? 'text-rose-300' : 'text-rose-700'}`}>{myPairs}</p>
             </div>
-            <div className={`w-[1px] ${isDark ? 'bg-rose-900/50' : 'bg-rose-200'}`}></div>
+            <div className={`w-px ${isDark ? 'bg-rose-900/50' : 'bg-rose-200'}`}></div>
             <div>
-              <p className={`text-[10px] font-serif uppercase tracking-widest mb-1 ${textSub}`}>{partnerName}</p>
+              <p className={`text-2.5 font-serif uppercase tracking-widest mb-1 ${textSub}`}>{partnerName}</p>
               <p className={`text-4xl font-handwriting ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>{shairaPairs}</p>
             </div>
           </div>
@@ -357,7 +357,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={initializeGame} 
-              className={`w-full sm:w-auto px-8 py-3.5 rounded-full font-serif uppercase tracking-widest text-[11px] transition-all border ${
+              className={`w-full sm:w-auto px-8 py-3.5 rounded-full font-serif uppercase tracking-widest text-2.75 transition-all border ${
                 isDark
                   ? 'bg-rose-900 border-rose-800 text-rose-50 hover:bg-rose-800 shadow-[0_5px_15px_rgba(0,0,0,0.3)]'
                   : 'bg-rose-950 border-rose-950 text-rose-50 hover:bg-rose-900 shadow-[0_5px_15px_rgba(136,19,55,0.25)]'
@@ -365,7 +365,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
               Play Again
             </motion.button>
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setGameStarted(false)} 
-              className={`w-full sm:w-auto px-8 py-3.5 rounded-full font-serif uppercase tracking-widest text-[11px] transition-all border ${
+              className={`w-full sm:w-auto px-8 py-3.5 rounded-full font-serif uppercase tracking-widest text-2.75 transition-all border ${
                 isDark
                   ? 'bg-transparent border-rose-800/50 text-rose-300 hover:bg-rose-900/40 hover:border-rose-700'
                   : 'bg-transparent border-rose-200 text-rose-800 hover:bg-white hover:border-rose-300 hover:shadow-sm'
@@ -383,13 +383,13 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({
             <div className={`text-center border px-5 py-2 rounded-sm transform -rotate-2 shadow-sm ${
               isDark ? 'bg-[#1a050f]/60 border-rose-900/50' : 'bg-white border-rose-200/80'
             }`}>
-              <p className={`text-[9px] font-serif uppercase tracking-widest mb-1 ${isDark ? 'text-rose-300' : 'text-rose-600'}`}>{displayName} ❤️</p>
+              <p className={`text-2.25 font-serif uppercase tracking-widest mb-1 ${isDark ? 'text-rose-300' : 'text-rose-600'}`}>{displayName} ❤️</p>
               <p className={`text-3xl font-handwriting ${isDark ? 'text-rose-200' : 'text-rose-800'}`}>{myPairs}</p>
             </div>
             <div className={`text-center border px-5 py-2 rounded-sm transform rotate-2 shadow-sm ${
               isDark ? 'bg-[#4c0519]/40 border-rose-800/60' : 'bg-rose-50 border-rose-300/80'
             }`}>
-              <p className={`text-[9px] font-serif uppercase tracking-widest mb-1 ${isDark ? 'text-rose-400' : 'text-rose-700'}`}>{partnerName} ⭐</p>
+              <p className={`text-2.25 font-serif uppercase tracking-widest mb-1 ${isDark ? 'text-rose-400' : 'text-rose-700'}`}>{partnerName} ⭐</p>
               <p className={`text-3xl font-handwriting ${isDark ? 'text-rose-300' : 'text-rose-600'}`}>{shairaPairs}</p>
             </div>
           </div>

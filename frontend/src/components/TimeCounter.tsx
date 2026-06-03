@@ -132,7 +132,7 @@ const TimeCounter: React.FC<TimeCounterProps> = ({ anniversaryDate }) => {
 
   if (!isDateValid) {
     return (
-      <div className={`p-8 rounded-[2rem] border backdrop-blur-sm text-center font-serif shadow-lg ${cardBg} ${mainBorder}`}>
+      <div className={`p-8 rounded-4xl border backdrop-blur-sm text-center font-serif shadow-lg ${cardBg} ${mainBorder}`}>
         <p className={`${subText} italic`}>This page of our story is waiting for a valid date...</p>
       </div>
     );
@@ -159,21 +159,21 @@ const TimeCounter: React.FC<TimeCounterProps> = ({ anniversaryDate }) => {
         </div>
 
         {/* Inner Timer Panel – airy, glassy */}
-        <div className={`relative mt-10 rounded-[2rem] border backdrop-blur-sm px-4 py-10 md:px-8 md:py-12 ${innerPanelBg} ${mainBorder}`}>
+        <div className={`relative mt-10 rounded-4xl border backdrop-blur-sm px-4 py-10 md:px-8 md:py-12 ${innerPanelBg} ${mainBorder}`}>
           
           {/* Faint inner dashed frame */}
           <div className={`absolute inset-2 rounded-[1.6rem] border border-dashed pointer-events-none opacity-30 ${mainBorder}`} />
           
           {/* Boy & Girl */}
-          <div className="absolute -top-[63px] left-4 md:left-12 z-30">
+          <div className="absolute -top-15.75 left-4 md:left-12 z-30">
             <BoySVG color={brandColor} />
           </div>
-          <div className="absolute -top-[63px] right-4 md:right-12 z-30">
+          <div className="absolute -top-15.75 right-4 md:right-12 z-30">
             <GirlSVG color={brandColor} />
           </div>
 
           {/* Connecting String & Heart */}
-          <div className="absolute -top-[45px] left-[55px] right-[55px] md:left-[85px] md:right-[85px] h-[60px] pointer-events-none z-20">
+          <div className="absolute -top-11.25 left-13.75 right-13.75 md:left-21.25 md:right-21.25 h-15 pointer-events-none z-20">
             <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 40">
               <path
                 d="M0,5 Q50,35 100,5"
@@ -184,7 +184,7 @@ const TimeCounter: React.FC<TimeCounterProps> = ({ anniversaryDate }) => {
                 className="opacity-40"
               />
             </svg>
-            <div className="absolute left-1/2 top-[28px] -translate-x-1/2 -translate-y-1/2">
+            <div className="absolute left-1/2 top-7 -translate-x-1/2 -translate-y-1/2">
               <motion.div
                 animate={{ scale: [1, 1.15, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
@@ -213,7 +213,7 @@ const TimeCounter: React.FC<TimeCounterProps> = ({ anniversaryDate }) => {
                   {formatNumber(item.value)}
                 </motion.div>
 
-                <div className={`mt-2 text-[10px] md:text-xs font-serif italic tracking-[0.15em] ${subText}`}>
+                <div className={`mt-2 text-2.5 md:text-xs font-serif italic tracking-[0.15em] ${subText}`}>
                   {item.label}
                 </div>
 

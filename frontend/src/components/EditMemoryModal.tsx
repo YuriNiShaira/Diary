@@ -5,19 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
 import DeleteConfirmModal from './DeleteConfirmModal';
-
-interface Memory {
-  id: number;
-  title: string;
-  date: string;
-  description: string;
-  image?: string;
-  location?: string;
-  favorite_quote?: string;
-  is_favorite: boolean;
-  memory_type: string;
-  year: number;
-}
+import type { Memory } from './year-detail';
 
 interface EditMemoryModalProps {
   isOpen: boolean;
@@ -235,21 +223,21 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/60 backdrop-blur-sm p-6 rounded-sm border border-gray-200 shadow-sm">
                   
                   <div className="md:col-span-12">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">
+                    <label className="block text-2.5 font-bold uppercase tracking-widest text-gray-500 mb-1">
                       Memory Title *
                     </label>
                     <input
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="w-full !bg-transparent border-b-2 border-dashed border-gray-300 outline-none font-handwriting text-3xl !text-gray-800 focus:border-rose-400 transition-colors pb-1"
+                      className="w-full bg-transparent! border-b-2 border-dashed border-gray-300 outline-none font-handwriting text-3xl text-gray-800! focus:border-rose-400 transition-colors pb-1"
                       placeholder="What happened?"
                       required
                     />
                   </div>
 
                   <div className="md:col-span-6">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">
+                    <label className="block text-2.5 font-bold uppercase tracking-widest text-gray-500 mb-1">
                       Date *
                     </label>
                     <div className="relative">
@@ -258,20 +246,20 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
                         type="date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
-                        className="w-full !bg-transparent border-b-2 border-dashed border-gray-300 outline-none font-handwriting text-2xl !text-gray-800 focus:border-rose-400 transition-colors pl-6 pb-1 cursor-pointer"
+                        className="w-full bg-transparent! border-b-2 border-dashed border-gray-300 outline-none font-handwriting text-2xl text-gray-800! focus:border-rose-400 transition-colors pl-6 pb-1 cursor-pointer"
                         required
                       />
                     </div>
                   </div>
 
                   <div className="md:col-span-6">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">
+                    <label className="block text-2.5 font-bold uppercase tracking-widest text-gray-500 mb-1">
                       Category
                     </label>
                     <select
                       value={memoryType}
                       onChange={(e) => setMemoryType(e.target.value)}
-                      className="w-full !bg-transparent border-b-2 border-dashed border-gray-300 outline-none font-handwriting text-2xl !text-gray-800 focus:border-rose-400 transition-colors pb-1 cursor-pointer appearance-none"
+                      className="w-full bg-transparent! border-b-2 border-dashed border-gray-300 outline-none font-handwriting text-2xl text-gray-800! focus:border-rose-400 transition-colors pb-1 cursor-pointer appearance-none"
                     >
                       {memoryTypes.map((type) => (
                         <option key={type.value} value={type.value} className="font-sans text-base">
@@ -288,10 +276,10 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
                   {/* Left Column: Image & Location */}
                   <div className="lg:col-span-5 space-y-6">
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
+                      <label className="block text-2.5 font-bold uppercase tracking-widest text-gray-500 mb-2">
                         Photo Memory
                       </label>
-                      <div className="bg-white p-2 pb-8 shadow-md transform -rotate-1 relative group w-full max-w-[250px] mx-auto sm:mx-0">
+                      <div className="bg-white p-2 pb-8 shadow-md transform -rotate-1 relative group w-full max-w-62.5 mx-auto sm:mx-0">
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-4 bg-yellow-100/80 shadow-sm transform rotate-3 z-10" />
                         
                         {preview ? (
@@ -306,7 +294,7 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
                             </button>
                           </div>
                         ) : (
-                          <label className="cursor-pointer block aspect-square w-full border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center hover:bg-gray-100 transition-colors">
+                          <label className="cursor-pointer aspect-square w-full border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center hover:bg-gray-100 transition-colors">
                             <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                             <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
                             <p className="font-handwriting text-xl text-gray-500">Paste photo here...</p>
@@ -317,7 +305,7 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
 
                     {/* Location */}
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">
+                      <label className="block text-2.5 font-bold uppercase tracking-widest text-gray-500 mb-1">
                         Location
                       </label>
                       <div className="relative">
@@ -326,7 +314,7 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
                           type="text"
                           value={location}
                           onChange={(e) => setLocation(e.target.value)}
-                          className="w-full !bg-transparent border-b-2 border-dashed border-gray-300 outline-none font-handwriting text-2xl !text-gray-800 focus:border-rose-400 transition-colors pl-7 pb-1"
+                          className="w-full bg-transparent! border-b-2 border-dashed border-gray-300 outline-none font-handwriting text-2xl text-gray-800! focus:border-rose-400 transition-colors pl-7 pb-1"
                           placeholder="Where did this happen?"
                         />
                       </div>
@@ -354,14 +342,14 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
                   <div className="lg:col-span-7 space-y-6">
                     
                     <div className="bg-white/60 backdrop-blur-sm p-6 rounded-sm border border-gray-200 shadow-sm h-full flex flex-col">
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-4">
+                      <label className="block text-2.5 font-bold uppercase tracking-widest text-gray-500 mb-4">
                         The Story *
                       </label>
                       <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={7}
-                        className="w-full flex-1 !bg-transparent resize-none outline-none font-handwriting text-2xl !text-gray-800 leading-8"
+                        className="w-full flex-1 bg-transparent! resize-none outline-none font-handwriting text-2xl text-gray-800! leading-8"
                         style={{
                           backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, rgba(156, 163, 175, 0.2) 31px, rgba(156, 163, 175, 0.2) 32px)',
                           backgroundAttachment: 'local',
@@ -374,14 +362,14 @@ const EditMemoryModal: React.FC<EditMemoryModalProps> = ({ isOpen, onClose, memo
 
                     {/* Quote */}
                     <div className="bg-amber-50/80 p-4 border border-amber-200 transform rotate-1">
-                      <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-amber-700 mb-2">
+                      <label className="flex items-center gap-2 text-2.5 font-bold uppercase tracking-widest text-amber-700 mb-2">
                         <Quote className="w-3 h-3" /> Memorable Quote
                       </label>
                       <textarea
                         value={favoriteQuote}
                         onChange={(e) => setFavoriteQuote(e.target.value)}
                         rows={2}
-                        className="w-full !bg-transparent resize-none outline-none font-handwriting text-2xl !text-gray-800 text-center"
+                        className="w-full bg-transparent! resize-none outline-none font-handwriting text-2xl text-gray-800! text-center"
                         placeholder="Something special that was said..."
                       />
                     </div>

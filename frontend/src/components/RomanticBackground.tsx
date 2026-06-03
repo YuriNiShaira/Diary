@@ -136,11 +136,11 @@ const RomanticBackground: React.FC = () => {
       ) : (
         <>
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, #FFF5F5 0%, #FFE8EB 30%, #FFD9E2 60%, #FFC8D3 100%)' }} />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-pink-100/15 to-pink-200/25" />
+          <div className="absolute inset-0 bg-linear-to-b from-transparent via-pink-100/15 to-pink-200/25" />
 
           {/* Sunlight glow */}
           <motion.div
-            className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-amber-100/15 blur-3xl"
+            className="absolute top-0 right-0 w-100 h-100 rounded-full bg-amber-100/15 blur-3xl"
             animate={{ opacity: [0.1, 0.25, 0.1] }}
             transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', repeatType: 'reverse' }}
           />

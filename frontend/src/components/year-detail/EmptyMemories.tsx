@@ -20,7 +20,7 @@ const EmptyMemories: React.FC<EmptyMemoriesProps> = ({ onCreate }) => (
       transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
       className="inline-block mb-8"
     >
-      <div className="w-40 h-40 rounded-full bg-gradient-to-br from-pink-200 to-rose-200 flex items-center justify-center mx-auto shadow-xl">
+      <div className="w-40 h-40 rounded-full bg-linear-to-br from-pink-200 to-rose-200 flex items-center justify-center mx-auto shadow-xl">
         <Camera className="w-20 h-20 text-pink-400/60" />
       </div>
     </motion.div>
@@ -34,7 +34,7 @@ const EmptyMemories: React.FC<EmptyMemoriesProps> = ({ onCreate }) => (
       whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(236, 72, 153, 0.3)' }}
       whileTap={{ scale: 0.95 }}
       onClick={onCreate}
-      className="px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all text-lg"
+      className="px-8 py-4 bg-linear-to-r from-rose-500 to-pink-500 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all text-lg"
     >
       Create First Memory 💕
     </motion.button>

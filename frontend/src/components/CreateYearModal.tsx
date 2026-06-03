@@ -183,7 +183,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                 {/* Year Number Area */}
                 <div className="bg-white/60 backdrop-blur-sm p-6 rounded-sm border border-gray-200 shadow-sm relative transform -rotate-1">
                   <div className="flex items-end gap-4 mb-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 pb-1">
+                    <label className="text-2.5 font-bold uppercase tracking-widest text-gray-500 pb-1">
                       Year No.
                     </label>
                     <input
@@ -191,7 +191,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
                       min={0}
                       value={yearNumber}
                       onChange={(e) => setYearNumber(parseInt(e.target.value) || 0)}
-                      className="w-24 !bg-transparent border-b-2 border-dashed border-gray-400 outline-none font-serif text-4xl !text-rose-500 text-center pb-1 focus:border-rose-500 transition-colors"
+                      className="w-24 bg-transparent! border-b-2 border-dashed border-gray-400 outline-none font-serif text-4xl !text-rose-500 text-center pb-1 focus:border-rose-500 transition-colors"
                       required
                     />
                   </div>
@@ -232,14 +232,14 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
 
                 {/* Chapter Title / Description */}
                 <div className="relative">
-                  <label className="bg-[#faf8f5] inline-block pr-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-[-10px] relative z-10">
+                  <label className="bg-[#faf8f5] inline-block pr-2 text-2.5 font-bold uppercase tracking-widest text-gray-500 mb-[-10px] relative z-10">
                     Chapter Title / Focus
                   </label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={2}
-                    className="w-full !bg-transparent resize-none outline-none font-handwriting text-3xl !text-gray-800 leading-[40px] mt-[-10px]"
+                    className="w-full bg-transparent! resize-none outline-none font-handwriting text-3xl text-gray-800! leading-[40px] mt-[-10px]"
                     placeholder={yearNumber === 0 ? "e.g., How We Met, The Chase..." : "Give this year a name..."}
                     style={{
                       backgroundImage: 'repeating-linear-gradient(transparent, transparent 39px, rgba(156, 163, 175, 0.3) 39px, rgba(156, 163, 175, 0.3) 40px)',
@@ -250,7 +250,7 @@ const CreateYearModal: React.FC<CreateYearModalProps> = ({ isOpen, onClose }) =>
 
                 {/* Cover Image Upload - Polaroid Style */}
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
+                  <label className="block text-2.5 font-bold uppercase tracking-widest text-gray-500 mb-2">
                     Cover Photo
                   </label>
                   <div className="bg-white p-3 pb-10 shadow-[0_4px_15px_rgba(0,0,0,0.1)] transform rotate-1 relative group w-full aspect-[4/3]">

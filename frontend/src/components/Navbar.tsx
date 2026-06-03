@@ -215,8 +215,8 @@ const Navbar: React.FC = () => {
         transition={{ duration: 0.4 }}
         className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-all duration-300 navbar-paper-texture relative ${
           theme === 'dark'
-            ? 'bg-gradient-to-r from-amber-950/75 via-amber-900/65 to-amber-950/75 border-amber-800/50 shadow-xl shadow-amber-950/30'
-            : 'bg-gradient-to-r from-amber-50/70 via-yellow-50/60 to-amber-50/70 border-amber-200/50 shadow-lg shadow-amber-200/15'
+            ? 'bg-linear-to-r from-amber-950/75 via-amber-900/65 to-amber-950/75 border-amber-800/50 shadow-xl shadow-amber-950/30'
+            : 'bg-linear-to-r from-amber-50/70 via-yellow-50/60 to-amber-50/70 border-amber-200/50 shadow-lg shadow-amber-200/15'
         }`}
       >
         <div className="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
@@ -336,8 +336,8 @@ const Navbar: React.FC = () => {
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className={`md:hidden border-t relative overflow-hidden ${
                 theme === 'dark'
-                  ? 'border-amber-800/40 bg-gradient-to-b from-amber-900/90 to-amber-950/90'
-                  : 'border-amber-200/50 bg-gradient-to-b from-amber-50/90 to-yellow-50/90'
+                  ? 'border-amber-800/40 bg-linear-to-b from-amber-900/90 to-amber-950/90'
+                  : 'border-amber-200/50 bg-linear-to-b from-amber-50/90 to-yellow-50/90'
               } backdrop-blur-xl`}
             >
               {/* Ribbon marker */}

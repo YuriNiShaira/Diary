@@ -280,12 +280,12 @@ const BucketListPageContent: React.FC = () => {
       <RomanticBackground />
       <Navbar />
 
-      <div className="max-w-[1400px] mx-auto relative z-10 px-6 py-10">
+      <div className="max-w-350 mx-auto relative z-10 px-6 py-10">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
           
           <button
             onClick={() => navigate('/dashboard')}
-            className={`flex items-center gap-2 text-[10px] font-serif uppercase tracking-widest transition-colors mb-8 group ${
+            className={`flex items-center gap-2 text-2.5 font-serif uppercase tracking-widest transition-colors mb-8 group ${
               isDark ? 'text-rose-300 hover:text-rose-100' : 'text-rose-600 hover:text-rose-900'
             }`}
           >
@@ -308,7 +308,7 @@ const BucketListPageContent: React.FC = () => {
                   One by one.
                 </span>
               </p>
-              <div className="h-[1px] w-24 mt-6 bg-gradient-to-r from-transparent via-rose-300 to-transparent opacity-60" />
+              <div className="h-px w-24 mt-6 bg-linear-to-r from-transparent via-rose-300 to-transparent opacity-60" />
             </div>
 
             {/* Premium 'Pen a Dream' Button */}
@@ -326,7 +326,7 @@ const BucketListPageContent: React.FC = () => {
               }`}
             >
               <div className="absolute inset-1 border border-dashed rounded-full opacity-30 pointer-events-none border-rose-200"></div>
-              <span className="relative z-10 flex items-center gap-2 font-serif uppercase tracking-widest text-[11px]">
+              <span className="relative z-10 flex items-center gap-2 font-serif uppercase tracking-widest text-2.75">
                 Pen a Dream <Sparkles className="w-3.5 h-3.5 text-rose-300" />
               </span>
             </motion.button>
@@ -363,7 +363,7 @@ const BucketListPageContent: React.FC = () => {
               }`}>
                 <Clock className={`w-4 h-4 ${isDark ? 'text-rose-400' : 'text-rose-500'}`} />
                 Not Yet
-                <span className={`text-[10px] ml-auto ${isDark ? 'text-rose-400/70' : 'text-rose-400'}`}>
+                <span className={`text-2.5 ml-auto ${isDark ? 'text-rose-400/70' : 'text-rose-400'}`}>
                   ({pendingItems.length})
                 </span>
               </h3>
@@ -394,7 +394,7 @@ const BucketListPageContent: React.FC = () => {
               }`}>
                 <Calendar className={`w-4 h-4 ${isDark ? 'text-rose-400' : 'text-rose-500'}`} />
                 Planned
-                <span className={`text-[10px] ml-auto ${isDark ? 'text-rose-400/70' : 'text-rose-400'}`}>
+                <span className={`text-2.5 ml-auto ${isDark ? 'text-rose-400/70' : 'text-rose-400'}`}>
                   ({plannedItems.length})
                 </span>
               </h3>
@@ -425,7 +425,7 @@ const BucketListPageContent: React.FC = () => {
               }`}>
                 <Trophy className={`w-4 h-4 ${isDark ? 'text-amber-500/80' : 'text-amber-500'}`} />
                 Achieved
-                <span className={`text-[10px] ml-auto ${isDark ? 'text-rose-400/70' : 'text-rose-400'}`}>
+                <span className={`text-2.5 ml-auto ${isDark ? 'text-rose-400/70' : 'text-rose-400'}`}>
                   ({completedItems.length})
                 </span>
               </h3>
