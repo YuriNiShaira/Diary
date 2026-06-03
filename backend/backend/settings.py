@@ -23,6 +23,11 @@ else:
         '*.azurewebsites.net',  
     ]
 
+CUSTOM_DOMAINS = ['logofus.dev', 'www.logofus.dev']
+for domain in CUSTOM_DOMAINS:
+    if domain not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(domain)
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -102,8 +107,10 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:3000',
     'https://logofus.vercel.app',
+    'https://logofus.dev',       
     'https://www.logofus.dev'
 ]
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
 CORS_ALLOW_HEADERS = [
