@@ -224,7 +224,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
               : 'bg-white border-gray-200 text-gray-700'
           }`}
         >
-          <Plus className="w-4 h-4" /> Jot down a song
+          <Plus className="w-4 h-4" /> add a song
         </motion.button>
       </header>
 
@@ -301,7 +301,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
         <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-60">
           <Disc className={`w-12 h-12 ${theme === 'dark' ? 'text-slate-500' : 'text-gray-400'}`} />
           <h4 className={`text-3xl font-handwriting ${theme === 'dark' ? 'text-slate-300' : 'text-gray-600'}`}>The mixtape is empty...</h4>
-          <p className={`font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'}`}>Jot down a song that reminds you of us.</p>
+          <p className={`font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'}`}>add a song that reminds you of us.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 pt-4">
