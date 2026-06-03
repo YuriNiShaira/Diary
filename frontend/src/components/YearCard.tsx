@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Heart, Sparkles } from 'lucide-react';
+import { BookOpen, Heart, Sparkles, Calendar } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface YearCardProps {
   year: {
@@ -14,28 +16,73 @@ interface YearCardProps {
 }
 
 const YearCard: React.FC<YearCardProps> = ({ year, onClick }) => {
+  const { theme } = useTheme();
+  const { user } = useAuth();
+  const isDark = theme === 'dark';
+
+  const getDateRange = () => {
+    if (!user?.anniversary_date) return null;
+    const anniversary = new Date(user.anniversary_date);
+    if (isNaN(anniversary.getTime())) return null;
+
+    if (year.year_number === 0) {
+      const end = new Date(anniversary);
+      end.setDate(end.getDate() - 1);
+      return { start: null, end };
+    }
+    const start = new Date(anniversary);
+    start.setFullYear(start.getFullYear() + (year.year_number - 1));
+    const end = new Date(start);
+    end.setFullYear(end.getFullYear() + 1);
+    end.setDate(end.getDate() - 1);
+    return { start, end };
+  };
+
+  const dateRange = getDateRange();
+  const formatDate = (date: Date) =>
+    date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  // Palette
+  const paperBg = isDark ? 'bg-[#1a050f]' : 'bg-[#FFFAF0]';
+  const layerBg = isDark ? 'bg-[#2a0815]' : 'bg-white';
+  const borderColor = isDark ? 'border-rose-900/60' : 'border-rose-200/80';
+  const subTextColor = isDark ? 'text-rose-300' : 'text-rose-700';
+  const displayVol = year.year_number === 0 ? '0' : year.year_number;
+
   return (
     <motion.div
-      whileHover={{ y: -8 }}
-      transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ type: 'spring', stiffness: 250, damping: 25 }}
       className="relative group cursor-pointer"
       onClick={onClick}
     >
-      {/* Floating Glow */}
-      <div className="absolute -inset-2 rounded-[2.5rem] bg-gradient-to-r from-rose-300/20 via-pink-200/10 to-red-300/20 blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700" />
+      {/* Paper Grain Texture */}
+      <style>{`
+        .journal-grain {
+          background-image: url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E");
+        }
+      `}</style>
 
-      {/* Diary Layers */}
-      <div className="absolute inset-0 rounded-[2.2rem] bg-white/70 border border-stone-200 rotate-1 translate-x-2 translate-y-2 shadow-md group-hover:rotate-3 group-hover:translate-x-4 group-hover:translate-y-3 transition-all duration-500" />
+      {/* Floating Ambient Glow */}
+      <div className={`absolute -inset-4 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 ${
+        isDark ? 'bg-rose-900/20' : 'bg-rose-300/30'
+      }`} />
 
-      <div className="absolute inset-0 rounded-[2.2rem] bg-white/80 border border-stone-200 -rotate-1 -translate-x-1 translate-y-1 shadow-md group-hover:-rotate-2 group-hover:-translate-x-2 group-hover:translate-y-2 transition-all duration-500" />
+      {/* Stacked Back Page */}
+      <div className={`absolute inset-0 rounded-2xl border origin-bottom-left rotate-2 translate-x-2 translate-y-2 shadow-sm group-hover:rotate-4 group-hover:translate-x-4 group-hover:translate-y-4 transition-all duration-500 ease-out ${layerBg} ${borderColor}`}>
+        <div className="absolute inset-0 opacity-[0.04] journal-grain pointer-events-none mix-blend-multiply dark:mix-blend-overlay" />
+      </div>
+
+      {/* Stacked Middle Page */}
+      <div className={`absolute inset-0 rounded-2xl border origin-bottom-left -rotate-1 translate-x-0.5 shadow-sm group-hover:-rotate-2 group-hover:translate-x-2 group-hover:translate-y-1 transition-all duration-500 ease-out ${paperBg} ${borderColor}`}>
+        <div className="absolute inset-0 opacity-[0.04] journal-grain pointer-events-none mix-blend-multiply dark:mix-blend-overlay" />
+      </div>
 
       {/* Main Card */}
-      <div className="relative overflow-hidden rounded-[2.2rem] border border-white/30 bg-white/80 backdrop-blur-xl shadow-[0_15px_40px_rgba(0,0,0,0.12)] group-hover:shadow-[0_20px_60px_rgba(0,0,0,0.18)] transition-all duration-500 z-10">
+      <div className={`relative overflow-hidden rounded-2xl border shadow-lg dark:shadow-[0_15px_30px_rgba(0,0,0,0.5)] group-hover:shadow-2xl transition-all duration-500 z-10 flex flex-col ${paperBg} ${borderColor}`}>
         
-        {/* Cover Area */}
-        <div className="relative h-72 overflow-hidden">
-          
-          {/* Image */}
+        {/* Top Cover Area (Taller for better photo display) */}
+        <div className="relative h-80 w-full overflow-hidden">
           {year.cover_image ? (
             <img
               src={year.cover_image}
@@ -43,160 +90,76 @@ const YearCard: React.FC<YearCardProps> = ({ year, onClick }) => {
               className="w-full h-full object-cover object-center scale-100 group-hover:scale-110 transition-transform duration-[2000ms] ease-out"
             />
           ) : (
-            <div className="relative w-full h-full bg-gradient-to-br from-rose-100 via-pink-50 to-red-100 overflow-hidden">
-              
-              {/* Notebook Lines */}
-              <div className="absolute inset-0 flex flex-col justify-evenly px-6 opacity-20">
-                {[...Array(7)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="border-b border-stone-700"
-                  />
-                ))}
-              </div>
-
-              {/* Decorative Circle */}
-              <div className="absolute top-10 right-10 w-32 h-32 bg-white/30 rounded-full blur-2xl" />
-              <div className="absolute bottom-0 left-0 w-40 h-40 bg-rose-200/40 rounded-full blur-3xl" />
-
-              {/* Empty State */}
-              <div className="relative z-10 flex flex-col items-center justify-center h-full text-stone-500">
-                <motion.div
-                  animate={{
-                    rotate: [0, -4, 4, 0],
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                  }}
-                >
-                  <BookOpen className="w-16 h-16 stroke-[1.3]" />
-                </motion.div>
-
-                <p className="mt-4 text-xs uppercase tracking-[0.4em] font-medium">
-                  Empty Chapter
-                </p>
+            <div className={`relative w-full h-full overflow-hidden ${isDark ? 'bg-[#15040c]' : 'bg-rose-50/50'}`}>
+              <div className="absolute inset-0 bg-radial-gradient from-transparent to-black/5 dark:to-black/40" />
+              <div className={`relative z-10 flex flex-col items-center justify-center h-full ${subTextColor}`}>
+                <BookOpen className="w-16 h-16 stroke-[1] opacity-40 mb-4" />
+                <p className="text-xs uppercase tracking-[0.3em] font-sans font-semibold opacity-50">Empty Canvas</p>
               </div>
             </div>
           )}
 
-          {/* Cinematic Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
-
-          {/* Dust/Particles */}
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-12 left-10 w-1 h-1 bg-white rounded-full animate-pulse" />
-            <div className="absolute top-24 right-16 w-1.5 h-1.5 bg-white rounded-full animate-pulse delay-1000" />
-            <div className="absolute bottom-20 left-20 w-1 h-1 bg-white rounded-full animate-pulse delay-500" />
-          </div>
-
-          {/* Ribbon */}
-          <motion.div
-            whileHover={{ y: 2 }}
-            className="absolute top-0 right-7 z-20"
-          >
-            <div className="relative bg-gradient-to-b from-rose-500 to-red-500 text-white px-4 py-4 rounded-b-2xl shadow-xl flex flex-col items-center">
-              
-              {/* Ribbon Cut */}
-              <div className="absolute -bottom-3 left-0 right-0 flex justify-center">
-                <div className="w-5 h-5 bg-red-700 rotate-45" />
-              </div>
-
-              <span className="text-[10px] uppercase tracking-[0.25em] opacity-70 font-semibold">
-                Volume
-              </span>
-
-              <span className="text-lg font-bold font-serif leading-none mt-1">
-                {year.year_number === 0 ? 'Prequel' : `Year ${year.year_number}`}
+          {/* Gradients to ensure text is ALWAYS readable */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-90" />
+          
+          {/* Prominent, Readable Top Badge */}
+          <div className="absolute top-5 left-5 z-20">
+            <div className="flex items-center gap-2 px-4 py-2 bg-white/20 dark:bg-black/40 backdrop-blur-md rounded-full border border-white/30 shadow-lg">
+              <Sparkles className="w-4 h-4 text-rose-200" />
+              <span className="text-sm font-bold text-white tracking-widest uppercase font-sans">
+                Vol {displayVol}
               </span>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Floating Sparkle */}
-          <motion.div
-            animate={{
-              y: [0, -6, 0],
-              rotate: [0, 8, 0],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-            }}
-            className="absolute top-5 left-5 text-white/80"
-          >
-            <Sparkles className="w-5 h-5" />
-          </motion.div>
+          {/* Large Watermark Number behind the title */}
+          <div className="absolute -bottom-4 right-4 z-10 pointer-events-none select-none">
+            <span className="text-[120px] font-serif font-black text-white/10 dark:text-white/5 leading-none">
+              {displayVol}
+            </span>
+          </div>
 
-          {/* Title */}
-          <div className="absolute bottom-7 left-7 right-7 z-10">
-            <motion.h2
-              initial={{ opacity: 0.9 }}
-              whileHover={{ scale: 1.01 }}
-              className="text-white text-3xl sm:text-4xl font-serif italic leading-tight drop-shadow-2xl line-clamp-2"
-            >
-              {year.description || (year.year_number === 0 ? 'Before We Were Official' : `Year ${year.year_number}`)}
-            </motion.h2>
+          {/* Title & Metadata (Large & Readable) */}
+          <div className="absolute bottom-6 left-6 right-6 z-20 flex flex-col">
+            {dateRange && (
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-rose-200/90 mb-3 font-sans font-semibold">
+                <Calendar className="w-4 h-4" />
+                <span>
+                  {dateRange.start
+                    ? `${formatDate(dateRange.start)} — ${formatDate(dateRange.end)}`
+                    : `Before ${formatDate(dateRange.end)}`}
+                </span>
+              </div>
+            )}
 
-            <div className="mt-3 w-16 h-[2px] bg-white/70 rounded-full group-hover:w-24 transition-all duration-500" />
+            <h2 className="text-white text-3xl sm:text-4xl font-serif font-medium leading-tight drop-shadow-lg line-clamp-2">
+              {year.description || (year.year_number === 0 ? 'Before We Were Official' : `The Story of Year ${year.year_number}`)}
+            </h2>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="relative px-6 py-5 bg-gradient-to-b from-white/70 to-rose-50/70 backdrop-blur-lg">
+        {/* Footer Bar */}
+        <div className={`px-6 py-5 border-t flex items-center justify-between ${
+          isDark ? 'bg-[#110307]/90 border-rose-900/60' : 'bg-white/80 border-rose-100'
+        }`}>
           
-          {/* Top Border Glow */}
-          <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-rose-300 to-transparent" />
-
-          <div className="flex items-center justify-between">
-            
-            {/* Memories */}
-            <motion.div
-              whileHover={{ scale: 1.04 }}
-              className="flex items-center gap-2.5 bg-white/70 border border-rose-200/60 px-4 py-2 rounded-full shadow-sm"
-            >
-              <div className="relative">
-                <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
-
-                <motion.div
-                  animate={{
-                    scale: [1, 1.4, 1],
-                    opacity: [0.3, 0, 0.3],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                  }}
-                  className="absolute inset-0 rounded-full border border-rose-400"
-                />
-              </div>
-
-              <span className="text-sm font-medium text-stone-700 font-serif italic">
-                {year.memory_count || 0}{' '}
-                {year.memory_count === 1 ? 'memory' : 'memories'}
-              </span>
-            </motion.div>
-
-            {/* Open Button */}
-            <motion.div
-              whileHover={{ x: 4 }}
-              className="flex items-center gap-2 text-rose-500 text-xs uppercase tracking-[0.25em] font-semibold"
-            >
-              <span>Open Entry</span>
-
-              <motion.span
-                animate={{
-                  x: [0, 4, 0],
-                }}
-                transition={{
-                  duration: 1.6,
-                  repeat: Infinity,
-                }}
-                className="text-base"
-              >
-                →
-              </motion.span>
-            </motion.div>
+          {/* Memories Counter */}
+          <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+            <Heart className="w-5 h-5 fill-current animate-pulse" />
+            <span className="text-sm font-semibold tracking-wide font-sans">
+              {year.memory_count || 0} {year.memory_count === 1 ? 'Memory' : 'Memories'}
+            </span>
           </div>
+
+          {/* Big Explore Button */}
+          <motion.div
+            whileHover={{ x: 5 }}
+            className="flex items-center gap-2 text-sm uppercase tracking-widest font-sans font-bold text-rose-700 dark:text-rose-300"
+          >
+            <span>Open Diary</span>
+            <span className="text-lg leading-none">→</span>
+          </motion.div>
+          
         </div>
       </div>
     </motion.div>
