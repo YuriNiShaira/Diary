@@ -7,7 +7,8 @@ import {
   Grid3x3,
   Image as ImageIcon,
   ArrowLeft,
-  Trophy
+  Trophy,
+  Sparkles
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -110,59 +111,62 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
       id: 'tictactoe' as GameType,
       name: 'Tic Tac Toe',
       icon: Grid3x3,
-      color: 'text-rose-500',
-      bg: 'bg-rose-100 dark:bg-rose-900/30',
-      border: 'border-rose-200 dark:border-rose-800',
-      description: "The classic game of X's and O's... but make it romantic! 💕",
+      description: "The classic game of X's and O's... 💕",
     },
     {
       id: 'memorymatch' as GameType,
       name: 'Memory Match',
       icon: ImageIcon,
-      color: 'text-blue-500',
-      bg: 'bg-blue-100 dark:bg-blue-900/30',
-      border: 'border-blue-200 dark:border-blue-800',
       description: 'Test your memory using your favorite moments together! 📸',
     },
   ];
 
-  const bgMain = theme === 'dark' ? 'bg-[#1a1a1a]' : 'bg-[#fdfbf7]';
-  const textMain = theme === 'dark' ? 'text-gray-100' : 'text-gray-800';
-  const textSub = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
-  const cardBg = theme === 'dark' ? 'bg-[#222] border-gray-700' : 'bg-white border-gray-200';
+  // Premium Palette Logic
+  const isDark = theme === 'dark';
+  const bgMain = isDark ? 'bg-[#2a0815]' : 'bg-[#FFFAF0]';
+  const textMain = isDark ? 'text-rose-50' : 'text-rose-950';
+  const textSub = isDark ? 'text-rose-300' : 'text-rose-800';
+  const cardBg = isDark ? 'bg-[#4c0519]/40 border-rose-900/50' : 'bg-white border-rose-100';
 
   return (
-    <div className={`space-y-8 max-w-5xl mx-auto p-4 sm:p-8 ${bgMain} rounded-sm min-h-screen transition-colors duration-300 shadow-sm border border-gray-200/50 relative overflow-hidden`}>
+    <div className={`space-y-8 max-w-5xl mx-auto p-6 sm:p-10 ${bgMain} rounded-sm min-h-screen transition-colors duration-300 shadow-[0_10px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)] border border-rose-900/5 relative overflow-hidden`}>
       
-      {/* Soft glowing ambient background */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-96 bg-gradient-to-b from-rose-100/40 via-amber-100/20 to-transparent dark:from-rose-900/10 dark:via-amber-900/5 dark:to-transparent blur-3xl -z-10 pointer-events-none" />
+      {/* Premium Paper Grain overlay */}
+      <style>{`
+        .paper-grain {
+          background-image: url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E");
+        }
+      `}</style>
+      <div className="absolute inset-0 opacity-[0.03] paper-grain pointer-events-none mix-blend-multiply dark:mix-blend-overlay"></div>
 
       {/* Header & Overall Scoreboard */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-8 border-b border-gray-300 dark:border-gray-800">
+      <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-10 border-b border-rose-200/50 dark:border-rose-900/50">
         <div>
-          <p className={`text-xs font-bold uppercase tracking-widest ${textSub} mb-1`}>Playful Moments</p>
-          <h2 className={`text-4xl sm:text-5xl font-serif tracking-tight ${textMain}`}>
-            Games & Wagers <span className="text-rose-500/80 font-light italic">{yearNumber}</span>
+          <p className={`text-[11px] font-bold uppercase tracking-[0.2em] ${textSub} mb-2 flex items-center gap-2`}>
+            <Sparkles className="w-3 h-3" /> Playful Moments
+          </p>
+          <h2 className={`text-4xl sm:text-5xl font-serif tracking-wide ${textMain}`}>
+            Games & Wagers <span className="text-rose-400 font-light italic text-3xl ml-2">Vol. {yearNumber}</span>
           </h2>
         </div>
 
         {/* Journal Ledger Scoreboard */}
-        <div className={`flex items-center gap-6 px-8 py-4 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border ${cardBg}`}>
+        <div className={`flex items-center gap-8 px-10 py-5 rounded-sm shadow-sm border ${cardBg}`}>
           <div className="text-center relative">
-            {leaderboard?.leader === 'me' && <Crown className="absolute -top-5 left-1/2 -translate-x-1/2 w-4 h-4 text-yellow-500" />}
-            <p className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-1`}>{displayName}</p>
-            <p className="text-4xl font-handwriting text-blue-500">{leaderboard?.my_total || 0}</p>
+            {leaderboard?.leader === 'me' && <Crown className="absolute -top-6 left-1/2 -translate-x-1/2 w-4 h-4 text-amber-500" />}
+            <p className={`text-[10px] font-serif uppercase tracking-widest ${textSub} mb-1`}>{displayName}</p>
+            <p className={`text-4xl font-handwriting ${isDark ? 'text-rose-300' : 'text-rose-700'}`}>{leaderboard?.my_total || 0}</p>
           </div>
           
-          <div className="flex flex-col items-center px-4 border-x border-dashed border-gray-300 dark:border-gray-700">
-            <Trophy className={`w-5 h-5 mb-1 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`} />
-            <span className={`text-xs font-serif italic ${textSub}`}>Total Score</span>
+          <div className="flex flex-col items-center px-6 border-x border-dashed border-rose-200 dark:border-rose-900/50">
+            <Trophy className={`w-5 h-5 mb-1 ${isDark ? 'text-rose-900' : 'text-rose-200'}`} />
+            <span className={`text-[11px] font-serif italic uppercase tracking-wider ${textSub}`}>The Ledger</span>
           </div>
           
           <div className="text-center relative">
-            {leaderboard?.leader === 'shaira' && <Crown className="absolute -top-5 left-1/2 -translate-x-1/2 w-4 h-4 text-yellow-500" />}
-            <p className={`text-[10px] font-bold uppercase tracking-widest ${textSub} mb-1`}>{partnerName}</p>
-            <p className="text-4xl font-handwriting text-rose-500">{leaderboard?.shaira_total || 0}</p>
+            {leaderboard?.leader === 'shaira' && <Crown className="absolute -top-6 left-1/2 -translate-x-1/2 w-4 h-4 text-amber-500" />}
+            <p className={`text-[10px] font-serif uppercase tracking-widest ${textSub} mb-1`}>{partnerName}</p>
+            <p className={`text-4xl font-handwriting ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>{leaderboard?.shaira_total || 0}</p>
           </div>
         </div>
       </div>
@@ -175,7 +179,7 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
             exit={{ opacity: 0, y: -20 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4"
+            className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 pt-6"
           >
             {games.map((game) => {
               const Icon = game.icon;
@@ -187,30 +191,30 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
                   whileHover={{ scale: 1.02, y: -4 }} 
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveGame(game.id)}
-                  className={`p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-md cursor-pointer transition-all border group ${cardBg}`}
+                  className={`p-8 sm:p-10 rounded-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] cursor-pointer transition-all border group relative overflow-hidden ${cardBg}`}
                 >
-                  <div className="flex items-start justify-between mb-6">
-                    <div className={`p-4 rounded-2xl ${game.bg} ${game.border} border shadow-inner transform group-hover:rotate-6 transition-transform`}>
-                      <Icon className={`w-8 h-8 ${game.color}`} />
+                  <div className="flex items-start justify-between mb-8 relative z-10">
+                    <div className={`p-4 rounded-full bg-transparent border-2 border-rose-200 dark:border-rose-900/60 transform group-hover:rotate-12 transition-transform duration-500`}>
+                      <Icon className={`w-7 h-7 ${isDark ? 'text-rose-400' : 'text-rose-600'}`} />
                     </div>
                     
                     {score && (
-                      <div className={`px-4 py-2 rounded-xl text-right border border-dashed ${theme === 'dark' ? 'bg-[#1a1a1a] border-gray-700' : 'bg-[#faf8f5] border-gray-300'}`}>
-                        <p className={`text-[9px] uppercase font-bold tracking-widest ${textSub} mb-1`}>Ledger</p>
-                        <p className="text-2xl font-handwriting">
-                          <span className="text-blue-500">{score.my_score}</span>
-                          <span className={textSub}> - </span>
-                          <span className="text-rose-500">{score.shaira_score}</span>
+                      <div className={`px-5 py-3 rounded-sm text-right border ${isDark ? 'bg-[#2a0815] border-rose-900/50' : 'bg-[#FFFAF0] border-rose-100'}`}>
+                        <p className={`text-[9px] uppercase font-serif tracking-widest ${textSub} mb-1`}>Score</p>
+                        <p className="text-2xl font-handwriting flex items-center gap-2">
+                          <span className={isDark ? 'text-rose-300' : 'text-rose-700'}>{score.my_score}</span>
+                          <span className={`${textSub} text-sm`}>—</span>
+                          <span className={isDark ? 'text-rose-400' : 'text-rose-600'}>{score.shaira_score}</span>
                         </p>
                       </div>
                     )}
                   </div>
                   
-                  <h3 className={`text-2xl font-serif mb-2 ${textMain}`}>{game.name}</h3>
-                  <p className={`text-sm leading-relaxed mb-6 ${textSub}`}>{game.description}</p>
+                  <h3 className={`text-3xl font-serif mb-3 tracking-wide ${textMain}`}>{game.name}</h3>
+                  <p className={`text-sm leading-relaxed mb-8 font-serif italic ${textSub}`}>{game.description}</p>
                   
-                  <div className={`inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest transition-colors ${game.color}`}>
-                    Play Now <span className="text-lg leading-none">→</span>
+                  <div className={`inline-flex items-center gap-3 text-[11px] font-serif uppercase tracking-[0.2em] transition-colors ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>
+                    Play Now <span className="text-lg leading-none transform group-hover:translate-x-2 transition-transform">→</span>
                   </div>
                 </motion.div>
               );
@@ -228,7 +232,7 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
             partnerName={partnerName}
           />
         ) : activeGame === 'memorymatch' ? (
-          <motion.div key="memorymatch" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <motion.div key="memorymatch" className="relative z-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <MemoryMatchGame
               yearId={yearId}
               yearNumber={yearNumber}
@@ -247,8 +251,8 @@ const GamesArena: React.FC<GamesArenaProps> = ({ yearId, yearNumber }) => {
         onConfirm={() => {
           if (resetTarget) resetGameMutation.mutate(resetTarget);
         }}
-        title="Erase Scoreboard"
-        message="This will wipe the ledger clean and reset the score to 0-0. Are you sure?"
+        title="Burn the Ledger?"
+        message="This will wipe the slate clean and reset the score to 0-0. Are you sure you want to erase this history?"
         loading={resetGameMutation.isPending}
       />
     </div>
@@ -311,92 +315,104 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({ onBack, onWin, currentScore, 
     setHasRecordedWin(false);
   };
 
-  const textMain = theme === 'dark' ? 'text-gray-100' : 'text-gray-800';
-  const textSub = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
-  const paperBg = theme === 'dark' ? 'bg-[#2a2a2a]' : 'bg-[#faf8f5]';
+  const isDark = theme === 'dark';
+  const textMain = isDark ? 'text-rose-50' : 'text-rose-950';
+  const textSub = isDark ? 'text-rose-300' : 'text-rose-800';
 
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }} 
+      initial={{ opacity: 0, scale: 0.98 }} 
       animate={{ opacity: 1, scale: 1 }} 
-      exit={{ opacity: 0, scale: 0.95 }}
-      className={`rounded-2xl p-6 sm:p-10 shadow-sm border ${theme === 'dark' ? 'bg-[#222] border-gray-700' : 'bg-white border-gray-200'}`}
+      exit={{ opacity: 0, scale: 0.98 }}
+      className="relative z-10 rounded-sm p-6 sm:p-12 w-full"
     >
-      <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
-        <button onClick={onBack} className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors ${textSub} hover:${textMain}`}>
-          <ArrowLeft className="w-4 h-4" /> Back to Games
+      <div className="flex items-center justify-between mb-12 flex-wrap gap-6">
+        <button 
+          onClick={onBack} 
+          className={`flex items-center gap-2 text-[10px] font-serif uppercase tracking-widest transition-colors ${textSub} hover:${textMain}`}
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to Menu
         </button>
         
-        <div className={`flex items-center gap-6 px-6 py-2 rounded-xl border border-dashed ${theme === 'dark' ? 'bg-[#1a1a1a] border-gray-700' : 'bg-[#faf8f5] border-gray-300'}`}>
+        <div className={`flex items-center gap-8 px-8 py-3 rounded-sm border ${isDark ? 'bg-[#1a050f]/60 border-rose-900/50' : 'bg-white/60 border-rose-200/60'}`}>
           <div className="text-center">
-            <p className={`text-[10px] uppercase font-bold tracking-widest ${textSub}`}>{displayName}</p>
-            <p className="text-3xl font-handwriting text-blue-500">{currentScore?.my_score || 0}</p>
+            <p className={`text-[9px] uppercase font-serif tracking-widest ${textSub} mb-1`}>{displayName}</p>
+            <p className={`text-3xl font-handwriting ${isDark ? 'text-rose-300' : 'text-rose-700'}`}>{currentScore?.my_score || 0}</p>
           </div>
           
-          <button onClick={() => setShowResetModal(true)} className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-500' : 'hover:bg-gray-200 text-gray-400'}`} title="Erase Ledger">
+          <button 
+            onClick={() => setShowResetModal(true)} 
+            className={`p-2 rounded-full transition-colors ${isDark ? 'hover:bg-rose-900/50 text-rose-500' : 'hover:bg-rose-50 text-rose-300'}`} 
+            title="Erase Ledger"
+          >
             <RotateCcw className="w-4 h-4" />
           </button>
           
           <div className="text-center">
-            <p className={`text-[10px] uppercase font-bold tracking-widest ${textSub}`}>{partnerName}</p>
-            <p className="text-3xl font-handwriting text-rose-500">{currentScore?.shaira_score || 0}</p>
+            <p className={`text-[9px] uppercase font-serif tracking-widest ${textSub} mb-1`}>{partnerName}</p>
+            <p className={`text-3xl font-handwriting ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>{currentScore?.shaira_score || 0}</p>
           </div>
         </div>
       </div>
 
-      <div className="text-center mb-8">
-        <h3 className={`text-3xl font-serif ${textMain}`}>
+      <div className="text-center mb-12">
+        <h3 className={`text-4xl font-serif tracking-wide ${textMain}`}>
           {winner
             ? `${winner === '❤️' ? displayName : partnerName} claims victory! 🎉`
             : `It's ${isXNext ? displayName : partnerName}'s turn ${isXNext ? '❤️' : '⭐'}`}
         </h3>
       </div>
 
-      {/* Journal Paper Dotted Background for the Board */}
-      <div className={`max-w-md mx-auto p-8 rounded-sm ${paperBg} border border-gray-200 dark:border-gray-800 shadow-inner`}
-        style={{
-          backgroundImage: theme === 'dark' ? 'radial-gradient(#444 1px, transparent 1px)' : 'radial-gradient(#d1d5db 1px, transparent 1px)',
-          backgroundSize: '20px 20px'
-        }}
-      >
-        {/* The Grid lines are created by the gap and the background color of the container */}
-        <div className={`grid grid-cols-3 gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}>
-          {board.map((cell, index) => (
-            <motion.button 
-              key={index}
-              whileHover={!cell && !winner ? { scale: 1.05 } : {}}
-              whileTap={!cell && !winner ? { scale: 0.95 } : {}}
-              onClick={() => handleClick(index)}
-              className={`w-full aspect-square text-5xl sm:text-6xl flex items-center justify-center transition-colors
-                ${winningLine?.includes(index) 
-                  ? 'bg-yellow-100 dark:bg-yellow-900/40' 
-                  : theme === 'dark' ? 'bg-[#222] hover:bg-[#2a2a2a]' : 'bg-white hover:bg-gray-50'
-                } 
-                ${!cell && !winner ? 'cursor-pointer' : 'cursor-default'}
-              `}
-            >
-              {cell && (
-                <motion.span 
-                  initial={{ scale: 0, rotate: -45 }} 
-                  animate={{ scale: 1, rotate: 0 }} 
-                  transition={{ type: "spring" }}
-                >
-                  {cell}
-                </motion.span>
-              )}
-            </motion.button>
-          ))}
+      {/* Hand-drawn style Tic Tac Toe Board */}
+      <div className="max-w-[350px] sm:max-w-[400px] mx-auto p-4 sm:p-8">
+        <div className="grid grid-cols-3">
+          {board.map((cell, index) => {
+            // Logic to create the classic # drawn shape instead of full borders
+            const borderBottom = index < 6 ? (isDark ? 'border-b border-rose-900/60' : 'border-b border-rose-200') : '';
+            const borderRight = index % 3 !== 2 ? (isDark ? 'border-r border-rose-900/60' : 'border-r border-rose-200') : '';
+            
+            return (
+              <motion.button 
+                key={index}
+                whileHover={!cell && !winner ? { scale: 1.05 } : {}}
+                whileTap={!cell && !winner ? { scale: 0.95 } : {}}
+                onClick={() => handleClick(index)}
+                className={`w-full aspect-square text-5xl sm:text-6xl flex items-center justify-center transition-colors
+                  ${borderBottom} ${borderRight}
+                  ${winningLine?.includes(index) 
+                    ? (isDark ? 'bg-rose-900/30' : 'bg-rose-50/80') 
+                    : (isDark ? 'hover:bg-[#4c0519]/20' : 'hover:bg-rose-50/30')
+                  } 
+                  ${!cell && !winner ? 'cursor-pointer' : 'cursor-default'}
+                `}
+              >
+                {cell && (
+                  <motion.span 
+                    initial={{ scale: 0, opacity: 0, rotate: -20 }} 
+                    animate={{ scale: 1, opacity: 1, rotate: 0 }} 
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    {cell}
+                  </motion.span>
+                )}
+              </motion.button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="text-center mt-10">
+      <div className="text-center mt-14">
         <motion.button 
-          whileHover={{ scale: 1.05 }} 
-          whileTap={{ scale: 0.95 }} 
+          whileHover={{ scale: 1.02 }} 
+          whileTap={{ scale: 0.98 }} 
           onClick={resetGame} 
-          className="px-8 py-3 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-xl font-semibold shadow-md hover:opacity-90 transition-opacity"
+          className={`px-8 py-3.5 rounded-full font-serif uppercase tracking-widest text-xs transition-all border ${
+            isDark
+              ? 'bg-rose-900 border-rose-800 text-rose-50 hover:bg-rose-800 shadow-[0_4px_15px_rgba(159,18,57,0.3)]'
+              : 'bg-rose-900 border-rose-950 text-rose-50 hover:bg-rose-800 shadow-[0_4px_15px_rgba(136,19,55,0.2)]'
+          }`}
         >
-          Draw a new grid
+          Draw a New Grid
         </motion.button>
       </div>
 
@@ -404,8 +420,8 @@ const TicTacToeGame: React.FC<TicTacToeProps> = ({ onBack, onWin, currentScore, 
         isOpen={showResetModal}
         onClose={() => setShowResetModal(false)}
         onConfirm={() => { onReset(); setShowResetModal(false); }}
-        title="Erase Tic Tac Toe Ledger"
-        message="This will reset the Tic Tac Toe score to 0-0. Continue?"
+        title="Burn the Ledger?"
+        message="This will wipe the Tic Tac Toe slate clean and reset the score to 0-0. Continue?"
       />
     </motion.div>
   );
