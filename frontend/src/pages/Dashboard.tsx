@@ -107,15 +107,13 @@ const Dashboard: React.FC = () => {
   const years = Array.isArray(yearsData) ? yearsData : [];
 
   return (
-    <div
-      className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${
-        theme === 'dark' ? 'bg-gray-950' : ''
-      }`}
-    >
+    <div className="min-h-screen relative overflow-hidden transition-colors duration-300">
       <style dangerouslySetInnerHTML={{__html: `
-        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Dancing+Script:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap');
         .font-handwriting { font-family: 'Caveat', cursive; }
         .font-serif { font-family: 'Playfair Display', serif; }
+        .font-script { font-family: 'Dancing Script', cursive; }
+        .font-cormorant { font-family: 'Cormorant Garamond', serif; }
       `}} />
 
       <RomanticBackground />
@@ -145,20 +143,30 @@ const Dashboard: React.FC = () => {
           )}
 
           <div className="text-center">
+            {/* Updated Typography Layout */}
             <h1
-              className={`text-5xl md:text-6xl font-serif mb-4 ${
-                theme === 'dark' ? 'text-purple-100' : 'text-gray-800'
+              className={`flex flex-wrap items-end justify-center gap-4 mb-2 ${
+                theme === 'dark' ? 'text-rose-50' : 'text-rose-950'
               }`}
             >
-              <span className="text-gradient-love">Welcome, {user?.display_name || 'Love'}</span>
-              <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }} className="inline-block ml-3">
-                💕
-              </motion.span>
+              {/* Changed Welcome to Cormorant Garamond */}
+              <span className="text-4xl md:text-[3.25rem] font-cormorant italic mb-1 md:mb-2 tracking-widest">Welcome,</span>
+              <span className="text-gradient-love font-script text-6xl md:text-7xl font-bold leading-none tracking-wide pr-2">
+                {user?.display_name || 'Love'}
+              </span>
             </h1>
-            <p className={`text-xl font-light italic ${theme === 'dark' ? 'text-purple-200' : 'text-gray-600'}`}>
-              Turn moments into memories. One entry at a time
+            
+            {/* Newly Styled Subtitle */}
+            <p className={`text-lg md:text-xl font-serif italic tracking-wide mt-4 ${theme === 'dark' ? 'text-rose-200/80' : 'text-rose-800/70'}`}>
+              Turn moments into memories. 
+              <span className="block sm:inline sm:ml-2 font-handwriting text-2xl text-rose-500 dark:text-rose-400 opacity-90">
+                One entry at a time.
+              </span>
             </p>
-            <motion.div initial={{ width: 0 }} animate={{ width: '180px' }} transition={{ delay: 0.5, duration: 1 }} className="h-0.5 bg-gradient-to-r from-transparent via-love-red to-transparent mx-auto mt-4" />
+            
+            <div className="flex justify-center mt-6 mb-2">
+              <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-rose-300 to-transparent opacity-60" />
+            </div>
           </div>
 
           {/* Mobile Invite Button */}
@@ -201,18 +209,18 @@ const Dashboard: React.FC = () => {
 
         {/* Years Grid */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-          <h2 className={`text-4xl font-serif text-center mb-8 ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
+          <h2 className={`text-4xl font-serif text-center mb-8 tracking-wide ${theme === 'dark' ? 'text-rose-100' : 'text-rose-950'}`}>
             <span className="text-gradient-soft">Our Journey Through The Years</span>
-            <motion.div initial={{ width: 0 }} animate={{ width: '120px' }} transition={{ delay: 0.5, duration: 1 }} className="h-0.5 bg-gradient-to-r from-transparent via-love-red to-transparent mx-auto mt-2" />
+            <motion.div initial={{ width: 0 }} animate={{ width: '120px' }} transition={{ delay: 0.5, duration: 1 }} className="h-[1px] bg-gradient-to-r from-transparent via-rose-300 to-transparent mx-auto mt-4" />
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {isLoading ? (
               [...Array(3)].map((_, i) => (
                 <div key={i} className="glass-card rounded-3xl p-6 animate-pulse">
-                  <div className="h-56 bg-cherry-blossom/30 rounded-2xl mb-4"></div>
-                  <div className="h-6 bg-cherry-blossom/30 rounded w-1/2 mb-3"></div>
-                  <div className="h-4 bg-cherry-blossom/30 rounded w-3/4"></div>
+                  <div className="h-56 bg-rose-200/30 rounded-2xl mb-4"></div>
+                  <div className="h-6 bg-rose-200/30 rounded w-1/2 mb-3"></div>
+                  <div className="h-4 bg-rose-200/30 rounded w-3/4"></div>
                 </div>
               ))
             ) : years.length > 0 ? (
@@ -220,36 +228,66 @@ const Dashboard: React.FC = () => {
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="col-span-full text-center py-16">
                 <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                  <Heart className="w-20 h-20 text-cherry-blossom/50 mx-auto mb-6" />
+                  <Heart className="w-20 h-20 text-rose-300/50 mx-auto mb-6" />
                 </motion.div>
-                <h3 className={`text-2xl font-serif mb-3 ${theme === 'dark' ? 'text-purple-200' : 'text-gray-600'}`}>Start Your Love Story</h3>
-                <p className={`mb-8 font-light ${theme === 'dark' ? 'text-purple-300' : 'text-gray-500'}`}>Create your first year to begin capturing beautiful memories together</p>
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setIsCreateYearModalOpen(true)} className="btn-romantic">
-                  Create First Year ✨
+                <h3 className={`text-2xl font-serif mb-3 ${theme === 'dark' ? 'text-rose-200' : 'text-rose-800'}`}>Start Your Love Story</h3>
+                <p className={`mb-8 font-serif italic ${theme === 'dark' ? 'text-rose-300/70' : 'text-rose-700/60'}`}>Create your first year to begin capturing beautiful memories together</p>
+                
+                {/* Redesigned Empty State Button */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setIsCreateYearModalOpen(true)}
+                  className={`relative overflow-hidden group px-8 py-3.5 rounded-full border shadow-md transition-all ${
+                    theme === 'dark'
+                      ? 'bg-rose-900 border-rose-800 text-rose-50 hover:bg-rose-800 shadow-[0_4px_15px_rgba(159,18,57,0.3)]'
+                      : 'bg-rose-950 border-rose-950 text-rose-50 hover:bg-rose-900 shadow-[0_4px_15px_rgba(136,19,55,0.25)]'
+                  }`}
+                >
+                  <div className="absolute inset-1 border border-dashed rounded-full opacity-30 pointer-events-none border-rose-200"></div>
+                  <span className="relative z-10 flex items-center gap-2 font-serif uppercase tracking-widest text-[11px]">
+                    Pen the First Page <Sparkles className="w-3.5 h-3.5 text-rose-300" />
+                  </span>
                 </motion.button>
               </motion.div>
             )}
           </div>
 
           {years.length > 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="mt-12 text-center">
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="btn-romantic" onClick={() => setIsCreateYearModalOpen(true)}>
-                <span className="flex items-center gap-2">
-                  Add New Year
-                  <Sparkles className="w-4 h-4" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="mt-16 text-center flex justify-center">
+              
+              {/* Redesigned Add New Year Button */}
+              <motion.button
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setIsCreateYearModalOpen(true)}
+                className={`relative overflow-hidden group px-10 py-4 rounded-full border shadow-lg transition-all ${
+                  theme === 'dark'
+                    ? 'bg-[#2a0815] border-rose-900/80 hover:bg-[#4c0519]/80 hover:border-rose-700 shadow-[0_8px_20px_rgba(0,0,0,0.4)]'
+                    : 'bg-[#FFFAF0] border-rose-200 hover:bg-white hover:border-rose-300 shadow-[0_8px_20px_rgba(225,29,72,0.1)]'
+                }`}
+              >
+                {/* Delicate inner dashed border */}
+                <div className={`absolute inset-1.5 border border-dashed rounded-full opacity-50 pointer-events-none ${theme === 'dark' ? 'border-rose-900' : 'border-rose-200'}`}></div>
+                
+                <span className={`relative z-10 flex items-center gap-3 font-serif uppercase tracking-[0.2em] text-xs font-bold ${theme === 'dark' ? 'text-rose-200' : 'text-rose-800'}`}>
+                  <Sparkles className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${theme === 'dark' ? 'text-rose-400' : 'text-rose-400'}`} />
+                  Begin a New Chapter
+                  <Sparkles className={`w-4 h-4 transform group-hover:scale-110 transition-transform ${theme === 'dark' ? 'text-rose-400' : 'text-rose-400'}`} />
                 </span>
               </motion.button>
+
             </motion.div>
           )}
         </motion.div>
 
         {/* Footer */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-16 text-center">
-          <p className={`font-light italic text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-gray-500'}`}>"Forever is composed of nows" — Emily Dickinson</p>
-          <div className="flex justify-center gap-1 mt-2">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-20 text-center pb-8">
+          <p className={`font-serif italic text-sm ${theme === 'dark' ? 'text-rose-300/60' : 'text-rose-700/50'}`}>"Forever is composed of nows" — Emily Dickinson</p>
+          <div className="flex justify-center gap-1 mt-3">
             {[...Array(3)].map((_, i) => (
               <motion.div key={i} animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.3 }}>
-                <Heart className="w-3 h-3 text-love-red/30 fill-current" />
+                <Heart className="w-3 h-3 text-rose-400/40 fill-current" />
               </motion.div>
             ))}
           </div>
