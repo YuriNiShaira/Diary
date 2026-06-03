@@ -1,4 +1,3 @@
-// frontend/src/components/RomanticBackground.tsx
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
