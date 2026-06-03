@@ -1,6 +1,6 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus, Camera, Star, Gamepad2, Coffee, Music, Heart,
@@ -30,7 +30,7 @@ import toast from 'react-hot-toast';
 
 interface Year {
   id: number;
-  year_number: number;  // ✅ anniversary‑based year number
+  year_number: number;  
   cover_image?: string;
   description?: string;
 }
@@ -44,8 +44,10 @@ const YearDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const timelineRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const location = useLocation();
 
   const [activeTab, setActiveTab] = useState<TabType>('memories');
+  const [pendingMemoryId, setPendingMemoryId] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [layoutStyle, setLayoutStyle] = useState<LayoutStyle>('timeline');
   const [isCreateMemoryModalOpen, setIsCreateMemoryModalOpen] = useState(false);
@@ -53,6 +55,7 @@ const YearDetailPage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMemoryForView, setSelectedMemoryForView] = useState<Memory | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [showReturnToBook, setShowReturnToBook] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
   const [showDeleteYearModal, setShowDeleteYearModal] = useState(false);
 
@@ -126,6 +129,42 @@ const YearDetailPage: React.FC = () => {
     return { favoriteCount, uniqueLocations, totalMemories: memories.length, monthsWithMemories };
   }, [memories]);
 
+  useEffect(() => {
+    const state = location.state as { memoryId?: number } | null;
+    const searchParams = new URLSearchParams(location.search);
+    const queryMemoryId = searchParams.get('memoryId') ?? searchParams.get('memory');
+    const memoryId = state?.memoryId ?? (queryMemoryId ? Number(queryMemoryId) : undefined);
+
+    if (memoryId && pendingMemoryId === null) {
+      setPendingMemoryId(memoryId);
+      setShowReturnToBook(!!state?.memoryId);
+      if (state?.memoryId) {
+        try {
+          navigate(location.pathname, { replace: true, state: {} });
+        } catch (e) {
+          // ignore navigation errors
+        }
+      }
+    }
+  }, [location.state, location.search, pendingMemoryId, navigate, location.pathname]);
+
+  useEffect(() => {
+    if (pendingMemoryId !== null && !isViewModalOpen && memories.length > 0) {
+      const memory = memories.find((m) => m.id === pendingMemoryId);
+      if (memory) {
+        setSelectedMemoryForView(memory);
+        setIsViewModalOpen(true);
+        setPendingMemoryId(null);
+        // Clear the navigation state so this doesn't re-trigger when the modal closes
+        try {
+          navigate(location.pathname, { replace: true, state: {} });
+        } catch (e) {
+          // ignore navigation errors
+        }
+      }
+    }
+  }, [pendingMemoryId, memories, isViewModalOpen]);
+
   if (yearLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
@@ -185,9 +224,9 @@ const YearDetailPage: React.FC = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl transition-all font-medium ${
+                  className={`flex-1 min-w-35 flex items-center justify-center gap-2 py-3 px-4 rounded-xl transition-all font-medium ${
                     isActive
-                      ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
+                      ? `bg-linear-to-r ${tab.color} text-white shadow-lg`
                       : 'text-gray-600 hover:bg-white/50'
                   }`}
                 >
@@ -222,21 +261,21 @@ const YearDetailPage: React.FC = () => {
                         <p className="text-gray-500">A journey through {memories.length} beautiful moments</p>
                       </motion.div>
                       <div className="relative">
-                        <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-pink-200 via-rose-300 to-pink-200 rounded-full hidden md:block" />
+                        <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-linear-to-b from-pink-200 via-rose-300 to-pink-200 rounded-full hidden md:block" />
                         {memories.map((memory, index) => (
                           <TimelineMemory
                             key={memory.id}
                             memory={memory}
                             index={index}
                             isEven={index % 2 === 0}
-                            onView={() => { setSelectedMemoryForView(memory); setIsViewModalOpen(true); }}
+                            onView={() => { setSelectedMemoryForView(memory); setShowReturnToBook(false); setIsViewModalOpen(true); }}
                             onEdit={() => { setSelectedMemory(memory); setIsEditModalOpen(true); }}
                             onDelete={() => setDeleteTarget({ id: memory.id, name: memory.title })}
                           />
                         ))}
                         <motion.div initial={{ scale: 0 }} whileInView={{ scale: 1 }} viewport={{ once: true }} className="flex justify-center mt-8">
                           <div className="relative">
-                            <div className="w-16 h-16 rounded-full bg-gradient-to-r from-pink-400 to-rose-500 flex items-center justify-center shadow-lg">
+                            <div className="w-16 h-16 rounded-full bg-linear-to-r from-pink-400 to-rose-500 flex items-center justify-center shadow-lg">
                               <Heart className="w-8 h-8 text-white fill-white" />
                             </div>
                             <div className="absolute inset-0 rounded-full bg-rose-400/30 animate-ping" />
@@ -247,12 +286,12 @@ const YearDetailPage: React.FC = () => {
                   )}
 
                   {layoutStyle === 'scattered' && (
-                    <div className="relative min-h-[600px]">
+                    <div className="relative min-h-150">
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 gap-y-12">
                         {memories.map((memory, index) => (
                           <ScatteredPolaroidCard
                             key={memory.id} memory={memory} index={index}
-                            onView={() => { setSelectedMemoryForView(memory); setIsViewModalOpen(true); }}
+                            onView={() => { setSelectedMemoryForView(memory); setShowReturnToBook(false); setIsViewModalOpen(true); }}
                             onEdit={() => { setSelectedMemory(memory); setIsEditModalOpen(true); }}
                             onDelete={() => setDeleteTarget({ id: memory.id, name: memory.title })}
                           />
@@ -266,7 +305,7 @@ const YearDetailPage: React.FC = () => {
                       {memories.map((memory, index) => (
                         <MasonryCard
                           key={memory.id} memory={memory} index={index}
-                          onView={() => { setSelectedMemoryForView(memory); setIsViewModalOpen(true); }}
+                          onView={() => { setSelectedMemoryForView(memory); setShowReturnToBook(false); setIsViewModalOpen(true); }}
                           onEdit={() => { setSelectedMemory(memory); setIsEditModalOpen(true); }}
                           onDelete={() => setDeleteTarget({ id: memory.id, name: memory.title })}
                         />
@@ -277,7 +316,7 @@ const YearDetailPage: React.FC = () => {
                   <motion.button
                     whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                     onClick={() => setIsCreateMemoryModalOpen(true)}
-                    className="fixed bottom-8 right-8 z-30 bg-gradient-to-r from-rose-500 to-pink-500 text-white p-4 rounded-full shadow-2xl transition-all"
+                    className="fixed bottom-8 right-8 z-30 bg-linear-to-r from-rose-500 to-pink-500 text-white p-4 rounded-full shadow-2xl transition-all"
                   >
                     <Plus className="w-6 h-6" />
                   </motion.button>
@@ -311,7 +350,19 @@ const YearDetailPage: React.FC = () => {
 
       <CreateMemoryModal isOpen={isCreateMemoryModalOpen} onClose={() => setIsCreateMemoryModalOpen(false)} yearId={parseInt(yearId!)} />
       <EditMemoryModal isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedMemory(null); }} memory={selectedMemory} yearId={parseInt(yearId!)} />
-      <MemoryDetailModal isOpen={isViewModalOpen} onClose={() => { setIsViewModalOpen(false); setSelectedMemoryForView(null); }} memory={selectedMemoryForView} onEdit={(memory) => { setIsViewModalOpen(false); setSelectedMemoryForView(null); setSelectedMemory(memory); setIsEditModalOpen(true); }} />
+      <MemoryDetailModal
+        isOpen={isViewModalOpen}
+        onClose={() => { setIsViewModalOpen(false); setSelectedMemoryForView(null); setShowReturnToBook(false); }}
+        memory={selectedMemoryForView}
+        onEdit={(memory) => { setIsViewModalOpen(false); setSelectedMemoryForView(null); setSelectedMemory(memory); setIsEditModalOpen(true); setShowReturnToBook(false); }}
+        onReturnToBook={showReturnToBook ? () => {
+          if (selectedMemoryForView) {
+            navigate('/calendar', { state: { openBookModal: true, bookDate: selectedMemoryForView.date } });
+          } else {
+            navigate('/calendar');
+          }
+        } : undefined}
+      />
       
       <DeleteConfirmModal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={() => { if (deleteTarget) { deleteMutation.mutate(deleteTarget.id); setDeleteTarget(null); } }} title="Delete Memory" itemName={deleteTarget?.name} message="This action cannot be undone. All data will be permanently removed." loading={deleteMutation.isPending} />
       <DeleteConfirmModal isOpen={showDeleteYearModal} onClose={() => setShowDeleteYearModal(false)} onConfirm={() => { deleteYearMutation.mutate(); setShowDeleteYearModal(false); }} title="Delete Year" itemName={year?.year_number?.toString()} message="This will permanently delete this year and ALL memories inside it. This cannot be undone!" loading={deleteYearMutation.isPending} />
