@@ -5,7 +5,7 @@ export interface Memory {
   title: string;
   date: string;
   description: string;
-  image?: string;
+  image?: string | null;
   location?: string;
   favorite_quote?: string;
   is_favorite: boolean;

@@ -77,7 +77,7 @@ const YearHeader: React.FC<YearHeaderProps> = ({ year, description, onDeleteYear
 
         {/* Text Content */}
         <div className="flex-1 space-y-2">
-          <div className="flex items-center gap-2 text-rose-500 dark:text-rose-400 uppercase tracking-[0.2em] text-[10px] font-bold">
+          <div className="flex items-center gap-2 text-rose-500 dark:text-rose-400 uppercase tracking-[0.2em] text-2.5 font-bold">
             <Sparkles className="w-3 h-3" />
             {isPrequel ? 'Prequel' : `Volume ${year}`}
           </div>
