@@ -9,92 +9,105 @@ interface BucketListStatsProps {
 }
 
 const BucketListStats: React.FC<BucketListStatsProps> = ({ stats, theme }) => {
+  const isDark = theme === 'dark';
+
+  // Premium Stationery Palette
+  const cardBg = isDark ? 'bg-[#1a050f]/80' : 'bg-[#FFFAF0]/90';
+  const outerBorder = isDark ? 'border-rose-900/60' : 'border-rose-200/60';
+  const innerBorder = isDark ? 'border-rose-900/40' : 'border-rose-200/50';
+  const textColor = isDark ? 'text-rose-100' : 'text-rose-950';
+  const subTextColor = isDark ? 'text-rose-300/80' : 'text-rose-800/70';
+
   return (
     <>
+      {/* Paper Grain Texture */}
+      <style>{`
+        .stats-paper-grain {
+          background-image: url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E");
+        }
+      `}</style>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8"
+        className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8"
       >
         {[
           {
-            icon: <Target className={`w-6 h-6 mx-auto mb-2 ${theme === 'dark' ? 'text-purple-400' : 'text-rose-500'}`} />,
+            icon: <Target className={`w-5 h-5 mx-auto mb-3 ${isDark ? 'text-rose-400' : 'text-rose-500'}`} />,
             value: stats.total,
             label: 'Total Dreams',
-            bg: theme === 'dark' 
-              ? '!bg-gray-800 !border-gray-700 !text-slate-100 !bg-none' 
-              : 'bg-white border-slate-200 text-slate-900',
           },
           {
-            icon: <CheckCircle className="w-6 h-6 text-green-500 mx-auto mb-2" />,
+            icon: <CheckCircle className={`w-5 h-5 mx-auto mb-3 ${isDark ? 'text-emerald-500/80' : 'text-emerald-600/80'}`} />,
             value: stats.completed,
             label: 'Achieved',
-            bg: theme === 'dark' 
-              ? '!bg-gray-800 !border-gray-700 !text-slate-100 !bg-none' 
-              : 'bg-white border-slate-200 text-slate-900',
           },
           {
-            icon: <Clock className="w-6 h-6 text-orange-500 mx-auto mb-2" />,
+            icon: <Clock className={`w-5 h-5 mx-auto mb-3 ${isDark ? 'text-amber-500/80' : 'text-amber-600/80'}`} />,
             value: stats.pending + stats.planned,
             label: 'In Progress',
-            bg: theme === 'dark' 
-              ? '!bg-gray-800 !border-gray-700 !text-slate-100 !bg-none' 
-              : 'bg-white border-slate-200 text-slate-900',
           },
           {
-            icon: <TrendingUp className="w-6 h-6 text-purple-500 mx-auto mb-2" />,
+            icon: <TrendingUp className={`w-5 h-5 mx-auto mb-3 ${isDark ? 'text-rose-300/80' : 'text-rose-400'}`} />,
             value: `${stats.completion_rate}%`,
             label: 'Completion',
-            bg: theme === 'dark' 
-              ? '!bg-gray-800 !border-gray-700 !text-slate-100 !bg-none' 
-              : 'bg-white border-slate-200 text-slate-900',
           },
-        ].map((card) => (
-          <div
+        ].map((card, index) => (
+          <motion.div
             key={card.label}
-            className={`relative rounded-4xl border p-6 text-center shadow-sm notebook-card ${card.bg}`}
+            whileHover={{ y: -4 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+            className={`relative rounded-sm border p-6 text-center shadow-[0_8px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_8px_20px_rgba(0,0,0,0.3)] transition-all ${cardBg} ${outerBorder}`}
           >
-            {/* The decorative notebook line */}
-            <div className={`absolute inset-x-6 top-5 h-1.5 rounded-full ${theme === 'dark' ? '!bg-gray-700' : 'bg-slate-200/80'}`} />
+            {/* Texture Overlay */}
+            <div className="absolute inset-0 opacity-[0.03] stats-paper-grain pointer-events-none mix-blend-multiply dark:mix-blend-overlay rounded-sm" />
             
-            <div className="relative pt-6">
+            {/* Delicate Inner Dashed Border */}
+            <div className={`absolute inset-1.5 border border-dashed rounded-sm pointer-events-none ${innerBorder}`} />
+            
+            <div className="relative z-10">
               {card.icon}
-              <p className={`text-3xl font-semibold ${theme === 'dark' ? '!text-white' : 'text-slate-900'}`}>{card.value}</p>
-              <p className={`text-sm ${theme === 'dark' ? '!text-gray-400' : 'text-slate-500'}`}>{card.label}</p>
+              <p className={`text-3xl sm:text-4xl font-serif tracking-tight mb-1 ${textColor}`}>
+                {card.value}
+              </p>
+              <p className={`text-[10px] sm:text-xs font-serif uppercase tracking-[0.15em] ${subTextColor}`}>
+                {card.label}
+              </p>
             </div>
-          </div>
+          </motion.div>
         ))}
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        transition={{ delay: 0.1 }}
+        className="mb-10"
       >
-        <div className={`relative rounded-4xl border p-6 shadow-sm notebook-card ${
-          theme === 'dark'
-            ? '!bg-gray-800 !border-gray-700 !text-slate-100 !bg-none'
-            : 'bg-white border-slate-200 text-slate-900'
-        }`}>
-          {/* The decorative notebook line */}
-          <div className={`absolute inset-x-6 top-5 h-1.5 rounded-full ${theme === 'dark' ? '!bg-gray-700' : 'bg-slate-200/80'}`} />
+        <div className={`relative rounded-sm border p-6 sm:p-8 shadow-sm ${cardBg} ${outerBorder}`}>
+          {/* Texture Overlay */}
+          <div className="absolute inset-0 opacity-[0.03] stats-paper-grain pointer-events-none mix-blend-multiply dark:mix-blend-overlay rounded-sm" />
           
-          <div className="relative pt-5">
-            <p className={`text-sm mb-3 ${theme === 'dark' ? '!text-gray-400' : 'text-slate-500'}`}>Overall Progress</p>
+          <div className="relative z-10">
+            <div className="flex justify-between items-end mb-4">
+              <p className={`text-xs font-serif uppercase tracking-[0.2em] font-semibold ${textColor}`}>
+                Journey Progress
+              </p>
+              <p className={`text-[11px] font-serif italic tracking-wide ${subTextColor}`}>
+                {stats.completed} of {stats.total} dreams achieved ✨
+              </p>
+            </div>
             
             {/* Progress Bar Background */}
-            <div className={`h-4 rounded-full overflow-hidden ${theme === 'dark' ? '!bg-gray-700' : 'bg-rose-100'}`}>
+            <div className={`h-3 rounded-full overflow-hidden border shadow-inner ${isDark ? 'bg-[#2a0815] border-rose-900/80' : 'bg-rose-50 border-rose-200/50'}`}>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${stats.completion_rate}%` }}
-                transition={{ duration: 1, ease: 'easeOut' }}
-                className={`h-full ${theme === 'dark' ? 'bg-pink-500' : 'bg-[#ff6b8b]'}`}
+                transition={{ duration: 1.5, ease: 'easeOut', delay: 0.2 }}
+                className={`h-full ${isDark ? 'bg-gradient-to-r from-rose-800 to-rose-400' : 'bg-gradient-to-r from-rose-300 to-rose-500'}`}
               />
             </div>
-            
-            <p className={`text-xs mt-2 ${theme === 'dark' ? '!text-gray-400' : 'text-slate-500'}`}>
-              {stats.completed} of {stats.total} dreams achieved ✨
-            </p>
           </div>
         </div>
       </motion.div>

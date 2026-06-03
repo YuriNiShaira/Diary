@@ -1,5 +1,6 @@
 import React from 'react';
 import { categories } from './bucketlistConstants';
+import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 
 interface BucketListFiltersProps {
   theme: string | null;
@@ -16,56 +17,71 @@ const BucketListFilters: React.FC<BucketListFiltersProps> = ({
   onCategoryChange,
   onStatusChange,
 }) => {
-  return (
-    <div className="flex gap-3 mb-6 flex-wrap items-center">
-      <span className={`notebook-label text-[11px] tracking-[0.35em] ${theme === 'dark' ? '!text-rose-400' : 'text-rose-500/80'}`}>
-        filter notes
-      </span>
-      <select
-        value={selectedCategory}
-        onChange={(e) => onCategoryChange(e.target.value)}
-        className={`px-4 py-3 border rounded-2xl text-sm shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-rose-500/50 ${
-          theme === 'dark'
-            ? '!bg-gray-800 !border-gray-700 !text-gray-100 color-scheme-dark'
-            : '!bg-white/90 !border-rose-200 !text-slate-700 color-scheme-light'
-        }`}
-      >
-        <option value="all" className={theme === 'dark' ? 'bg-gray-800 text-gray-100' : 'bg-white text-slate-700'}>
-          All Categories
-        </option>
-        {categories.map((cat) => (
-          <option 
-            key={cat.value} 
-            value={cat.value} 
-            className={theme === 'dark' ? 'bg-gray-800 text-gray-100' : 'bg-white text-slate-700'}
-          >
-            {cat.label}
-          </option>
-        ))}
-      </select>
+  const isDark = theme === 'dark';
 
-      <select
-        value={selectedStatus}
-        onChange={(e) => onStatusChange(e.target.value)}
-        className={`px-4 py-3 border rounded-2xl text-sm shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-rose-500/50 ${
-          theme === 'dark'
-            ? '!bg-gray-800 !border-gray-700 !text-gray-100 color-scheme-dark'
-            : '!bg-white/90 !border-rose-200 !text-slate-700 color-scheme-light'
-        }`}
-      >
-        <option value="all" className={theme === 'dark' ? 'bg-gray-800 text-gray-100' : 'bg-white text-slate-700'}>
-          All Status
-        </option>
-        <option value="pending" className={theme === 'dark' ? 'bg-gray-800 text-gray-100' : 'bg-white text-slate-700'}>
-          ⏳ Not Yet
-        </option>
-        <option value="planned" className={theme === 'dark' ? 'bg-gray-800 text-gray-100' : 'bg-white text-slate-700'}>
-          📅 Planned
-        </option>
-        <option value="completed" className={theme === 'dark' ? 'bg-gray-800 text-gray-100' : 'bg-white text-slate-700'}>
-          ✅ Completed
-        </option>
-      </select>
+  // Premium Stationery Palette
+  const selectBg = isDark ? 'bg-[#1a050f]/60 hover:bg-[#2a0815]/80' : 'bg-[#FFFAF0]/80 hover:bg-white';
+  const borderColor = isDark ? 'border-rose-900/50' : 'border-rose-200/80';
+  const textColor = isDark ? 'text-rose-200' : 'text-rose-800';
+  const iconColor = isDark ? 'text-rose-400' : 'text-rose-400';
+  const focusRing = isDark ? 'focus:ring-rose-800' : 'focus:ring-rose-200';
+  const optionBg = isDark ? 'bg-[#1a050f]' : 'bg-[#FFFAF0]';
+
+  return (
+    <div className="flex flex-wrap items-center gap-3 mb-8">
+      {/* Elegant Label */}
+      <div className={`flex items-center gap-2 mr-2 ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>
+        <SlidersHorizontal className="w-3.5 h-3.5" />
+        <span className="text-[10px] uppercase font-serif tracking-[0.3em] font-semibold">
+          Filter Entries
+        </span>
+      </div>
+
+      {/* Category Select Wrapper */}
+      <div className="relative inline-block group">
+        <select
+          value={selectedCategory}
+          onChange={(e) => onCategoryChange(e.target.value)}
+          className={`appearance-none cursor-pointer pl-5 pr-10 py-2 rounded-full text-xs font-serif uppercase tracking-widest shadow-sm transition-all outline-none border backdrop-blur-sm focus:ring-2 ${selectBg} ${borderColor} ${textColor} ${focusRing}`}
+        >
+          <option value="all" className={`${optionBg} ${textColor}`}>
+            All Categories
+          </option>
+          {categories.map((cat) => (
+            <option 
+              key={cat.value} 
+              value={cat.value} 
+              className={`${optionBg} ${textColor}`}
+            >
+              {cat.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className={`absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none transition-transform group-hover:translate-y-[-30%] ${iconColor}`} />
+      </div>
+
+      {/* Status Select Wrapper */}
+      <div className="relative inline-block group">
+        <select
+          value={selectedStatus}
+          onChange={(e) => onStatusChange(e.target.value)}
+          className={`appearance-none cursor-pointer pl-5 pr-10 py-2 rounded-full text-xs font-serif uppercase tracking-widest shadow-sm transition-all outline-none border backdrop-blur-sm focus:ring-2 ${selectBg} ${borderColor} ${textColor} ${focusRing}`}
+        >
+          <option value="all" className={`${optionBg} ${textColor}`}>
+            All Statuses
+          </option>
+          <option value="pending" className={`${optionBg} ${textColor}`}>
+            Not Yet
+          </option>
+          <option value="planned" className={`${optionBg} ${textColor}`}>
+            Planned
+          </option>
+          <option value="completed" className={`${optionBg} ${textColor}`}>
+            Completed
+          </option>
+        </select>
+        <ChevronDown className={`absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none transition-transform group-hover:translate-y-[-30%] ${iconColor}`} />
+      </div>
     </div>
   );
 };

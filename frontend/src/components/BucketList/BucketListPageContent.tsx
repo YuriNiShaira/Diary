@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
-  Plus,
   Clock,
   Calendar,
   Trophy,
+  Sparkles
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
@@ -39,8 +39,9 @@ const BucketListPageContent: React.FC = () => {
   });
 
   const queryClient = useQueryClient();
+  const isDark = theme === 'dark';
 
-  // THE NUCLEAR OPTION: Force fix hardcoded white backgrounds and dark inputs
+  // THE REFINED NUCLEAR OPTION: Forces your unstyled modals to match the Premium Mahogany/Ivory theme!
   useEffect(() => {
     const styleId = 'bucketlist-theme-overrides';
     if (!document.getElementById(styleId)) {
@@ -53,76 +54,70 @@ const BucketListPageContent: React.FC = () => {
     
     if (theme === 'dark') {
       styleEl.innerHTML = `
-        /* Override stubborn white backgrounds and notebook patterns */
+        /* Premium Mahogany Overrides for Modals */
         #bucketlist-page-wrapper .bg-white,
         #bucketlist-page-wrapper .notebook-page,
         div[role="dialog"] .bg-white,
-        div[role="dialog"] .notebook-page {
-          background-color: #1f2937 !important;
+        div[role="dialog"] .notebook-page,
+        div[role="dialog"] {
+          background-color: #2a0815 !important;
           background-image: none !important;
-          border-color: #374151 !important;
+          border-color: #4c0519 !important;
         }
         
-        /* Ensure text is readable on the new dark backgrounds */
-        #bucketlist-page-wrapper .bg-white p, 
-        #bucketlist-page-wrapper .bg-white h1, 
-        #bucketlist-page-wrapper .bg-white h2, 
-        #bucketlist-page-wrapper .bg-white h3, 
-        #bucketlist-page-wrapper .bg-white h4,
-        #bucketlist-page-wrapper .bg-white label,
         div[role="dialog"] p,
         div[role="dialog"] h1,
         div[role="dialog"] h2,
         div[role="dialog"] h3,
         div[role="dialog"] h4,
         div[role="dialog"] label {
-           color: #e5e7eb !important;
+           color: #fecdd3 !important; /* rose-200 */
+           font-family: 'Playfair Display', serif !important;
         }
         
-        /* Fix text inputs and textareas (prevents gray-on-gray unreadable text) */
-        #bucketlist-page-wrapper input, 
-        #bucketlist-page-wrapper textarea, 
-        #bucketlist-page-wrapper select,
         div[role="dialog"] input,
         div[role="dialog"] textarea,
         div[role="dialog"] select {
-          background-color: #374151 !important;
-          color: #f3f4f6 !important;
-          border: 1px solid #4b5563 !important;
+          background-color: #1a050f !important;
+          color: #ffe4e6 !important;
+          border: 1px solid #881337 !important; /* rose-900 */
           color-scheme: dark !important;
-          -webkit-text-fill-color: #f3f4f6 !important;
+          -webkit-text-fill-color: #ffe4e6 !important;
+          border-radius: 0.5rem !important;
         }
         
-        #bucketlist-page-wrapper input::placeholder, 
-        #bucketlist-page-wrapper textarea::placeholder,
         div[role="dialog"] input::placeholder,
         div[role="dialog"] textarea::placeholder {
-          color: #9ca3af !important;
-          -webkit-text-fill-color: #9ca3af !important;
+          color: #be185d !important; /* rose-700 */
+          -webkit-text-fill-color: #be185d !important;
         }
       `;
     } else {
       styleEl.innerHTML = `
-        /* Safety guard for Light mode */
-        #bucketlist-page-wrapper input, 
-        #bucketlist-page-wrapper textarea, 
-        #bucketlist-page-wrapper select,
-        div[role="dialog"] input,
-        div[role="dialog"] textarea,
+        /* Premium Ivory Overrides for Modals */
+        div[role="dialog"] .bg-white,
+        div[role="dialog"] .notebook-page,
+        div[role="dialog"] {
+          background-color: #FFFAF0 !important;
+          background-image: none !important;
+          border-color: #fecdd3 !important;
+        }
+
+        div[role="dialog"] input, 
+        div[role="dialog"] textarea, 
         div[role="dialog"] select {
-          background-color: rgba(255, 255, 255, 0.9) !important;
-          color: #1f2937 !important;
-          border: 1px solid #d1d5db !important;
+          background-color: #ffffff !important;
+          color: #4c0519 !important;
+          border: 1px solid #fecdd3 !important;
           color-scheme: light !important;
-          -webkit-text-fill-color: #1f2937 !important;
+          -webkit-text-fill-color: #4c0519 !important;
+          border-radius: 0.5rem !important;
         }
         
-        #bucketlist-page-wrapper input::placeholder, 
-        #bucketlist-page-wrapper textarea::placeholder,
-        div[role="dialog"] input::placeholder,
+        div[role="dialog"] input::placeholder, 
         div[role="dialog"] textarea::placeholder {
-          color: #9ca3af !important;
-          -webkit-text-fill-color: #9ca3af !important;
+          color: #fda4af !important;
+          -webkit-text-fill-color: #fda4af !important;
         }
       `;
     }
@@ -273,55 +268,74 @@ const BucketListPageContent: React.FC = () => {
   const completedItems = filteredItems?.filter((i) => i.status === 'completed') || [];
 
   return (
-    <div id="bucketlist-page-wrapper" className="min-h-screen relative overflow-hidden">
+    <div id="bucketlist-page-wrapper" className="min-h-screen relative overflow-hidden transition-colors duration-300">
+      <style dangerouslySetInnerHTML={{__html: `
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Dancing+Script:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap');
+        .font-handwriting { font-family: 'Caveat', cursive; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-script { font-family: 'Dancing Script', cursive; }
+        .font-cormorant { font-family: 'Cormorant Garamond', serif; }
+      `}} />
+      
       <RomanticBackground />
       <Navbar />
 
-      <div className="max-w-7xl mx-auto relative z-10 px-6 py-10 notebook-page">
-        <div className="absolute left-0 top-20 h-24 w-2 rounded-r-full bg-rose-200/40 blur-2xl" />
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+      <div className="max-w-[1400px] mx-auto relative z-10 px-6 py-10">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
+          
           <button
             onClick={() => navigate('/dashboard')}
-            className={`flex items-center transition-colors mb-4 group ${
-              theme === 'dark' ? 'text-purple-200 hover:text-pink-400' : 'text-gray-600 hover:text-rose-500'
+            className={`flex items-center gap-2 text-[10px] font-serif uppercase tracking-widest transition-colors mb-8 group ${
+              isDark ? 'text-rose-300 hover:text-rose-100' : 'text-rose-600 hover:text-rose-900'
             }`}
           >
-            <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
             Back to Dashboard
           </button>
 
-          <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center justify-between flex-wrap gap-8">
             <div>
-              <h1 className="text-4xl md:text-5xl font-serif mb-2">
-                <span className={`font-handwriting ${theme === 'dark' ? 'text-purple-100' : 'text-gradient-love'}`}>
-                  Our Bucket List
+              <h1 className={`flex flex-wrap items-end gap-3 mb-2 ${isDark ? 'text-rose-50' : 'text-rose-950'}`}>
+                <span className="text-4xl md:text-[3.25rem] font-cormorant italic tracking-widest mb-1 md:mb-2">Our</span>
+                <span className="text-gradient-love font-script text-6xl md:text-7xl font-bold leading-none pr-2">
+                  Bucket List
                 </span>
-                <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }} className="inline-block ml-3">
-                  🌟
-                </motion.span>
               </h1>
-              <p className={`text-lg max-w-2xl ${theme === 'dark' ? 'text-purple-200' : 'text-slate-600'} font-handwriting`}>
-                Dreams we'll achieve together, one by one
+              
+              <p className={`text-lg md:text-xl font-serif italic tracking-wide mt-3 ${isDark ? 'text-rose-200/80' : 'text-rose-800/70'}`}>
+                Dreams we'll achieve together. 
+                <span className="block sm:inline sm:ml-2 font-handwriting text-2xl text-rose-500 dark:text-rose-400 opacity-90">
+                  One by one.
+                </span>
               </p>
+              <div className="h-[1px] w-24 mt-6 bg-gradient-to-r from-transparent via-rose-300 to-transparent opacity-60" />
             </div>
+
+            {/* Premium 'Pen a Dream' Button */}
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => {
                 resetForm();
                 setIsModalOpen(true);
               }}
-              className="btn-romantic flex items-center gap-2"
+              className={`relative overflow-hidden group px-8 py-3.5 rounded-full border shadow-md transition-all ${
+                isDark
+                  ? 'bg-rose-900 border-rose-800 text-rose-50 hover:bg-rose-800 shadow-[0_4px_15px_rgba(159,18,57,0.3)]'
+                  : 'bg-rose-950 border-rose-950 text-rose-50 hover:bg-rose-900 shadow-[0_4px_15px_rgba(136,19,55,0.25)]'
+              }`}
             >
-              <Plus className="w-5 h-5" />
-              Add Dream
+              <div className="absolute inset-1 border border-dashed rounded-full opacity-30 pointer-events-none border-rose-200"></div>
+              <span className="relative z-10 flex items-center gap-2 font-serif uppercase tracking-widest text-[11px]">
+                Pen a Dream <Sparkles className="w-3.5 h-3.5 text-rose-300" />
+              </span>
             </motion.button>
           </div>
         </motion.div>
 
         {stats && <BucketListStats stats={stats} theme={theme} />}
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-8">
           <BucketListFilters
             theme={theme}
             selectedCategory={selectedCategory}
@@ -332,24 +346,28 @@ const BucketListPageContent: React.FC = () => {
         </motion.div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="rounded-2xl p-4 animate-pulse">
-                <div className="h-24 bg-purple-200/30 rounded-2xl"></div>
+              <div key={i} className={`rounded-sm p-6 animate-pulse border ${isDark ? 'bg-[#2a0815] border-rose-900/50' : 'bg-[#FFFAF0] border-rose-100'}`}>
+                <div className={`h-24 rounded-sm ${isDark ? 'bg-rose-900/30' : 'bg-rose-200/30'}`}></div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12 mt-8">
+            
+            {/* Column 1: Not Yet */}
             <div>
-              <h3 className={`text-xl font-serif mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
-                <Clock className="w-5 h-5 text-orange-500" />
+              <h3 className={`text-xs font-serif uppercase tracking-[0.2em] font-semibold mb-6 pb-4 border-b flex items-center gap-3 ${
+                isDark ? 'text-rose-200 border-rose-900/50' : 'text-rose-800 border-rose-200/80'
+              }`}>
+                <Clock className={`w-4 h-4 ${isDark ? 'text-rose-400' : 'text-rose-500'}`} />
                 Not Yet
-                <span className={`text-sm ml-2 ${theme === 'dark' ? 'text-purple-300' : 'text-gray-500'}`}>
+                <span className={`text-[10px] ml-auto ${isDark ? 'text-rose-400/70' : 'text-rose-400'}`}>
                   ({pendingItems.length})
                 </span>
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-5">
                 {pendingItems.map((item, index) => (
                   <BucketListCard
                     key={item.id}
@@ -362,22 +380,25 @@ const BucketListPageContent: React.FC = () => {
                   />
                 ))}
                 {pendingItems.length === 0 && (
-                  <p className={`text-center py-8 text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-gray-400'}`}>
+                  <p className={`text-center py-10 font-serif italic text-sm ${isDark ? 'text-rose-400/50' : 'text-rose-400'}`}>
                     No pending dreams ✨
                   </p>
                 )}
               </div>
             </div>
 
+            {/* Column 2: Planned */}
             <div>
-              <h3 className={`text-xl font-serif mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
-                <Calendar className="w-5 h-5 text-blue-500" />
+              <h3 className={`text-xs font-serif uppercase tracking-[0.2em] font-semibold mb-6 pb-4 border-b flex items-center gap-3 ${
+                isDark ? 'text-rose-200 border-rose-900/50' : 'text-rose-800 border-rose-200/80'
+              }`}>
+                <Calendar className={`w-4 h-4 ${isDark ? 'text-rose-400' : 'text-rose-500'}`} />
                 Planned
-                <span className={`text-sm ml-2 ${theme === 'dark' ? 'text-purple-300' : 'text-gray-500'}`}>
+                <span className={`text-[10px] ml-auto ${isDark ? 'text-rose-400/70' : 'text-rose-400'}`}>
                   ({plannedItems.length})
                 </span>
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-5">
                 {plannedItems.map((item, index) => (
                   <BucketListCard
                     key={item.id}
@@ -390,22 +411,25 @@ const BucketListPageContent: React.FC = () => {
                   />
                 ))}
                 {plannedItems.length === 0 && (
-                  <p className={`text-center py-8 text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-gray-400'}`}>
+                  <p className={`text-center py-10 font-serif italic text-sm ${isDark ? 'text-rose-400/50' : 'text-rose-400'}`}>
                     No planned dreams 📅
                   </p>
                 )}
               </div>
             </div>
 
+            {/* Column 3: Achieved */}
             <div>
-              <h3 className={`text-xl font-serif mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-purple-100' : 'text-gray-800'}`}>
-                <Trophy className="w-5 h-5 text-yellow-500" />
+              <h3 className={`text-xs font-serif uppercase tracking-[0.2em] font-semibold mb-6 pb-4 border-b flex items-center gap-3 ${
+                isDark ? 'text-rose-200 border-rose-900/50' : 'text-rose-800 border-rose-200/80'
+              }`}>
+                <Trophy className={`w-4 h-4 ${isDark ? 'text-amber-500/80' : 'text-amber-500'}`} />
                 Achieved
-                <span className={`text-sm ml-2 ${theme === 'dark' ? 'text-purple-300' : 'text-gray-500'}`}>
+                <span className={`text-[10px] ml-auto ${isDark ? 'text-rose-400/70' : 'text-rose-400'}`}>
                   ({completedItems.length})
                 </span>
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-5">
                 {completedItems.map((item, index) => (
                   <BucketListCard
                     key={item.id}
@@ -418,12 +442,13 @@ const BucketListPageContent: React.FC = () => {
                   />
                 ))}
                 {completedItems.length === 0 && (
-                  <p className={`text-center py-8 text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-gray-400'}`}>
+                  <p className={`text-center py-10 font-serif italic text-sm ${isDark ? 'text-rose-400/50' : 'text-rose-400'}`}>
                     No completed dreams yet 🌟
                   </p>
                 )}
               </div>
             </div>
+
           </div>
         )}
       </div>
@@ -464,9 +489,9 @@ const BucketListPageContent: React.FC = () => {
             setDeleteTarget(null);
           }
         }}
-        title="Delete Dream"
+        title="Burn this Page?"
         itemName={deleteTarget?.name}
-        message="This action cannot be undone. This dream will be permanently removed from your bucket list."
+        message="This action cannot be undone. This dream will be permanently erased from your journal."
         loading={deleteMutation.isPending}
       />
     </div>

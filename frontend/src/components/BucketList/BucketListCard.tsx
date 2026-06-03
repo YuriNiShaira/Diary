@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
+import { Star, CalendarDays, Check } from 'lucide-react';
 import type { BucketListItem } from './bucketlistTypes';
 import { categories } from './bucketlistConstants';
 
@@ -23,106 +23,171 @@ const BucketListCard: React.FC<BucketListCardProps> = ({
 }) => {
   const category = categories.find((c) => c.value === item.category);
   const isCompleted = item.status === 'completed';
-  const categoryColor = theme === 'dark' ? category?.darkColor : category?.color;
+  const isDark = theme === 'dark';
+
+  // Premium Stationery Palette
+  const cardBg = isDark ? 'bg-[#1a050f]/80' : 'bg-[#FFFAF0]/90';
+  const borderColor = isDark ? 'border-rose-900/60' : 'border-rose-200/60';
+  const titleColor = isDark ? 'text-rose-100' : 'text-rose-950';
+  const textColor = isDark ? 'text-rose-200/90' : 'text-rose-800/80';
+  const mutedText = isDark ? 'text-rose-400/60' : 'text-rose-600/60';
   
-  // Force important colors so global typography overrides don't ruin contrast
-  const titleColorClass = isCompleted 
-    ? 'line-through !text-slate-400' 
-    : (theme === 'dark' ? '!text-white' : 'text-slate-900');
+  // Hand-taped look
+  const tapeRotation = useMemo(() => (Math.random() * 6) - 3, []);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className={`relative rounded-4xl border p-6 shadow-[0_24px_50px_rgba(255,112,157,0.14)] transition-all duration-300 notebook-card ${isCompleted ? 'opacity-80' : 'hover:-translate-y-1'} ${
-        theme === 'dark'
-          ? '!bg-gray-800 !border-gray-700 !text-slate-100 !bg-none' // !bg-none removes paper texture
-          : 'bg-white border-rose-100 text-slate-900'
-      }`}
+      className={`relative rounded-sm border p-6 sm:p-8 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)] ${
+        isCompleted ? 'opacity-75 grayscale-[20%]' : 'hover:-translate-y-1'
+      } ${cardBg} ${borderColor}`}
     >
-      <div className={`absolute inset-x-6 top-5 h-1.5 rounded-full ${theme === 'dark' ? '!bg-gray-700' : 'bg-rose-100'}`} />
-      
-      {/* Hide the notebook rings in dark mode so they don't look weird on the dark background */}
-      <div className={`notebook-rings absolute left-0 top-20 h-0 w-0 ${theme === 'dark' ? 'hidden' : ''}`} />
-      
-      <div className={`absolute left-5 top-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] shadow-sm ${
-        theme === 'dark' ? '!bg-gray-900/95 !text-gray-300' : 'bg-white/90 text-slate-500'
+      {/* Paper Grain Texture */}
+      <style>{`
+        .card-grain {
+          background-image: url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E");
+        }
+      `}</style>
+      <div className="absolute inset-0 opacity-[0.03] card-grain pointer-events-none mix-blend-multiply dark:mix-blend-overlay rounded-sm"></div>
+
+      {/* Washi Tape at the top */}
+      <div 
+        className={`absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 backdrop-blur-sm shadow-sm z-20 ${
+          isDark ? 'bg-rose-900/40' : 'bg-rose-200/50'
+        }`}
+        style={{ 
+          rotate: `${tapeRotation}deg`,
+          borderRadius: '2px 8px 3px 6px' 
+        }} 
+      />
+
+      {/* Category Tag (Top Left) */}
+      <div className={`absolute left-5 top-5 inline-flex items-center gap-2 px-3 py-1 rounded-sm border shadow-sm ${
+        isDark ? 'bg-[#2a0815] border-rose-900/50 text-rose-300' : 'bg-white border-rose-100 text-rose-600'
       }`}>
-        <span className={`inline-flex h-2 w-2 rounded-full ${theme === 'dark' ? 'bg-rose-400' : 'bg-pink-400'}`} />
-        {category?.label}
+        <span className={`inline-flex h-1.5 w-1.5 rounded-full ${isDark ? 'bg-rose-400' : 'bg-rose-400'}`} />
+        <span className="text-[9px] uppercase font-serif tracking-[0.2em] font-semibold pt-px">
+          {category?.label}
+        </span>
       </div>
 
-      <div className="p-6 pt-14 relative">
-        {/* Hide notebook lines in dark mode */}
-        <div className={`notebook-lines absolute inset-x-6 top-24 bottom-6 rounded-3xl opacity-60 ${theme === 'dark' ? 'hidden' : ''}`} />
+      {/* Content Area */}
+      <div className="pt-10 relative z-10">
         
-        <div className="flex items-start gap-3 relative">
-          <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-r ${categoryColor || 'from-gray-400 to-gray-500'}`}>
-            {category?.icon && <category.icon className="w-5 h-5 text-white" />}
+        <div className="flex items-start gap-4">
+          {/* Icon Container (Stamped Style) */}
+          <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border ${
+            isDark ? 'bg-[#110307]/50 border-rose-800 text-rose-300' : 'bg-rose-50/50 border-rose-200 text-rose-600'
+          }`}>
+            {category?.icon ? <category.icon className="w-5 h-5" /> : <Star className="w-5 h-5" />}
           </div>
-          <div className="flex-1">
-            <h4 className={`text-2xl font-semibold font-handwriting ${titleColorClass}`}>
+
+          <div className="flex-1 pt-1">
+            {/* Hand-written style title */}
+            <h4 className={`text-3xl font-semibold font-handwriting tracking-wide ${
+              isCompleted ? `line-through ${mutedText}` : titleColor
+            }`}>
               {item.title}
             </h4>
+            
+            {/* Description */}
             {item.description && (
-              <p className={`text-sm mt-3 leading-7 ${theme === 'dark' ? '!text-gray-300' : 'text-slate-600'}`}>
+              <p className={`text-sm mt-3 leading-relaxed font-serif italic ${textColor}`}>
                 {item.description}
               </p>
             )}
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-2 text-sm relative z-10">
-          {Array.from({ length: item.priority }).map((_, i) => (
-            <Star key={i} className="w-3 h-3 text-amber-500" />
-          ))}
+        {/* Metadata: Stars & Date */}
+        <div className={`mt-6 flex flex-wrap items-center gap-4 pl-16 border-t pt-4 ${isDark ? 'border-rose-900/30' : 'border-rose-100'}`}>
+          <div className="flex items-center gap-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star 
+                key={i} 
+                className={`w-3.5 h-3.5 ${
+                  i < item.priority 
+                    ? (isDark ? 'text-amber-500/80 fill-amber-500/80' : 'text-amber-400 fill-amber-400') 
+                    : (isDark ? 'text-rose-950' : 'text-rose-100')
+                }`} 
+              />
+            ))}
+          </div>
+
           {item.target_date && (
-            <span className={`rounded-full px-3 py-1 text-xs font-medium ${theme === 'dark' ? '!bg-gray-700 !text-gray-300' : 'bg-slate-100 text-slate-600'}`}>
-              📅 {new Date(item.target_date).toLocaleDateString()}
-            </span>
+            <div className={`flex items-center gap-2 text-[10px] font-serif uppercase tracking-widest px-3 py-1 rounded-sm border ${
+              isDark ? 'bg-[#110307] border-rose-900/50 text-rose-300' : 'bg-white border-rose-200/60 text-rose-600'
+            }`}>
+              <CalendarDays className="w-3 h-3" />
+              {new Date(item.target_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+            </div>
           )}
         </div>
 
+        {/* Completion Notes (Indented paper look) */}
         {isCompleted && item.completion_notes && (
-          <p className={`mt-4 text-xs italic ${theme === 'dark' ? '!text-gray-400' : 'text-slate-500'}`}>
-            "{item.completion_notes}"
-          </p>
+          <div className="mt-5 pl-16">
+            <div className={`relative p-4 rounded-sm border shadow-inner ${
+              isDark 
+                ? 'bg-[#110307]/80 border-rose-900/50 text-rose-200' 
+                : 'bg-white/60 border-rose-200/50 text-rose-800'
+            }`}>
+              {/* Small "Achieved" watermark */}
+              <div className="absolute top-2 right-2 text-[8px] uppercase tracking-[0.3em] font-serif font-bold opacity-30">
+                Achieved
+              </div>
+              <p className="text-sm italic font-serif leading-relaxed pr-10">
+                "{item.completion_notes}"
+              </p>
+            </div>
+          </div>
         )}
 
-        <div className="mt-5 flex flex-wrap items-center gap-2 relative z-10">
+        {/* Action Buttons */}
+        <div className="mt-8 flex flex-wrap items-center justify-end gap-3 pl-16">
           {!isCompleted && (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => onComplete(item)}
-              className={`rounded-2xl px-3 py-2 text-sm font-semibold transition ${
-                theme === 'dark'
-                  ? '!bg-emerald-500/20 !text-emerald-300 hover:!bg-emerald-500/30'
-                  : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+              className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-[10px] font-serif uppercase tracking-widest font-bold transition-colors border shadow-sm ${
+                isDark
+                  ? 'bg-rose-900 border-rose-800 text-rose-50 hover:bg-rose-800'
+                  : 'bg-rose-900 border-rose-950 text-rose-50 hover:bg-rose-800'
               }`}
             >
+              <Check className="w-3 h-3" />
               Complete
-            </button>
+            </motion.button>
           )}
-          <button
+          
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => onEdit(item)}
-            className={`rounded-2xl px-3 py-2 text-sm font-semibold transition ${
-              theme === 'dark'
-                ? '!bg-gray-700 !text-gray-100 hover:!bg-gray-600'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            className={`rounded-full px-5 py-2 text-[10px] font-serif uppercase tracking-widest font-bold transition-colors border ${
+              isDark
+                ? 'bg-transparent border-rose-800/60 text-rose-300 hover:bg-rose-900/40 hover:border-rose-700'
+                : 'bg-transparent border-rose-200 text-rose-600 hover:bg-white hover:border-rose-300'
             }`}
           >
             Edit
-          </button>
-          <button
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => onDelete(item)}
-            className={`rounded-2xl px-3 py-2 text-sm font-semibold transition ${
-              theme === 'dark'
-                ? '!bg-rose-500/20 !text-rose-300 hover:!bg-rose-500/30'
-                : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
+            className={`rounded-full px-5 py-2 text-[10px] font-serif uppercase tracking-widest font-bold transition-colors border ${
+              isDark
+                ? 'bg-transparent border-rose-950 text-rose-500/70 hover:bg-rose-950/50 hover:text-rose-400 hover:border-rose-900'
+                : 'bg-transparent border-rose-100 text-rose-400 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200'
             }`}
           >
             Delete
-          </button>
+          </motion.button>
         </div>
       </div>
     </motion.div>
