@@ -1,8 +1,7 @@
-// frontend/src/pages/MemoryCalendarPage.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../services/api';
 import {
   ChevronLeft,
@@ -14,6 +13,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import BookModal from '../components/BookModal';
+import MemoryDetailModal from '../components/MemoryDetailModal'; 
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import RomanticBackground from '../components/RomanticBackground';
@@ -22,6 +22,7 @@ import Navbar from '../components/Navbar';
 interface CalendarMemory {
   id: number;
   title: string;
+  date: string;
   description: string;
   image: string | null;
   memory_type: string;
@@ -38,10 +39,10 @@ interface CalendarData {
 }
 
 const PinNote = ({ count, label, bg, rotate, theme }: { count: number | string, label: string, bg: string, rotate: string, theme: string }) => (
-  <div className={`relative ${theme === 'dark' ? 'bg-[#2a2626] border border-stone-700' : bg} p-4 w-[140px] flex flex-col items-center justify-center rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${rotate} transition-transform hover:scale-105`}>
+  <div className={`relative ${theme === 'dark' ? 'bg-[#2a2626] border border-stone-700' : bg} p-4 w-35 flex flex-col items-center justify-center rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${rotate} transition-transform hover:scale-105`}>
     <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#f96a7b] rounded-full border border-[#e55365] shadow-sm z-10" />
     <span className={`font-handwriting text-4xl mt-1 ${theme === 'dark' ? 'text-stone-200' : 'text-gray-800'}`}>{count}</span>
-    <span className={`text-[10px] font-bold uppercase tracking-wider text-center mt-1 ${theme === 'dark' ? 'text-stone-400' : 'text-gray-500'}`}>{label}</span>
+    <span className={`text-2.5 font-bold uppercase tracking-wider text-center mt-1 ${theme === 'dark' ? 'text-stone-400' : 'text-gray-500'}`}>{label}</span>
   </div>
 );
 
@@ -51,7 +52,6 @@ const slideVariants = {
     opacity: 0,
   }),
   center: {
-    x: 0,
     opacity: 1,
   },
   exit: (direction: number) => ({
@@ -62,6 +62,7 @@ const slideVariants = {
 
 const MemoryCalendarPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme } = useTheme();
   const { user } = useAuth();
   const today = new Date();
@@ -73,6 +74,10 @@ const MemoryCalendarPage: React.FC = () => {
   const [selectedMemories, setSelectedMemories] = useState<CalendarMemory[]>([]);
   const [viewMode, setViewMode] = useState<'calendar' | 'timeline'>('calendar');
   const [isBookOpen, setIsBookOpen] = useState(false);
+  
+  // ✅ ADDED: State for memory detail modal
+  const [detailMemory, setDetailMemory] = useState<CalendarMemory | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Use couple's anniversary year as the starting point, with a reasonable fallback
   const startYear = user?.anniversary_date
@@ -186,6 +191,34 @@ const MemoryCalendarPage: React.FC = () => {
     : [];
 
   const isDark = theme === 'dark';
+
+  // Open BookModal when coming back from YearDetailPage via router state
+  useEffect(() => {
+    const state: any = location.state;
+    if (state?.openBookModal && state.bookDate) {
+      const dateStr: string = state.bookDate;
+      const dateObj = new Date(dateStr + 'T00:00:00');
+      const targetYear = dateObj.getFullYear();
+      const targetMonth = dateObj.getMonth();
+
+      // If calendar is not on the target year, switch to it first and wait for data
+      if (currentYear !== targetYear) {
+        setCurrentYear(targetYear);
+        setCurrentMonth(targetMonth);
+        setSelectedDate(dateStr);
+        setIsBookOpen(true);
+        try { navigate(location.pathname, { replace: true, state: {} }); } catch (e) {}
+        return;
+      }
+
+      // Calendar is on target year — select memories if available
+      setSelectedDate(dateStr);
+      setSelectedMemories(allMemoriesData[dateStr] || []);
+      setIsBookOpen(true);
+      // clear state to avoid re-trigger
+      try { navigate(location.pathname, { replace: true, state: {} }); } catch (e) {}
+    }
+  }, [location.state, allMemoriesData, currentYear]);
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#fdfbf7] dark:bg-[#1a1a1a]">
@@ -358,7 +391,7 @@ const MemoryCalendarPage: React.FC = () => {
                       >
                         {isTodayDate && (
                           <div className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center shadow-md rotate-12 z-10">
-                            <span className="text-white text-[10px] font-bold">★</span>
+                            <span className="text-white text-2.5 font-bold">★</span>
                           </div>
                         )}
                         <span className={`font-handwriting text-3xl md:text-4xl ${hasMemory ? (isDark ? 'text-rose-300' : 'text-rose-600') : (isDark ? 'text-stone-600' : 'text-stone-400')}`}>
@@ -401,7 +434,7 @@ const MemoryCalendarPage: React.FC = () => {
                       className="relative group"
                     >
                       {/* Timeline Node */}
-                      <div className={`absolute -left-[43px] md:-left-[59px] top-4 w-5 h-5 rounded-full border-4 shadow-sm z-10 ${isDark ? 'bg-stone-900 border-rose-900' : 'bg-white border-rose-300'}`} />
+                      <div className={`absolute -left-10.75 md:-left-14.75 top-4 w-5 h-5 rounded-full border-4 shadow-sm z-10 ${isDark ? 'bg-stone-900 border-rose-900' : 'bg-white border-rose-300'}`} />
 
                       {/* Polaroid / Clipped Note Card */}
                       <div 
@@ -457,17 +490,28 @@ const MemoryCalendarPage: React.FC = () => {
         )}
       </div>
 
+      {/* ✅ UPDATED: BookModal with onViewFullStory prop */}
       <BookModal
         isOpen={isBookOpen}
         onClose={() => setIsBookOpen(false)}
         date={selectedDate || ''}
         memories={selectedMemories}
         allMemories={allMemoriesData}
-        onNavigate={(yearId) => navigate(`/year/${yearId}`)}
+        onNavigate={(yearId, memoryId) => navigate(`/year/${yearId}`, { state: { memoryId, fromBookModal: true, bookDate: selectedDate } })}
         onDateChange={(newDate) => {
           setSelectedDate(newDate);
           setSelectedMemories(allMemoriesData[newDate] || []);
         }}
+      />
+
+      {/* ✅ ADDED: MemoryDetailModal */}
+      <MemoryDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setDetailMemory(null);
+        }}
+        memory={detailMemory}
       />
     </div>
   );

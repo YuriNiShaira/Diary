@@ -59,12 +59,12 @@ const JoinPage: React.FC = () => {
   return (
     <div className={`min-h-screen flex items-center justify-center p-4 sm:p-8 relative overflow-hidden ${
       theme === 'dark'
-        ? 'bg-gradient-to-br from-purple-950 via-purple-900 to-purple-950'
+        ? 'bg-linear-to-br from-purple-950 via-purple-900 to-purple-950'
         : 'bg-[#f5f0ff]'
     }`}>
       <RomanticBackground />
       {/* Background Glow */}
-      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full blur-[110px] pointer-events-none z-0 ${
+      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-225 h-225 rounded-full blur-[110px] pointer-events-none z-0 ${
         theme === 'dark' ? 'bg-purple-800/30' : 'bg-purple-200/40'
       }`} />
       
@@ -79,10 +79,10 @@ const JoinPage: React.FC = () => {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-        className="relative z-10 w-full max-w-[400px] md:max-w-[860px] preserve-3d"
+        className="relative z-10 w-full max-w-100 md:max-w-215 preserve-3d"
       >
         {/* Vibrant Hardcover */}
-        <div className={`absolute inset-0 rounded-2xl shadow-[0_20px_50px_rgba(139,92,246,0.4)] md:-inset-2 md:rounded-[1.5rem] ${
+        <div className={`absolute inset-0 rounded-2xl shadow-[0_20px_50px_rgba(139,92,246,0.4)] md:-inset-2 md:rounded-3xl ${
           theme === 'dark'
             ? 'bg-gradient-cover-purple-dark'
             : 'bg-gradient-cover-purple'
@@ -97,7 +97,7 @@ const JoinPage: React.FC = () => {
         <div className="relative flex bg-[#fefdfb] rounded-xl md:rounded-lg shadow-inner overflow-hidden border border-gray-200/50">
           
           {/* --- LEFT PAGE (Decorative, hidden on mobile) --- */}
-          <div className="hidden md:flex w-1/2 relative bg-gradient-to-r from-[#fffefc] via-[#fefdfb] to-[#f5f0e8] p-10 flex-col items-center justify-center border-r border-gray-200 shadow-[inset_-15px_0_20px_rgba(0,0,0,0.04)]">
+          <div className="hidden md:flex w-1/2 relative bg-linear-to-r from-[#fffefc] via-[#fefdfb] to-[#f5f0e8] p-10 flex-col items-center justify-center border-r border-gray-200 shadow-[inset_-15px_0_20px_rgba(0,0,0,0.04)]">
             
             {/* Page Paper Texture/Lines */}
             <div className="absolute inset-0 opacity-20 bg-page-lines mix-blend-multiply" />
@@ -113,7 +113,7 @@ const JoinPage: React.FC = () => {
               </div>
               
               <h2 className="text-3xl font-serif text-purple-900 mb-3 tracking-wide">Join Their Story</h2>
-              <div className="w-16 h-[1px] bg-purple-300/60 mx-auto my-4" />
+              <div className="w-16 h-px bg-purple-300/60 mx-auto my-4" />
               <p className="text-purple-700/80 text-sm italic leading-relaxed px-6 font-serif">
                 "The best stories are written together. Accept the invitation to share your world."
               </p>
@@ -126,17 +126,17 @@ const JoinPage: React.FC = () => {
           </div>
 
           {/* --- CENTER SPINE CREASE --- */}
-          <div className="hidden md:block absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-10 bg-gradient-to-r from-black/5 via-black/10 to-black/5 z-20 pointer-events-none" />
-          <div className="hidden md:block absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[1px] bg-black/10 z-20 pointer-events-none" />
+          <div className="hidden md:block absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-10 bg-linear-to-r from-black/5 via-black/10 to-black/5 z-20 pointer-events-none" />
+          <div className="hidden md:block absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-px bg-black/10 z-20 pointer-events-none" />
 
           {/* --- RIGHT PAGE (Join Form) - ALWAYS WHITE/CREAM --- */}
-          <div className="w-full md:w-1/2 relative bg-gradient-to-l from-[#fffefc] via-[#fefdfb] to-[#f5f0e8] p-8 md:p-10 flex flex-col justify-center shadow-[inset_15px_0_20px_rgba(0,0,0,0.04)]">
+          <div className="w-full md:w-1/2 relative bg-linear-to-l from-[#fffefc] via-[#fefdfb] to-[#f5f0e8] p-8 md:p-10 flex flex-col justify-center shadow-[inset_15px_0_20px_rgba(0,0,0,0.04)]">
             
             {/* Page Paper Texture/Lines */}
             <div className="absolute inset-0 opacity-20 bg-page-lines mix-blend-multiply" />
             
             {/* Purple Margin Line */}
-            <div className="absolute left-6 md:left-8 top-0 bottom-0 w-[1px] bg-purple-300/40" />
+            <div className="absolute left-6 md:left-8 top-0 bottom-0 w-px bg-purple-300/40" />
 
             <div className="relative z-10 pl-4 md:pl-6">
               <motion.div 
@@ -153,7 +153,7 @@ const JoinPage: React.FC = () => {
                 
                 {/* Invite Code - Highlighted */}
                 <div className="bg-purple-50/80 p-4 rounded-xl border border-purple-200 shadow-inner">
-                  <label className="block text-[10px] font-bold text-purple-600 uppercase tracking-widest mb-2 text-center">Secret Invite Code</label>
+                  <label className="block text-2.5 font-bold text-purple-600 uppercase tracking-widest mb-2 text-center">Secret Invite Code</label>
                   <div className="relative">
                     <Link className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 w-4 h-4" />
                     <input 
@@ -171,13 +171,13 @@ const JoinPage: React.FC = () => {
 
                 <div className="flex items-center gap-3 my-2 opacity-60">
                   <div className="flex-1 h-px bg-purple-200" />
-                  <span className="text-[9px] text-purple-600 uppercase tracking-widest font-bold">Your Details</span>
+                  <span className="text-2.25 text-purple-600 uppercase tracking-widest font-bold">Your Details</span>
                   <div className="flex-1 h-px bg-purple-200" />
                 </div>
 
                 {/* Username */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-purple-800/60 uppercase tracking-widest ml-1">Username</label>
+                  <label className="block text-2.5 font-bold text-purple-800/60 uppercase tracking-widest ml-1">Username</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 w-4 h-4" />
                     <input 
@@ -194,7 +194,7 @@ const JoinPage: React.FC = () => {
 
                 {/* Your Name */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-purple-800/60 uppercase tracking-widest ml-1">Your First Name</label>
+                  <label className="block text-2.5 font-bold text-purple-800/60 uppercase tracking-widest ml-1">Your First Name</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 w-4 h-4" />
                     <input 
@@ -211,7 +211,7 @@ const JoinPage: React.FC = () => {
 
                 {/* Password */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-purple-800/60 uppercase tracking-widest ml-1">Password</label>
+                  <label className="block text-2.5 font-bold text-purple-800/60 uppercase tracking-widest ml-1">Password</label>
                   <div className="relative">
                     <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 w-4 h-4" />
                     <input 
@@ -231,7 +231,7 @@ const JoinPage: React.FC = () => {
                   <button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-gradient-to-r from-purple-400 to-violet-500 text-white py-3.5 rounded-xl font-bold shadow-lg hover:shadow-purple-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 active:scale-95"
+                    className="w-full bg-linear-to-r from-purple-400 to-violet-500 text-white py-3.5 rounded-xl font-bold shadow-lg hover:shadow-purple-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 active:scale-95"
                   >
                     {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> :
                       <><span>Accept Invitation</span><ArrowRight size={18} /></>}
@@ -242,7 +242,7 @@ const JoinPage: React.FC = () => {
               <div className="mt-6 flex flex-col items-center justify-center space-y-2">
                 <div className="flex items-center gap-3 w-full">
                   <div className="flex-1 h-px bg-purple-200/50" />
-                  <span className="text-[10px] text-purple-400/60 uppercase tracking-widest font-semibold">Or</span>
+                  <span className="text-2.5 text-purple-400/60 uppercase tracking-widest font-semibold">Or</span>
                   <div className="flex-1 h-px bg-purple-200/50" />
                 </div>
                 <p className="text-xs text-purple-700/70 font-medium mt-2">

@@ -59,12 +59,12 @@ const RegisterPage: React.FC = () => {
   return (
     <div className={`min-h-screen flex items-center justify-center p-4 sm:p-8 relative overflow-hidden ${
       theme === 'dark'
-        ? 'bg-gradient-to-br from-purple-950 via-purple-900 to-purple-950'
+        ? 'bg-linear-to-br from-purple-950 via-purple-900 to-purple-950'
         : 'bg-[#fff0f5]'
     }`}>
       <RomanticBackground />
       {/* Background Glow */}
-      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full blur-[110px] pointer-events-none z-0 ${
+      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-225 h-225 rounded-full blur-[110px] pointer-events-none z-0 ${
         theme === 'dark' ? 'bg-purple-800/30' : 'bg-pink-100/60'
       }`} />
       
@@ -79,12 +79,12 @@ const RegisterPage: React.FC = () => {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-        className="relative z-10 w-full max-w-[400px] md:max-w-[860px] preserve-3d"
+        className="relative z-10 w-full max-w-100 md:max-w-215 preserve-3d"
       >
         {/* The Leather Cover */}
-        <div className={`absolute inset-0 rounded-2xl shadow-[0_20px_50px_rgba(131,24,67,0.3)] md:-inset-2 md:rounded-[1.5rem] ${
+        <div className={`absolute inset-0 rounded-2xl shadow-[0_20px_50px_rgba(131,24,67,0.3)] md:-inset-2 md:rounded-3xl ${
           theme === 'dark'
-            ? 'bg-gradient-to-br from-purple-900 via-purple-800 to-purple-950 shadow-purple-900/30'
+            ? 'bg-linear-to-br from-purple-900 via-purple-800 to-purple-950 shadow-purple-900/30'
             : 'bg-gradient-leather'
         }`} />
         
@@ -97,7 +97,7 @@ const RegisterPage: React.FC = () => {
         <div className="relative flex bg-[#fefdfb] rounded-xl md:rounded-lg shadow-inner overflow-hidden border border-gray-200/50">
           
           {/* --- LEFT PAGE (Decorative, hidden on mobile) --- */}
-          <div className="hidden md:flex w-1/2 relative bg-gradient-to-r from-[#fffefc] via-[#fefdfb] to-[#f5f0e8] p-10 flex-col items-center justify-center border-r border-gray-200 shadow-[inset_-15px_0_20px_rgba(0,0,0,0.04)]">
+          <div className="hidden md:flex w-1/2 relative bg-linear-to-r from-[#fffefc] via-[#fefdfb] to-[#f5f0e8] p-10 flex-col items-center justify-center border-r border-gray-200 shadow-[inset_-15px_0_20px_rgba(0,0,0,0.04)]">
             
             {/* Page Paper Texture/Lines */}
             <div className="absolute inset-0 opacity-20 bg-page-lines mix-blend-multiply" />
@@ -113,7 +113,7 @@ const RegisterPage: React.FC = () => {
               </div>
               
               <h2 className="text-3xl font-serif text-rose-900 mb-3 tracking-wide">A New Chapter</h2>
-              <div className="w-16 h-[1px] bg-rose-300/60 mx-auto my-4" />
+              <div className="w-16 h-px bg-rose-300/60 mx-auto my-4" />
               <p className="text-rose-700/80 text-sm italic leading-relaxed px-6 font-serif">
                 "Every great love story starts with a single page. Write yours together."
               </p>
@@ -126,17 +126,17 @@ const RegisterPage: React.FC = () => {
           </div>
 
           {/* --- CENTER SPINE CREASE --- */}
-          <div className="hidden md:block absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-10 bg-gradient-to-r from-black/5 via-black/10 to-black/5 z-20 pointer-events-none" />
-          <div className="hidden md:block absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[1px] bg-black/10 z-20 pointer-events-none" />
+          <div className="hidden md:block absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-10 bg-linear-to-r from-black/5 via-black/10 to-black/5 z-20 pointer-events-none" />
+          <div className="hidden md:block absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-px bg-black/10 z-20 pointer-events-none" />
 
           {/* --- RIGHT PAGE (Registration Form) - ALWAYS WHITE/CREAM --- */}
-          <div className="w-full md:w-1/2 relative bg-gradient-to-l from-[#fffefc] via-[#fefdfb] to-[#f5f0e8] p-8 md:p-10 flex flex-col justify-center shadow-[inset_15px_0_20px_rgba(0,0,0,0.04)]">
+          <div className="w-full md:w-1/2 relative bg-linear-to-l from-[#fffefc] via-[#fefdfb] to-[#f5f0e8] p-8 md:p-10 flex flex-col justify-center shadow-[inset_15px_0_20px_rgba(0,0,0,0.04)]">
             
             {/* Page Paper Texture/Lines */}
             <div className="absolute inset-0 opacity-20 bg-page-lines mix-blend-multiply" />
             
             {/* Red Margin Line (Classic notebook look) */}
-            <div className="absolute left-6 md:left-8 top-0 bottom-0 w-[1px] bg-rose-300/40" />
+            <div className="absolute left-6 md:left-8 top-0 bottom-0 w-px bg-rose-300/40" />
 
             <div className="relative z-10 pl-4 md:pl-6">
               <motion.div 
@@ -152,7 +152,7 @@ const RegisterPage: React.FC = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Username */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-rose-800/60 uppercase tracking-widest ml-1">Username</label>
+                  <label className="block text-2.5 font-bold text-rose-800/60 uppercase tracking-widest ml-1">Username</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400 w-4 h-4" />
                     <input 
@@ -169,7 +169,7 @@ const RegisterPage: React.FC = () => {
 
                 {/* Your Name */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-rose-800/60 uppercase tracking-widest ml-1">Your First Name</label>
+                  <label className="block text-2.5 font-bold text-rose-800/60 uppercase tracking-widest ml-1">Your First Name</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400 w-4 h-4" />
                     <input 
@@ -186,7 +186,7 @@ const RegisterPage: React.FC = () => {
 
                 {/* Password */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-rose-800/60 uppercase tracking-widest ml-1">Password</label>
+                  <label className="block text-2.5 font-bold text-rose-800/60 uppercase tracking-widest ml-1">Password</label>
                   <div className="relative">
                     <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400 w-4 h-4" />
                     <input 
@@ -204,7 +204,7 @@ const RegisterPage: React.FC = () => {
 
                 {/* Anniversary */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-rose-800/60 uppercase tracking-widest ml-1">Anniversary Date</label>
+                  <label className="block text-2.5 font-bold text-rose-800/60 uppercase tracking-widest ml-1">Anniversary Date</label>
                   <div className="relative">
                     <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400 w-4 h-4" />
                     <input 
@@ -218,7 +218,7 @@ const RegisterPage: React.FC = () => {
                       required 
                     />
                   </div>
-                  <p className="text-[10px] text-rose-400/70 ml-1 mt-1">
+                  <p className="text-2.5 text-rose-400/70 ml-1 mt-1">
                     When did your love story begin?
                   </p>
                 </div>
@@ -227,7 +227,7 @@ const RegisterPage: React.FC = () => {
                   <button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-gradient-to-r from-rose-400 to-pink-500 text-white py-3.5 rounded-xl font-bold shadow-lg hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 active:scale-95"
+                    className="w-full bg-linear-to-r from-rose-400 to-pink-500 text-white py-3.5 rounded-xl font-bold shadow-lg hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 active:scale-95"
                   >
                     {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> :
                       <><span>Open First Page</span><ArrowRight size={18} /></>}
@@ -238,7 +238,7 @@ const RegisterPage: React.FC = () => {
               <div className="mt-6 flex flex-col items-center justify-center space-y-2">
                 <div className="flex items-center gap-3 w-full">
                   <div className="flex-1 h-px bg-rose-200/50" />
-                  <span className="text-[10px] text-rose-400/60 uppercase tracking-widest font-semibold">Or</span>
+                  <span className="text-2.5 text-rose-400/60 uppercase tracking-widest font-semibold">Or</span>
                   <div className="flex-1 h-px bg-rose-200/50" />
                 </div>
                 <p className="text-xs text-rose-700/70 font-medium mt-2">

@@ -68,8 +68,8 @@ const ContactPage: React.FC = () => {
               <div className="flex justify-center mb-6">
                 <div className={`h-20 w-20 rounded-full flex items-center justify-center shadow-lg border-2 ${
                   theme === 'dark' 
-                    ? 'bg-gradient-to-br from-rose-800 to-rose-950 border-rose-900' 
-                    : 'bg-gradient-to-br from-rose-600 to-rose-800 border-rose-700'
+                    ? 'bg-linear-to-br from-rose-800 to-rose-950 border-rose-900' 
+                    : 'bg-linear-to-br from-rose-600 to-rose-800 border-rose-700'
                 }`}>
                   <Heart className="h-8 w-8 text-white fill-white/50" />
                 </div>
@@ -84,7 +84,7 @@ const ContactPage: React.FC = () => {
               </p>
               
               <div className="flex justify-center">
-                <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-rose-300 to-transparent mb-8" />
+                <div className="w-16 h-px bg-linear-to-r from-transparent via-rose-300 to-transparent mb-8" />
               </div>
 
               <button

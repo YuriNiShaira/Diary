@@ -165,7 +165,7 @@ const Dashboard: React.FC = () => {
             </p>
             
             <div className="flex justify-center mt-6 mb-2">
-              <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-rose-300 to-transparent opacity-60" />
+              <div className="w-32 h-px bg-linear-to-r from-transparent via-rose-300 to-transparent opacity-60" />
             </div>
           </div>
 
@@ -211,7 +211,7 @@ const Dashboard: React.FC = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
           <h2 className={`text-4xl font-serif text-center mb-8 tracking-wide ${theme === 'dark' ? 'text-rose-100' : 'text-rose-950'}`}>
             <span className="text-gradient-soft">Our Journey Through The Years</span>
-            <motion.div initial={{ width: 0 }} animate={{ width: '120px' }} transition={{ delay: 0.5, duration: 1 }} className="h-[1px] bg-gradient-to-r from-transparent via-rose-300 to-transparent mx-auto mt-4" />
+            <motion.div initial={{ width: 0 }} animate={{ width: '120px' }} transition={{ delay: 0.5, duration: 1 }} className="h-px bg-linear-to-r from-transparent via-rose-300 to-transparent mx-auto mt-4" />
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -245,7 +245,7 @@ const Dashboard: React.FC = () => {
                   }`}
                 >
                   <div className="absolute inset-1 border border-dashed rounded-full opacity-30 pointer-events-none border-rose-200"></div>
-                  <span className="relative z-10 flex items-center gap-2 font-serif uppercase tracking-widest text-[11px]">
+                  <span className="relative z-10 flex items-center gap-2 font-serif uppercase tracking-widest text-2.75">
                     Pen the First Page <Sparkles className="w-3.5 h-3.5 text-rose-300" />
                   </span>
                 </motion.button>
@@ -362,7 +362,7 @@ const Dashboard: React.FC = () => {
                 </span>
                 
                 {/* Tooltip badge */}
-                <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300 ${
+                <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-2.5 font-bold uppercase tracking-wider transition-all duration-300 ${
                   copied 
                     ? 'opacity-100 bg-emerald-500 text-white shadow-md transform -translate-y-1' 
                     : 'opacity-0 group-hover:opacity-100 bg-stone-200 text-stone-600 transform translate-y-0'

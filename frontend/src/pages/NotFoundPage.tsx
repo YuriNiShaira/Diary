@@ -65,7 +65,7 @@ const NotFoundPage: React.FC = () => {
             </h1>
             
             <div className="flex justify-center mb-8">
-              <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-rose-300 to-transparent opacity-70" />
+              <div className="w-16 h-px bg-linear-to-r from-transparent via-rose-300 to-transparent opacity-70" />
             </div>
 
             <p className={`text-2xl font-serif italic mb-6 ${
@@ -85,7 +85,7 @@ const NotFoundPage: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate(-1)}
-                className={`w-full sm:w-auto px-7 py-3.5 rounded-full font-serif uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 border ${
+                className={`w-full sm:w-auto px-7 py-3.5 rounded-full font-serif uppercase tracking-widest text-2.75 transition-all flex items-center justify-center gap-2 border ${
                   theme === 'dark'
                     ? 'bg-transparent border-rose-800/50 text-rose-300 hover:bg-rose-900/40 hover:border-rose-700'
                     : 'bg-transparent border-rose-200 text-rose-800 hover:bg-white hover:border-rose-300 hover:shadow-sm'
@@ -98,7 +98,7 @@ const NotFoundPage: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate('/dashboard')}
-                className={`w-full sm:w-auto px-7 py-3.5 rounded-full font-serif uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 border ${
+                className={`w-full sm:w-auto px-7 py-3.5 rounded-full font-serif uppercase tracking-widest text-2.75 transition-all flex items-center justify-center gap-2 border ${
                   theme === 'dark'
                     ? 'bg-rose-900 border-rose-800 text-rose-50 hover:bg-rose-800 shadow-[0_5px_15px_rgba(0,0,0,0.3)]'
                     : 'bg-rose-950 border-rose-950 text-rose-50 hover:bg-rose-900 shadow-[0_5px_15px_rgba(136,19,55,0.25)]'

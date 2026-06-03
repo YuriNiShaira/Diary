@@ -122,8 +122,8 @@ const LandingPage: React.FC = () => {
               transition={{ duration: 0.8 }}
               className="hidden md:flex md:col-span-3 flex-col items-end gap-12 pt-10"
             >
-              <Polaroid image="/dashboard.jpg" caption="Our timeline" rotation={-6} tapeColor="bg-rose-100/80" tapeRotate="-rotate-3" className="w-full max-w-[240px] -translate-x-4" />
-              <Polaroid image="/dashboard2.jpg" caption="Bucket list" rotation={4} tapeColor="bg-blue-100/80" tapeRotate="rotate-2" className="w-full max-w-[220px] translate-x-4" />
+              <Polaroid image="/dashboard.jpg" caption="Our timeline" rotation={-6} tapeColor="bg-rose-100/80" tapeRotate="-rotate-3" className="w-full max-w-60 -translate-x-4" />
+              <Polaroid image="/dashboard2.jpg" caption="Bucket list" rotation={4} tapeColor="bg-blue-100/80" tapeRotate="rotate-2" className="w-full max-w-55 translate-x-4" />
             </motion.div>
 
             {/* Center Card */}
@@ -206,8 +206,8 @@ const LandingPage: React.FC = () => {
               transition={{ duration: 0.8, delay: 0.1 }}
               className="hidden md:flex md:col-span-3 flex-col items-start gap-12 pt-10"
             >
-              <Polaroid image="/dashboard1.jpg" caption="Shared calendar" rotation={5} tapeColor="bg-yellow-100/80" tapeRotate="rotate-3" className="w-full max-w-[240px] translate-x-2" />
-              <Polaroid image="/dashboard3.jpg" caption="Watchlists" rotation={-5} tapeColor="bg-rose-100/80" tapeRotate="-rotate-4" className="w-full max-w-[220px] -translate-x-6" />
+              <Polaroid image="/dashboard1.jpg" caption="Shared calendar" rotation={5} tapeColor="bg-yellow-100/80" tapeRotate="rotate-3" className="w-full max-w-60 translate-x-2" />
+              <Polaroid image="/dashboard3.jpg" caption="Watchlists" rotation={-5} tapeColor="bg-rose-100/80" tapeRotate="-rotate-4" className="w-full max-w-55 -translate-x-6" />
             </motion.div>
           </div>
         </div>
@@ -374,7 +374,7 @@ const LandingPage: React.FC = () => {
       {/* ========== FOOTER ========== */}
       <footer className="relative z-10 bg-[#f8f5f0] border-t border-gray-200 pt-20 pb-8 px-4 sm:px-6 overflow-hidden">
         {/* Decorative elements in footer */}
-        <div className="absolute top-0 left-10 w-full h-1 bg-gradient-to-r from-transparent via-rose-200 to-transparent opacity-50" />
+        <div className="absolute top-0 left-10 w-full h-1 bg-linear-to-r from-transparent via-rose-200 to-transparent opacity-50" />
         <WashiTape color="bg-rose-200/40" rotate="-rotate-2" className="top-[-10px] right-[10%] w-24" />
         <FloatingPaperHeart x="80%" size={16} delay={2} />
 
