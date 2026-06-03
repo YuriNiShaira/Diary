@@ -53,7 +53,7 @@ const BucketListStats: React.FC<BucketListStatsProps> = ({ stats, theme }) => {
             value: `${stats.completion_rate}%`,
             label: 'Completion',
           },
-        ].map((card, index) => (
+        ].map((card) => (
           <motion.div
             key={card.label}
             whileHover={{ y: -4 }}

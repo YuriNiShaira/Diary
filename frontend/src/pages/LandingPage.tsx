@@ -5,7 +5,6 @@ import {
   Heart, ArrowRight, PenLine, BookOpen, Camera, 
   MapPin, Star, Music, MessageCircle, ChevronRight,
   Lock, EyeOff, HeartHandshake, ChevronDown, Sparkles,
-  Users
 } from 'lucide-react';
 import RomanticBackground from '../components/RomanticBackground';
 
