@@ -7,6 +7,7 @@ import {
   Lock, EyeOff, HeartHandshake, ChevronDown, Sparkles,
 } from 'lucide-react';
 import RomanticBackground from '../components/RomanticBackground';
+import InstallPWA from '../components/InstallPWA';
 
 // Helper: Torn Washi Tape
 const WashiTape = ({ rotate = '-rotate-2', color = 'bg-yellow-100/70', className = '' }) => (
@@ -445,6 +446,9 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </footer>
+      
+      {/* PWA Smart Install Banner */}
+      <InstallPWA />
     </div>
   );
 };
