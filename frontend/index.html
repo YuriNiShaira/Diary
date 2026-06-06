@@ -3,9 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#ffffff" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="LogOfUs - Document your love story together. A shared diary for couples." />
     <title>LogOfUs - Your Love Story Diary</title>
+    
+    <!-- iOS / Safari PWA Support -->
+    <!-- Allows the web app to run in full-screen (hides Safari URL bar) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <!-- Controls the top status bar appearance (can be default, black, or black-translucent) -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LogOfUs">
+    
+    <!-- The icon iOS uses when a user clicks "Add to Home Screen" -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   </head>
   <body>
     <div id="root"></div>
