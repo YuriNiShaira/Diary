@@ -169,7 +169,7 @@ const MemoryDetailModal: React.FC<MemoryDetailModalProps> = ({
                             onClick={() => onReturnToBook()}
                             className="font-serif text-sm italic text-blue-600 transition-colors hover:text-blue-800 underline decoration-blue-200 underline-offset-4"
                           >
-                            Return to book
+                            Return
                           </button>
                         )}
                         <button 
