@@ -10,7 +10,8 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: 'script',
+      injectRegister: 'inline', // Inline script guarantees registration fires instantly on page load
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png'], // Tells Vite to explicitly track app icons
       manifest: {
         name: 'LogOfUs',
         short_name: 'LogOfUs',
@@ -23,17 +24,17 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: '/pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
@@ -41,7 +42,11 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'], // Caching all frontend assets for offline use
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg}'], // Included jpg/jpeg to cache your dashboard polaroids!
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module'
       }
     }),
   ],
