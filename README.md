@@ -1,4 +1,4 @@
-# LogOfUs – Diary SaaS
+# LogOfUs
 
 LogOfUs is a full-stack diary and memory preservation platform that allows users to document life moments, manage yearly journals, create bucket lists, explore memory timelines, save playlists, write love letters, and relive experiences through an interactive digital scrapbook experience.
 
