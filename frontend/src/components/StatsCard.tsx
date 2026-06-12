@@ -1,19 +1,14 @@
-// frontend/src/components/StatsCard.tsx
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useTheme } from '../contexts/ThemeContext';
 
 interface StatsCardProps {
   icon: React.ReactNode;
   label: string;
   value: number;
-  color?: string; // Kept for compatibility, but we will use custom pastels
+  color?: string; 
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({ icon, label, value }) => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
   // Slight random rotation for a hand-pinned note look
   const randomRotation = useMemo(() => (Math.random() * 4) - 2, []);
 
@@ -21,17 +16,17 @@ const StatsCard: React.FC<StatsCardProps> = ({ icon, label, value }) => {
   const cardTheme = useMemo(() => {
     const lowerLabel = label.toLowerCase();
     if (lowerLabel.includes('days') || lowerLabel.includes('photo')) {
-      return isDark ? 'bg-[#3b1a20]' : 'bg-[#fdf0f2]'; // Soft Pink
+      return 'bg-[#fdf0f2]'; // Soft Pink
     }
     if (lowerLabel.includes('years') || lowerLabel.includes('core')) {
-      return isDark ? 'bg-[#3a3220]' : 'bg-[#fdfce8]'; // Soft Yellow
+      return 'bg-[#fdfce8]'; // Soft Yellow
     }
     if (lowerLabel.includes('precious') || lowerLabel.includes('place')) {
-      return isDark ? 'bg-[#1a332d]' : 'bg-[#ebfbf7]'; // Soft Mint
+      return 'bg-[#ebfbf7]'; // Soft Mint
     }
     // Default to Soft Blue
-    return isDark ? 'bg-[#1e233b]' : 'bg-[#eff3fe]';
-  }, [label, isDark]);
+    return 'bg-[#eff3fe]';
+  }, [label]);
 
   return (
     <motion.div
@@ -66,7 +61,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ icon, label, value }) => {
       {/* ------ Content ------ */}
       
       {/* Icon */}
-      <div className={`mb-4 ${isDark ? 'text-gray-400' : 'text-gray-500'} scale-110`}>
+      <div className="mb-4 text-gray-500 scale-110">
         {icon}
       </div>
 
@@ -75,17 +70,13 @@ const StatsCard: React.FC<StatsCardProps> = ({ icon, label, value }) => {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
-        className={`text-4xl sm:text-5xl font-bold font-serif tracking-tighter mb-4 ${
-          isDark ? 'text-gray-100' : 'text-gray-900'
-        }`}
+        className="text-4xl sm:text-5xl font-bold font-serif tracking-tighter mb-4 text-gray-900"
       >
         {value.toLocaleString()}
       </motion.p>
 
       {/* Handwritten Label */}
-      <p className={`font-handwriting text-xl sm:text-2xl ${
-        isDark ? 'text-gray-300' : 'text-gray-700'
-      }`}>
+      <p className="font-handwriting text-xl sm:text-2xl text-gray-700">
         {label}
       </p>
       
