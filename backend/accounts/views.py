@@ -90,7 +90,7 @@ def login_view(request):
         'has_partner': has_partner,
         'invite_code': invite_code,
         'tokens': tokens,
-    })
+    }, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

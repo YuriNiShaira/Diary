@@ -37,24 +37,72 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (loading) return;
+    
+    // Basic validation
+    if (!formData.username.trim() || !formData.password) {
+      toast.error('Please fill in both fields 💕');
+      return;
+    }
+    
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/login/', formData);
+      const response = await api.post('/auth/login/', {
+        username: formData.username.trim(),
+        password: formData.password
+      });
+      
+      // Extract data from response
       const { tokens, ...userData } = response.data;
+      
+      // Validate tokens exist
+      if (!tokens?.access || !tokens?.refresh) {
+        throw new Error('Invalid response from server');
+      }
+      
+      // Call login from context
       login(userData, tokens.access, tokens.refresh);
       
+      // Show success message
       toast.success(response.data.message || 'Welcome back! 💕');
+      
+      // Start opening animation
       setIsOpening(true);
-      setTimeout(() => { navigate('/dashboard'); }, 1800);
+      
+      // Navigate after animation completes
+      setTimeout(() => { 
+        navigate('/dashboard');
+      }, 1800);
+      
     } catch (error: any) {
-      const errorData = error.response?.data;
-      toast.error(
-        errorData?.details?.non_field_errors?.[0] || 
-        errorData?.error || 
-        'Invalid credentials. Try again 💕'
-      );
       setLoading(false);
+      setIsOpening(false);
+      
+      let errorMessage = 'Invalid credentials. Try again 💕';
+      
+      if (error.response?.data?.details?.non_field_errors) {
+        errorMessage = error.response.data.details.non_field_errors[0];
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
+      
+      setFormData(prev => ({ ...prev, password: '' }));
+      
+      setTimeout(() => {
+        const passwordInput = document.querySelector('input[name="password"]') as HTMLInputElement;
+        if (passwordInput) {
+          passwordInput.focus();
+        }
+      }, 100);
     }
   };
 
@@ -122,7 +170,7 @@ const LoginPage: React.FC = () => {
               </div>
               <br></br>
               {/* Login Form - Added flex-1 to push bottom content down */}
-              <AnimatePresence>
+              <AnimatePresence mode="wait">
                 {!isOpening && (
                   <motion.form 
                     initial={{ opacity: 1 }}
@@ -145,6 +193,7 @@ const LoginPage: React.FC = () => {
                             className="w-full pl-11 pr-4 py-2.5 bg-white/95 text-gray-800 border-none rounded-xl focus:ring-4 focus:ring-rose-400/50 font-medium shadow-inner transition-all text-sm"
                             placeholder="Username"
                             required
+                            autoComplete="username"
                           />
                         </div>
                       </div>
@@ -162,6 +211,7 @@ const LoginPage: React.FC = () => {
                             className="w-full pl-11 pr-4 py-2.5 bg-white/95 text-gray-800 border-none rounded-xl focus:ring-4 focus:ring-rose-400/50 font-medium shadow-inner transition-all text-sm"
                             placeholder="••••••••"
                             required
+                            autoComplete="current-password"
                           />
                         </div>
                       </div>
@@ -169,7 +219,7 @@ const LoginPage: React.FC = () => {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-linear-to-r from-rose-50 to-rose-100 text-rose-800 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 mt-4"
+                        className="w-full bg-linear-to-r from-rose-50 to-rose-100 text-rose-800 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {loading ? (
                           <div className="w-5 h-5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
