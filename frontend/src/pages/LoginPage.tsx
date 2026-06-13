@@ -38,10 +38,8 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Prevent multiple submissions
     if (loading) return;
     
-    // Basic validation
     if (!formData.username.trim() || !formData.password) {
       toast.error('Please fill in both fields 💕');
       return;
@@ -55,24 +53,16 @@ const LoginPage: React.FC = () => {
         password: formData.password
       });
       
-      // Extract data from response
       const { tokens, ...userData } = response.data;
       
-      // Validate tokens exist
       if (!tokens?.access || !tokens?.refresh) {
         throw new Error('Invalid response from server');
       }
       
-      // Call login from context
       login(userData, tokens.access, tokens.refresh);
-      
-      // Show success message
       toast.success(response.data.message || 'Welcome back! 💕');
-      
-      // Start opening animation
       setIsOpening(true);
       
-      // Navigate after animation completes
       setTimeout(() => { 
         navigate('/dashboard');
       }, 1800);
@@ -94,7 +84,6 @@ const LoginPage: React.FC = () => {
       }
       
       toast.error(errorMessage);
-      
       setFormData(prev => ({ ...prev, password: '' }));
       
       setTimeout(() => {
@@ -120,7 +109,6 @@ const LoginPage: React.FC = () => {
 
       {/* --- THE BOOK CONTAINER --- */}
       <div className="relative z-10 perspective-[2000px]">
-        
         <div className="relative w-85 sm:w-100 h-145 sm:h-160 preserve-3d">
           
           {/* Rear paper stack */}
@@ -155,34 +143,34 @@ const LoginPage: React.FC = () => {
             <div className="absolute inset-0 bg-[#ffe4e6] rounded-l-[2.25rem] rounded-r-md backface-hidden [transform:rotateY(180deg)] border-l-8 border-[#ec4899] shadow-inner" />
 
             {/* Outside of cover */}
-            <div className="absolute inset-0 rounded-r-[2.25rem] rounded-l-md backface-hidden flex flex-col items-center p-6 pl-10 overflow-hidden border-l-4 border-rose-950/40 bg-gradient-leather bg-[#831843] shadow-[10px_0_30px_rgba(0,0,0,0.4)]">
+            <div className="absolute inset-0 rounded-r-[2.25rem] rounded-l-md backface-hidden flex flex-col items-center p-4 sm:p-6 pl-8 sm:pl-10 overflow-hidden border-l-4 border-rose-950/40 bg-gradient-leather bg-[#831843] shadow-[10px_0_30px_rgba(0,0,0,0.4)]">
               
               <div className="absolute inset-4 rounded-r-[1.5rem] rounded-l-sm border-2 border-dashed border-rose-400/20 pointer-events-none" />
               <div className="absolute left-0 top-0 bottom-0 w-10 bg-linear-to-r from-black/50 via-black/10 to-transparent pointer-events-none" />
               <div className="absolute left-8 top-0 bottom-0 w-px bg-white/10" />
 
-              {/* Cover Art - Dynamic title */}
-              <div className="mt-4 mb-3 flex flex-col items-center text-center relative z-20">
-                <Heart className="w-12 h-12 text-rose-200 fill-rose-200/20 mb-3 drop-shadow-md" />
-                <h1 className="text-4xl font-serif text-gradient-gold font-bold tracking-wider">LogOfUs</h1>
-                <div className="w-16 h-px bg-rose-300/40 my-2" />
-                <p className="text-gradient-gold text-xs italic tracking-widest uppercase opacity-90">Your Love Story Diary</p>
+              {/* Cover Art */}
+              <div className="mt-2 sm:mt-4 mb-2 sm:mb-3 flex flex-col items-center text-center relative z-20">
+                <Heart className="w-10 h-10 sm:w-12 sm:h-12 text-rose-200 fill-rose-200/20 mb-2 sm:mb-3 drop-shadow-md" />
+                <h1 className="text-3xl sm:text-4xl font-serif text-gradient-gold font-bold tracking-wider">LogOfUs</h1>
+                <div className="w-16 h-px bg-rose-300/40 my-1.5 sm:my-2" />
+                <p className="text-gradient-gold text-[10px] sm:text-xs italic tracking-widest uppercase opacity-90">Your Love Story Diary</p>
               </div>
-              <br></br>
-              {/* Login Form - Added flex-1 to push bottom content down */}
+              
+              {/* Login Form */}
               <AnimatePresence mode="wait">
                 {!isOpening && (
                   <motion.form 
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onSubmit={handleSubmit} 
-                    className="w-full flex flex-col flex-1 mt-1 relative z-20"
+                    className="w-full flex flex-col flex-1 mt-0 sm:mt-1 relative z-20"
                   >
                     {/* Top Group: Login Inputs & Main Button */}
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       {/* Username */}
                       <div className="space-y-1">
-                        <label className="block text-2.5 font-bold text-rose-100 uppercase tracking-widest ml-1">Username</label>
+                        <label className="block text-[10px] sm:text-xs font-bold text-rose-100 uppercase tracking-widest ml-1">Username</label>
                         <div className="relative">
                           <User className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400 w-4 h-4" />
                           <input
@@ -190,7 +178,7 @@ const LoginPage: React.FC = () => {
                             name="username"
                             value={formData.username}
                             onChange={handleChange}
-                            className="w-full pl-11 pr-4 py-2.5 bg-white/95 text-gray-800 border-none rounded-xl focus:ring-4 focus:ring-rose-400/50 font-medium shadow-inner transition-all text-sm"
+                            className="w-full pl-11 pr-4 py-2 sm:py-2.5 bg-white/95 text-gray-800 border-none rounded-xl focus:ring-4 focus:ring-rose-400/50 font-medium shadow-inner transition-all text-sm"
                             placeholder="Username"
                             required
                             autoComplete="username"
@@ -200,7 +188,7 @@ const LoginPage: React.FC = () => {
                       
                       {/* Password */}
                       <div className="space-y-1">
-                        <label className="block text-2.5 font-bold text-rose-100 uppercase tracking-widest ml-1">Password</label>
+                        <label className="block text-[10px] sm:text-xs font-bold text-rose-100 uppercase tracking-widest ml-1">Password</label>
                         <div className="relative">
                           <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400 w-4 h-4" />
                           <input
@@ -208,50 +196,50 @@ const LoginPage: React.FC = () => {
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
-                            className="w-full pl-11 pr-4 py-2.5 bg-white/95 text-gray-800 border-none rounded-xl focus:ring-4 focus:ring-rose-400/50 font-medium shadow-inner transition-all text-sm"
+                            className="w-full pl-11 pr-4 py-2 sm:py-2.5 bg-white/95 text-gray-800 border-none rounded-xl focus:ring-4 focus:ring-rose-400/50 font-medium shadow-inner transition-all text-sm"
                             placeholder="••••••••"
                             required
                             autoComplete="current-password"
                           />
                         </div>
                       </div>
-                        <br></br>
+                      
                       <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-linear-to-r from-rose-50 to-rose-100 text-rose-800 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-linear-to-r from-rose-50 to-rose-100 text-rose-800 py-2.5 sm:py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 mt-3 sm:mt-4 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                       >
                         {loading ? (
-                          <div className="w-5 h-5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <><span>Unlock Our Pages</span><Sparkles size={16} /></>
                         )}
                       </button>
                     </div>
 
-                    {/* Bottom Group: Action Buttons - mt-auto pushes this to the very bottom */}
-                    <div className="mt-auto pb-4 space-y-2.5">
-                      <div className="flex items-center gap-3 mb-3">
+                    {/* Bottom Group: Action Buttons - Removed mt-auto, replaced with mt-6/mt-8 */}
+                    <div className="mt-6 sm:mt-8 pb-1 sm:pb-4 space-y-2 sm:space-y-2.5">
+                      <div className="flex items-center gap-3 mb-2 sm:mb-3">
                         <div className="flex-1 h-px bg-rose-300/20" />
-                        <span className="text-2.25 text-rose-200/60 uppercase tracking-widest font-semibold">Or</span>
+                        <span className="text-[10px] sm:text-xs text-rose-200/60 uppercase tracking-widest font-semibold">Or</span>
                         <div className="flex-1 h-px bg-rose-300/20" />
                       </div>
 
                       <button
                         type="button"
                         onClick={() => navigate('/register')}
-                        className="w-full bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/30 text-rose-50 py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm shadow-sm backdrop-blur-sm"
+                        className="w-full bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/30 text-rose-50 py-2 sm:py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-xs sm:text-sm shadow-sm backdrop-blur-sm"
                       >
-                        <Heart className="w-4 h-4 fill-current opacity-80" />
+                        <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current opacity-80" />
                         Create New Diary
                       </button>
 
                       <button
                         type="button"
                         onClick={() => navigate('/join')}
-                        className="w-full bg-black/10 hover:bg-black/20 border border-rose-400/20 text-rose-200 py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm shadow-sm"
+                        className="w-full bg-black/10 hover:bg-black/20 border border-rose-400/20 text-rose-200 py-2 sm:py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-xs sm:text-sm shadow-sm"
                       >
-                        <svg className="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                           <circle cx="9" cy="7" r="4" />
                           <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -262,7 +250,6 @@ const LoginPage: React.FC = () => {
                     </div>
 
                   </motion.form>
-                  
                 )}
               </AnimatePresence>
 
