@@ -39,8 +39,7 @@ interface CalendarData {
 }
 
 const PinNote = ({ count, label, bg, rotate, theme }: { count: number | string, label: string, bg: string, rotate: string, theme: string }) => (
-  // Replaced non-standard `w-35` with `w-full sm:w-[140px]` for better grid placement on mobile
-  <div className={`relative ${theme === 'dark' ? 'bg-[#2a2626] border border-stone-700' : bg} p-3 md:p-4 w-full sm:w-[140px] flex flex-col items-center justify-center rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${rotate} transition-transform hover:scale-105`}>
+  <div className={`relative ${theme === 'dark' ? 'bg-[#2a2626] border border-stone-700' : bg} p-3 md:p-4 w-full flex flex-col items-center justify-center rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${rotate} transition-transform hover:scale-105`}>
     <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#f96a7b] rounded-full border border-[#e55365] shadow-sm z-10" />
     <span className={`font-handwriting text-3xl md:text-4xl mt-1 ${theme === 'dark' ? 'text-stone-200' : 'text-gray-800'}`}>{count}</span>
     <span className={`text-[10px] md:text-xs font-bold uppercase tracking-wider text-center mt-1 ${theme === 'dark' ? 'text-stone-400' : 'text-gray-500'}`}>{label}</span>
@@ -228,7 +227,6 @@ const MemoryCalendarPage: React.FC = () => {
       <div className="bg-dotted-paper absolute inset-0 pointer-events-none opacity-50" />
       <Navbar />
 
-      {/* Adjusted side padding on mobile (px-4 instead of px-6) */}
       <div className="max-w-6xl mx-auto relative z-10 px-4 sm:px-6 py-6 md:py-10">
         
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 md:mb-10">
@@ -244,7 +242,6 @@ const MemoryCalendarPage: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
-              {/* Scaled down text for mobile headings */}
               <h1 className={`text-4xl sm:text-5xl md:text-6xl font-serif italic font-bold mb-1 md:mb-2 ${isDark ? 'text-stone-200' : 'text-stone-800'}`}>
                 Calendar of <span className="text-rose-500">Us</span>
               </h1>
@@ -253,7 +250,6 @@ const MemoryCalendarPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Optimized the controls layout to stack nicely on smaller viewports */}
             <div className="flex items-center gap-3 md:gap-4 flex-wrap">
               <div className={`flex items-center gap-1 md:gap-2 p-1.5 md:p-2 rounded-lg border-2 border-dashed ${isDark ? 'border-stone-700 bg-stone-800/50' : 'border-stone-300 bg-white/60'}`}>
                 <button onClick={() => jumpToYear(Math.max(startYear, currentYear - 1))} className={`p-1 sm:p-1.5 rounded-md hover:bg-black/5 transition-colors ${isDark ? 'text-stone-400' : 'text-stone-600'}`}>
@@ -297,8 +293,7 @@ const MemoryCalendarPage: React.FC = () => {
 
         <div className={`border-b-2 border-dashed my-6 md:my-8 ${isDark ? 'border-stone-700' : 'border-stone-300'}`} />
 
-        {/* Switched to grid display for equal spacing of note cards on mobile */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 gap-4 sm:flex sm:flex-wrap sm:gap-6 justify-items-center sm:justify-center mb-8 md:mb-12">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:gap-6 justify-items-center sm:justify-center mb-8 md:mb-12">
           <PinNote count={calendarData?.total_dates || 0} label="Memory Days" bg="bg-[#eef5fb]" rotate="-rotate-2" theme={theme} />
           <PinNote count={calendarData?.total_memories || 0} label="Total Entries" bg="bg-[#fbf0f6]" rotate="rotate-1" theme={theme} />
           <PinNote count={daysInMonth} label={`Days in ${monthNames[currentMonth].substring(0,3)}`} bg="bg-[#eafbf3]" rotate="-rotate-1" theme={theme} />
@@ -307,12 +302,11 @@ const MemoryCalendarPage: React.FC = () => {
 
         {viewMode === 'calendar' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            // Lowered mobile padding
-            className={`relative rounded-sm p-4 sm:p-6 md:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.04)] ${isDark ? 'bg-[#262222] border border-stone-800' : 'bg-white border border-stone-200'}`}
+            className={`relative rounded-sm p-3 sm:p-6 md:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.04)] ${isDark ? 'bg-[#262222] border border-stone-800' : 'bg-white border border-stone-200'}`}
           >
-            <div className="flex items-center justify-between mb-6 md:mb-8 overflow-hidden">
-              <button onClick={prevMonth} className={`font-handwriting text-xl md:text-2xl transition-colors hover:text-rose-500 z-10 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
-                &larr; Prev
+            <div className="flex items-center justify-between mb-4 md:mb-8 overflow-hidden">
+              <button onClick={prevMonth} className={`font-handwriting text-lg sm:text-xl md:text-2xl transition-colors hover:text-rose-500 z-10 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                ← Prev
               </button>
               <AnimatePresence mode="wait" custom={direction}>
                 <motion.h3 
@@ -323,14 +317,13 @@ const MemoryCalendarPage: React.FC = () => {
                   animate="center"
                   exit="exit"
                   transition={{ duration: 0.2, ease: "easeInOut" }}
-                  // Shrink title slightly on mobile to prevent squishing the prev/next buttons
-                  className={`text-2xl sm:text-3xl md:text-4xl font-serif font-bold italic text-center mx-2 ${isDark ? 'text-stone-200' : 'text-stone-800'}`}
+                  className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-serif font-bold italic text-center mx-2 ${isDark ? 'text-stone-200' : 'text-stone-800'}`}
                 >
                   {monthNames[currentMonth]} {currentYear}
                 </motion.h3>
               </AnimatePresence>
-              <button onClick={nextMonth} className={`font-handwriting text-xl md:text-2xl transition-colors hover:text-rose-500 z-10 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
-                Next &rarr;
+              <button onClick={nextMonth} className={`font-handwriting text-lg sm:text-xl md:text-2xl transition-colors hover:text-rose-500 z-10 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
+                Next →
               </button>
             </div>
 
@@ -344,18 +337,16 @@ const MemoryCalendarPage: React.FC = () => {
                 exit="exit"
                 transition={{ duration: 0.2, ease: "easeInOut" }}
               >
-                <div className={`grid grid-cols-7 gap-1 sm:gap-2 mb-3 md:mb-4 border-b-2 border-dashed pb-2 ${isDark ? 'border-stone-700' : 'border-stone-300'}`}>
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
-                    // Truncated headers on ultra-small screens
-                    <div key={day} className={`text-center font-handwriting text-sm sm:text-lg md:text-2xl ${i === 0 || i === 6 ? 'text-rose-500' : (isDark ? 'text-stone-400' : 'text-stone-600')}`}>
-                      <span className="hidden sm:inline">{day}</span>
-                      <span className="sm:hidden">{day.charAt(0)}</span>
+                <div className={`grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2 mb-2 md:mb-4 border-b-2 border-dashed pb-2 ${isDark ? 'border-stone-700' : 'border-stone-300'}`}>
+                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                    <div key={day} className={`text-center font-handwriting text-xs sm:text-sm md:text-lg lg:text-2xl ${i === 0 || i === 6 ? 'text-rose-500' : (isDark ? 'text-stone-400' : 'text-stone-600')}`}>
+                      <span className="hidden xs:inline">{day === 'S' && i === 0 ? 'Sun' : day === 'S' && i === 6 ? 'Sat' : day === 'M' ? 'Mon' : day === 'T' && i === 2 ? 'Tue' : day === 'W' ? 'Wed' : day === 'T' && i === 4 ? 'Thu' : day === 'F' ? 'Fri' : day}</span>
+                      <span className="xs:hidden">{day}</span>
                     </div>
                   ))}
                 </div>
 
-                {/* Grid gap slightly tighter for mobile */}
-                <div className="grid grid-cols-7 gap-1.5 sm:gap-3 md:gap-4">
+                <div className="grid grid-cols-7 gap-1 sm:gap-1.5 md:gap-2 lg:gap-3">
                   {Array.from({ length: firstDayOfMonth }).map((_, i) => (
                     <div key={`empty-${i}`} className="aspect-square" />
                   ))}
@@ -372,7 +363,7 @@ const MemoryCalendarPage: React.FC = () => {
                         onClick={() => handleDateClick(day)}
                         disabled={!hasMemory}
                         className={`
-                          relative aspect-square flex flex-col items-center justify-center transition-all
+                          relative aspect-square flex flex-col items-center justify-center transition-all p-1
                           ${hasMemory ? 'cursor-pointer' : 'cursor-default opacity-60'}
                           ${hasMemory && !isDark ? 'bg-[#fff5f5] border-2 border-dashed border-rose-300 shadow-sm' : ''}
                           ${hasMemory && isDark ? 'bg-stone-800/80 border-2 border-dashed border-rose-900 shadow-sm' : ''}
@@ -382,17 +373,17 @@ const MemoryCalendarPage: React.FC = () => {
                         style={{ borderRadius: hasMemory ? '8px 4px 8px 4px' : '4px' }}
                       >
                         {isTodayDate && (
-                          // Made star tag slightly smaller on mobile
-                          <div className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 w-4 h-4 sm:w-6 sm:h-6 bg-rose-500 rounded-full flex items-center justify-center shadow-md rotate-12 z-10">
-                            <span className="text-white text-[10px] sm:text-xs font-bold">★</span>
+                          <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-rose-500 rounded-full flex items-center justify-center shadow-md rotate-12 z-10">
+                            <span className="text-white text-[8px] sm:text-[10px] md:text-xs font-bold">★</span>
                           </div>
                         )}
-                        {/* Font size scaling for days */}
-                        <span className={`font-handwriting text-xl sm:text-3xl md:text-4xl ${hasMemory ? (isDark ? 'text-rose-300' : 'text-rose-600') : (isDark ? 'text-stone-600' : 'text-stone-400')}`}>
+                        
+                        <span className={`font-handwriting text-base sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl ${hasMemory ? (isDark ? 'text-rose-300' : 'text-rose-600') : (isDark ? 'text-stone-600' : 'text-stone-400')}`}>
                           {day}
                         </span>
+                        
                         {hasMemory && (
-                          <Heart className={`w-2.5 h-2.5 sm:w-4 sm:h-4 mt-0.5 sm:mt-1 ${isDark ? 'text-rose-400 fill-rose-900/50' : 'text-rose-400 fill-rose-200'}`} />
+                          <Heart className={`w-2 h-2 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 mt-0.5 sm:mt-1 ${isDark ? 'text-rose-400 fill-rose-900/50' : 'text-rose-400 fill-rose-200'}`} />
                         )}
                       </motion.button>
                     );
@@ -415,7 +406,6 @@ const MemoryCalendarPage: React.FC = () => {
                 <p className={`font-serif italic text-lg md:text-xl ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>No entries torn out for this month yet...</p>
               </div>
             ) : (
-              // Better left margin positioning for mobile timeline border
               <div className={`relative border-l-2 border-dashed ml-3 sm:ml-4 md:ml-8 pl-6 sm:pl-8 md:pl-12 space-y-10 md:space-y-12 pb-8 ${isDark ? 'border-stone-700' : 'border-stone-300'}`}>
                 {thisMonthMemories.map((memory: any, index: number) => {
                   const memDate = new Date(memory.date + 'T00:00:00');
@@ -427,8 +417,7 @@ const MemoryCalendarPage: React.FC = () => {
                       transition={{ delay: index * 0.1 }}
                       className="relative group"
                     >
-                      {/* Replaced arbitrary fractional classes with accurate negative margins so dots stay aligned to the dashed border on all devices */}
-                      <div className={`absolute -left-[35px] sm:-left-[43px] md:-left-[59px] top-4 w-4 h-4 md:w-5 md:h-5 rounded-full border-4 shadow-sm z-10 ${isDark ? 'bg-stone-900 border-rose-900' : 'bg-white border-rose-300'}`} />
+                      <div className={`absolute -left-[31px] sm:-left-[39px] md:-left-[55px] top-4 w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 rounded-full border-2 sm:border-4 shadow-sm z-10 ${isDark ? 'bg-stone-900 border-rose-900' : 'bg-white border-rose-300'}`} />
 
                       <div 
                         onClick={() => navigate(`/year/${memory.year_id}`)}
@@ -444,7 +433,6 @@ const MemoryCalendarPage: React.FC = () => {
                           {memory.image ? (
                             <div className="relative shrink-0 flex justify-center sm:justify-start">
                               <img src={memory.image} alt={memory.title} className="w-full max-w-[12rem] sm:max-w-none sm:w-24 h-40 sm:h-24 object-cover rounded-sm border border-stone-200 shadow-sm" />
-                              {/* Tag repositioning for stacked mobile view */}
                               <div className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 bg-white px-2 py-0.5 rounded shadow border border-stone-200 font-handwriting text-lg md:text-xl text-stone-800 rotate-[-10deg]">
                                 {memDate.getDate()} {monthNames[memDate.getMonth()].substring(0,3)}
                               </div>
