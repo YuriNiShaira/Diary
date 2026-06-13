@@ -39,7 +39,7 @@ interface CalendarData {
 }
 
 const PinNote = ({ count, label, bg, rotate, theme }: { count: number | string, label: string, bg: string, rotate: string, theme: string }) => (
-  <div className={`relative ${theme === 'dark' ? 'bg-[#2a2626] border border-stone-700' : bg} p-3 md:p-4 w-full flex flex-col items-center justify-center rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${rotate} transition-transform hover:scale-105`}>
+  <div className={`relative ${theme === 'dark' ? 'bg-[#2a2626] border border-stone-700' : bg} p-3 md:p-4 w-full sm:w-40 md:w-48 flex flex-col items-center justify-center rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${rotate} transition-transform hover:scale-105`}>
     <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#f96a7b] rounded-full border border-[#e55365] shadow-sm z-10" />
     <span className={`font-handwriting text-3xl md:text-4xl mt-1 ${theme === 'dark' ? 'text-stone-200' : 'text-gray-800'}`}>{count}</span>
     <span className={`text-[10px] md:text-xs font-bold uppercase tracking-wider text-center mt-1 ${theme === 'dark' ? 'text-stone-400' : 'text-gray-500'}`}>{label}</span>
@@ -211,7 +211,7 @@ const MemoryCalendarPage: React.FC = () => {
   }, [location.state, allMemoriesData, currentYear]);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#fdfbf7] dark:bg-[#1a1a1a]">
+    <div className="min-h-screen relative overflow-x-hidden bg-[#fdfbf7] dark:bg-[#1a1a1a]">
       <style dangerouslySetInnerHTML={{__html: `
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
         .font-handwriting { font-family: 'Caveat', cursive; }
@@ -302,9 +302,9 @@ const MemoryCalendarPage: React.FC = () => {
 
         {viewMode === 'calendar' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className={`relative rounded-sm p-3 sm:p-6 md:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.04)] ${isDark ? 'bg-[#262222] border border-stone-800' : 'bg-white border border-stone-200'}`}
+            className={`relative rounded-sm px-2 py-3 sm:p-6 md:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.04)] ${isDark ? 'bg-[#262222] border border-stone-800' : 'bg-white border border-stone-200'}`}
           >
-            <div className="flex items-center justify-between mb-4 md:mb-8 overflow-hidden">
+            <div className="flex items-center justify-between gap-2 mb-4 md:mb-8">
               <button onClick={prevMonth} className={`font-handwriting text-lg sm:text-xl md:text-2xl transition-colors hover:text-rose-500 z-10 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
                 ← Prev
               </button>
@@ -317,7 +317,7 @@ const MemoryCalendarPage: React.FC = () => {
                   animate="center"
                   exit="exit"
                   transition={{ duration: 0.2, ease: "easeInOut" }}
-                  className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-serif font-bold italic text-center mx-2 ${isDark ? 'text-stone-200' : 'text-stone-800'}`}
+                  className={`flex-1 text-center text-lg sm:text-2xl md:text-3xl lg:text-4xl font-serif font-bold italic mx-2 ${isDark ? 'text-stone-200' : 'text-stone-800'}`}
                 >
                   {monthNames[currentMonth]} {currentYear}
                 </motion.h3>
@@ -340,13 +340,13 @@ const MemoryCalendarPage: React.FC = () => {
                 <div className={`grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2 mb-2 md:mb-4 border-b-2 border-dashed pb-2 ${isDark ? 'border-stone-700' : 'border-stone-300'}`}>
                   {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
                     <div key={day} className={`text-center font-handwriting text-xs sm:text-sm md:text-lg lg:text-2xl ${i === 0 || i === 6 ? 'text-rose-500' : (isDark ? 'text-stone-400' : 'text-stone-600')}`}>
-                      <span className="hidden xs:inline">{day === 'S' && i === 0 ? 'Sun' : day === 'S' && i === 6 ? 'Sat' : day === 'M' ? 'Mon' : day === 'T' && i === 2 ? 'Tue' : day === 'W' ? 'Wed' : day === 'T' && i === 4 ? 'Thu' : day === 'F' ? 'Fri' : day}</span>
-                      <span className="xs:hidden">{day}</span>
+                      <span className="hidden sm:inline">{day === 'S' && i === 0 ? 'Sun' : day === 'S' && i === 6 ? 'Sat' : day === 'M' ? 'Mon' : day === 'T' && i === 2 ? 'Tue' : day === 'W' ? 'Wed' : day === 'T' && i === 4 ? 'Thu' : day === 'F' ? 'Fri' : day}</span>
+                      <span className="sm:hidden">{day}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="grid grid-cols-7 gap-1 sm:gap-1.5 md:gap-2 lg:gap-3">
+                <div className="grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2 lg:gap-3">
                   {Array.from({ length: firstDayOfMonth }).map((_, i) => (
                     <div key={`empty-${i}`} className="aspect-square" />
                   ))}
@@ -378,12 +378,12 @@ const MemoryCalendarPage: React.FC = () => {
                           </div>
                         )}
                         
-                        <span className={`font-handwriting text-base sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl ${hasMemory ? (isDark ? 'text-rose-300' : 'text-rose-600') : (isDark ? 'text-stone-600' : 'text-stone-400')}`}>
+                        <span className={`font-handwriting text-xs sm:text-lg md:text-2xl lg:text-3xl xl:text-4xl ${hasMemory ? (isDark ? 'text-rose-300' : 'text-rose-600') : (isDark ? 'text-stone-600' : 'text-stone-400')}`}>
                           {day}
                         </span>
                         
                         {hasMemory && (
-                          <Heart className={`w-2 h-2 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 mt-0.5 sm:mt-1 ${isDark ? 'text-rose-400 fill-rose-900/50' : 'text-rose-400 fill-rose-200'}`} />
+                          <Heart className={`w-1.5 h-1.5 sm:w-3 sm:h-3 md:w-4 md:h-4 mt-0.5 sm:mt-1 ${isDark ? 'text-rose-400 fill-rose-900/50' : 'text-rose-400 fill-rose-200'}`} />
                         )}
                       </motion.button>
                     );
@@ -432,7 +432,7 @@ const MemoryCalendarPage: React.FC = () => {
                         <div className="flex flex-col sm:flex-row gap-4 md:gap-5">
                           {memory.image ? (
                             <div className="relative shrink-0 flex justify-center sm:justify-start">
-                              <img src={memory.image} alt={memory.title} className="w-full max-w-[12rem] sm:max-w-none sm:w-24 h-40 sm:h-24 object-cover rounded-sm border border-stone-200 shadow-sm" />
+                              <img src={memory.image} alt={memory.title} className="w-full sm:w-40 md:w-48 max-w-[12rem] sm:max-w-none sm:w-24 h-40 sm:h-24 object-cover rounded-sm border border-stone-200 shadow-sm" />
                               <div className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 bg-white px-2 py-0.5 rounded shadow border border-stone-200 font-handwriting text-lg md:text-xl text-stone-800 rotate-[-10deg]">
                                 {memDate.getDate()} {monthNames[memDate.getMonth()].substring(0,3)}
                               </div>
