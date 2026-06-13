@@ -60,6 +60,7 @@ const slideVariants = {
     opacity: 0,
   }),
   center: {
+    x: 0,
     opacity: 1,
   },
   exit: (direction: number) => ({
@@ -323,7 +324,8 @@ const MemoryCalendarPage: React.FC = () => {
 
         {viewMode === 'calendar' && !isError && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className={`relative rounded-sm p-3 sm:p-6 md:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.04)] ${isDark ? 'bg-[#262222] border border-stone-800' : 'bg-white border border-stone-200'}`}
+            /* UPDATED: Changed mobile padding from p-3 to px-5 py-4 to give more horizontal breathing room */
+            className={`relative rounded-sm px-5 py-4 sm:px-8 sm:py-6 md:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.04)] w-full mx-auto ${isDark ? 'bg-[#262222] border border-stone-800' : 'bg-white border border-stone-200'}`}
           >
             <div className="flex items-center justify-between gap-2 mb-6 md:mb-8">
               <button onClick={prevMonth} className={`font-handwriting text-lg sm:text-xl md:text-2xl transition-colors hover:text-rose-500 z-10 ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>
@@ -359,7 +361,7 @@ const MemoryCalendarPage: React.FC = () => {
                 transition={{ duration: 0.2, ease: "easeInOut" }}
               >
                 {/* Fixed Header Row: Using the exact same gap classes as the body */}
-                <div className={`grid grid-cols-7 ${gridGapClasses} mb-2 md:mb-4 border-b-2 border-dashed pb-2 ${isDark ? 'border-stone-700' : 'border-stone-300'}`}>
+                <div className={`grid grid-cols-7 ${gridGapClasses} mb-2 md:mb-4 border-b-2 border-dashed pb-2 w-full ${isDark ? 'border-stone-700' : 'border-stone-300'}`}>
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
                     <div key={day} className={`text-center font-handwriting text-[12px] sm:text-sm md:text-lg lg:text-2xl ${i === 0 || i === 6 ? 'text-rose-500' : (isDark ? 'text-stone-400' : 'text-stone-600')}`}>
                       <span className="hidden sm:inline">{day}</span>
@@ -368,10 +370,9 @@ const MemoryCalendarPage: React.FC = () => {
                   ))}
                 </div>
 
-                {/* Fixed Body Row: Same gaps. */}
-                <div className={`grid grid-cols-7 ${gridGapClasses}`}>
+                {/* Fixed Body Row: Added w-full mx-auto to constrain it beautifully */}
+                <div className={`grid grid-cols-7 ${gridGapClasses} w-full mx-auto`}>
                   {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-                    // Added w-full h-full to prevent empty cells from collapsing on mobile WebKit
                     <div key={`empty-${i}`} className="aspect-square w-full h-full" />
                   ))}
 
@@ -402,8 +403,8 @@ const MemoryCalendarPage: React.FC = () => {
                           </div>
                         )}
                         
-                        {/* Adjusted text size so larger numbers don't stretch the flex container on tiny screens */}
-                        <span className={`font-handwriting text-sm sm:text-base md:text-2xl lg:text-3xl xl:text-4xl ${hasMemory ? (isDark ? 'text-rose-300' : 'text-rose-600') : (isDark ? 'text-stone-600' : 'text-stone-400')}`}>
+                        {/* UPDATED: Added block w-full text-center leading-none and adjusted mobile text size */}
+                        <span className={`font-handwriting block w-full text-center leading-none text-[13px] sm:text-base md:text-2xl lg:text-3xl xl:text-4xl ${hasMemory ? (isDark ? 'text-rose-300' : 'text-rose-600') : (isDark ? 'text-stone-600' : 'text-stone-400')}`}>
                           {day}
                         </span>
                         
