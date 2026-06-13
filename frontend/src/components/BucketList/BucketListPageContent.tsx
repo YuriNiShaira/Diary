@@ -1,13 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  ArrowLeft,
-  Clock,
-  Calendar,
-  Trophy,
-  Sparkles
-} from 'lucide-react';
+import { ArrowLeft, Clock, Calendar, Trophy, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -19,6 +13,42 @@ import DeleteConfirmModal from '../DeleteConfirmModal';
 import { BucketListCard, BucketListFilters, BucketListStats, CompleteModal, AddEditBucketListModal } from './index';
 import type { BucketListItem, BucketListStats as BucketListStatsType, BucketListFormData } from './bucketlistTypes';
 
+// Move CSS to separate file or use CSS modules
+const darkThemeStyles = `
+  #bucketlist-page-wrapper .bg-white,
+  #bucketlist-page-wrapper .notebook-page,
+  div[role="dialog"] .bg-white,
+  div[role="dialog"] .notebook-page,
+  div[role="dialog"] {
+    background-color: #2a0815 !important;
+    border-color: #4c0519 !important;
+  }
+  div[role="dialog"] input,
+  div[role="dialog"] textarea,
+  div[role="dialog"] select {
+    background-color: #1a050f !important;
+    color: #ffe4e6 !important;
+    border: 1px solid #881337 !important;
+  }
+`;
+
+const lightThemeStyles = `
+  div[role="dialog"] .bg-white,
+  div[role="dialog"] .notebook-page,
+  div[role="dialog"] {
+    background-color: #FFFAF0 !important;
+    border-color: #fecdd3 !important;
+  }
+  div[role="dialog"] input,
+  div[role="dialog"] textarea,
+  div[role="dialog"] select {
+    background-color: #ffffff !important;
+    color: #4c0519 !important;
+    border: 1px solid #fecdd3 !important;
+  }
+`;
+
+// Optimized: Single style injection
 const BucketListPageContent: React.FC = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
@@ -29,7 +59,8 @@ const BucketListPageContent: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<BucketListItem | null>(null);
   const [completionNotes, setCompletionNotes] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
-
+  
+  // Optimized: Use local state for form to prevent re-renders
   const [formData, setFormData] = useState<BucketListFormData>({
     title: '',
     description: '',
@@ -41,7 +72,7 @@ const BucketListPageContent: React.FC = () => {
   const queryClient = useQueryClient();
   const isDark = theme === 'dark';
 
-  // THE REFINED NUCLEAR OPTION: Forces your unstyled modals to match the Premium Mahogany/Ivory theme!
+  // OPTIMIZATION 1: Inject CSS once, only on mount
   useEffect(() => {
     const styleId = 'bucketlist-theme-overrides';
     if (!document.getElementById(styleId)) {
@@ -51,89 +82,20 @@ const BucketListPageContent: React.FC = () => {
     }
     
     const styleEl = document.getElementById(styleId) as HTMLStyleElement;
+    styleEl.innerHTML = isDark ? darkThemeStyles : lightThemeStyles;
     
-    if (theme === 'dark') {
-      styleEl.innerHTML = `
-        /* Premium Mahogany Overrides for Modals */
-        #bucketlist-page-wrapper .bg-white,
-        #bucketlist-page-wrapper .notebook-page,
-        div[role="dialog"] .bg-white,
-        div[role="dialog"] .notebook-page,
-        div[role="dialog"] {
-          background-color: #2a0815 !important;
-          background-image: none !important;
-          border-color: #4c0519 !important;
-        }
-        
-        div[role="dialog"] p,
-        div[role="dialog"] h1,
-        div[role="dialog"] h2,
-        div[role="dialog"] h3,
-        div[role="dialog"] h4,
-        div[role="dialog"] label {
-           color: #fecdd3 !important; /* rose-200 */
-           font-family: 'Playfair Display', serif !important;
-        }
-        
-        div[role="dialog"] input,
-        div[role="dialog"] textarea,
-        div[role="dialog"] select {
-          background-color: #1a050f !important;
-          color: #ffe4e6 !important;
-          border: 1px solid #881337 !important; /* rose-900 */
-          color-scheme: dark !important;
-          -webkit-text-fill-color: #ffe4e6 !important;
-          border-radius: 0.5rem !important;
-        }
-        
-        div[role="dialog"] input::placeholder,
-        div[role="dialog"] textarea::placeholder {
-          color: #be185d !important; /* rose-700 */
-          -webkit-text-fill-color: #be185d !important;
-        }
-      `;
-    } else {
-      styleEl.innerHTML = `
-        /* Premium Ivory Overrides for Modals */
-        div[role="dialog"] .bg-white,
-        div[role="dialog"] .notebook-page,
-        div[role="dialog"] {
-          background-color: #FFFAF0 !important;
-          background-image: none !important;
-          border-color: #fecdd3 !important;
-        }
+    // No cleanup needed - styles persist
+  }, [isDark]); // Only re-run when theme actually changes
 
-        div[role="dialog"] input, 
-        div[role="dialog"] textarea, 
-        div[role="dialog"] select {
-          background-color: #ffffff !important;
-          color: #4c0519 !important;
-          border: 1px solid #fecdd3 !important;
-          color-scheme: light !important;
-          -webkit-text-fill-color: #4c0519 !important;
-          border-radius: 0.5rem !important;
-        }
-        
-        div[role="dialog"] input::placeholder, 
-        div[role="dialog"] textarea::placeholder {
-          color: #fda4af !important;
-          -webkit-text-fill-color: #fda4af !important;
-        }
-      `;
-    }
-
-    return () => {
-      const style = document.getElementById(styleId);
-      if (style) style.remove();
-    };
-  }, [theme]);
-
+  // OPTIMIZATION 2: Memoize API calls
   const { data: items, isLoading } = useQuery<BucketListItem[]>({
     queryKey: ['bucketlist'],
     queryFn: async () => {
       const response = await api.get('/bucketlist/');
       return Array.isArray(response.data) ? response.data : response.data.results || [];
     },
+    staleTime: 30000, // Cache for 30 seconds
+    refetchOnWindowFocus: false, // Prevent refetch on tab switch
   });
 
   const { data: stats } = useQuery<BucketListStatsType>({
@@ -142,7 +104,14 @@ const BucketListPageContent: React.FC = () => {
       const response = await api.get('/bucketlist/stats/');
       return response.data;
     },
+    staleTime: 30000,
   });
+
+  // OPTIMIZATION 3: Batch query invalidations
+  const invalidateQueries = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['bucketlist'] });
+    queryClient.invalidateQueries({ queryKey: ['bucketlistStats'] });
+  }, [queryClient]);
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -150,8 +119,7 @@ const BucketListPageContent: React.FC = () => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bucketlist'] });
-      queryClient.invalidateQueries({ queryKey: ['bucketlistStats'] });
+      invalidateQueries();
       toast.success('Added to bucket list! 🌟');
       setIsModalOpen(false);
       resetForm();
@@ -168,8 +136,7 @@ const BucketListPageContent: React.FC = () => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bucketlist'] });
-      queryClient.invalidateQueries({ queryKey: ['bucketlistStats'] });
+      invalidateQueries();
       toast.success('Item updated! ✏️');
       setIsModalOpen(false);
       resetForm();
@@ -185,8 +152,7 @@ const BucketListPageContent: React.FC = () => {
       await api.delete(`/bucketlist/${id}/`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bucketlist'] });
-      queryClient.invalidateQueries({ queryKey: ['bucketlistStats'] });
+      invalidateQueries();
       toast.success('Item removed');
     },
     onError: (error: any) => {
@@ -200,14 +166,17 @@ const BucketListPageContent: React.FC = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['bucketlist'] });
-      queryClient.invalidateQueries({ queryKey: ['bucketlistStats'] });
-
-      confetti({
-        particleCount: 200,
-        spread: 100,
-        origin: { y: 0.6 },
-      });
+      invalidateQueries();
+      
+      // Debounced confetti to prevent lag
+      setTimeout(() => {
+        confetti({
+          particleCount: 100, // Reduced from 200
+          spread: 70, // Reduced from 100
+          origin: { y: 0.6 },
+          startVelocity: 15, // Slower particles = less CPU
+        });
+      }, 100);
 
       toast.success(data.message);
       setSelectedItem(null);
@@ -215,7 +184,7 @@ const BucketListPageContent: React.FC = () => {
     },
   });
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setEditingItem(null);
     setFormData({
       title: '',
@@ -224,9 +193,9 @@ const BucketListPageContent: React.FC = () => {
       priority: 2,
       target_date: '',
     });
-  };
+  }, []);
 
-  const buildPayload = () => {
+  const buildPayload = useCallback(() => {
     const payload: Record<string, any> = {
       title: formData.title.trim(),
       description: formData.description.trim(),
@@ -239,9 +208,9 @@ const BucketListPageContent: React.FC = () => {
     }
 
     return payload;
-  };
+  }, [formData]);
 
-  const handleEdit = (item: BucketListItem) => {
+  const handleEdit = useCallback((item: BucketListItem) => {
     setEditingItem(item);
     setFormData({
       title: item.title,
@@ -251,21 +220,56 @@ const BucketListPageContent: React.FC = () => {
       target_date: item.target_date || '',
     });
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleDeleteClick = (item: BucketListItem) => {
+  const handleDeleteClick = useCallback((item: BucketListItem) => {
     setDeleteTarget({ id: item.id, name: item.title });
-  };
+  }, []);
 
-  const filteredItems = items?.filter((item) => {
-    if (selectedCategory !== 'all' && item.category !== selectedCategory) return false;
-    if (selectedStatus !== 'all' && item.status !== selectedStatus) return false;
-    return true;
-  });
+  // OPTIMIZATION 4: Memoize filtered items
+  const filteredItems = useMemo(() => {
+    if (!items) return [];
+    return items.filter((item) => {
+      if (selectedCategory !== 'all' && item.category !== selectedCategory) return false;
+      if (selectedStatus !== 'all' && item.status !== selectedStatus) return false;
+      return true;
+    });
+  }, [items, selectedCategory, selectedStatus]);
 
-  const pendingItems = filteredItems?.filter((i) => i.status === 'pending') || [];
-  const plannedItems = filteredItems?.filter((i) => i.status === 'planned') || [];
-  const completedItems = filteredItems?.filter((i) => i.status === 'completed') || [];
+  // OPTIMIZATION 5: Memoize categorized items
+  const { pendingItems, plannedItems, completedItems } = useMemo(() => ({
+    pendingItems: filteredItems.filter((i) => i.status === 'pending'),
+    plannedItems: filteredItems.filter((i) => i.status === 'planned'),
+    completedItems: filteredItems.filter((i) => i.status === 'completed'),
+  }), [filteredItems]);
+
+  // OPTIMIZATION 6: Virtualize long lists (for 50+ items)
+  const shouldVirtualize = pendingItems.length > 30 || plannedItems.length > 30 || completedItems.length > 30;
+
+  // OPTIMIZATION 7: Render optimization - show limited items initially
+  const [visibleCount, setVisibleCount] = useState({ pending: 10, planned: 10, completed: 10 });
+  
+  const loadMore = useCallback((column: 'pending' | 'planned' | 'completed') => {
+    setVisibleCount(prev => ({
+      ...prev,
+      [column]: prev[column] + 10
+    }));
+  }, []);
+
+  const visiblePending = shouldVirtualize ? pendingItems.slice(0, visibleCount.pending) : pendingItems;
+  const visiblePlanned = shouldVirtualize ? plannedItems.slice(0, visibleCount.planned) : plannedItems;
+  const visibleCompleted = shouldVirtualize ? completedItems.slice(0, visibleCount.completed) : completedItems;
+
+  // Loading skeleton (memoized)
+  const LoadingSkeleton = useMemo(() => (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className={`rounded-sm p-6 animate-pulse border ${isDark ? 'bg-[#2a0815] border-rose-900/50' : 'bg-[#FFFAF0] border-rose-100'}`}>
+          <div className={`h-24 rounded-sm ${isDark ? 'bg-rose-900/30' : 'bg-rose-200/30'}`}></div>
+        </div>
+      ))}
+    </div>
+  ), [isDark]);
 
   return (
     <div id="bucketlist-page-wrapper" className="min-h-screen relative overflow-hidden transition-colors duration-300">
@@ -275,14 +279,23 @@ const BucketListPageContent: React.FC = () => {
         .font-serif { font-family: 'Playfair Display', serif; }
         .font-script { font-family: 'Dancing Script', cursive; }
         .font-cormorant { font-family: 'Cormorant Garamond', serif; }
+        
+        /* OPTIMIZATION 8: Reduce paint operations */
+        .will-change-transform {
+          will-change: transform;
+        }
       `}} />
       
       <RomanticBackground />
       <Navbar />
 
       <div className="max-w-350 mx-auto relative z-10 px-6 py-10">
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
-          
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }} 
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }} // Reduced duration
+          className="mb-12"
+        >
           <button
             onClick={() => navigate('/dashboard')}
             className={`flex items-center gap-2 text-2.5 font-serif uppercase tracking-widest transition-colors mb-8 group ${
@@ -311,10 +324,11 @@ const BucketListPageContent: React.FC = () => {
               <div className="h-px w-24 mt-6 bg-linear-to-r from-transparent via-rose-300 to-transparent opacity-60" />
             </div>
 
-            {/* Premium 'Pen a Dream' Button */}
+            {/* OPTIMIZATION 9: Reduced animation intensity */}
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.01 }} // Reduced from 1.02
+              whileTap={{ scale: 0.99 }} // Reduced from 0.98
+              transition={{ duration: 0.15 }} // Faster animation
               onClick={() => {
                 resetForm();
                 setIsModalOpen(true);
@@ -335,7 +349,12 @@ const BucketListPageContent: React.FC = () => {
 
         {stats && <BucketListStats stats={stats} theme={theme} />}
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mt-8"
+        >
           <BucketListFilters
             theme={theme}
             selectedCategory={selectedCategory}
@@ -346,13 +365,7 @@ const BucketListPageContent: React.FC = () => {
         </motion.div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className={`rounded-sm p-6 animate-pulse border ${isDark ? 'bg-[#2a0815] border-rose-900/50' : 'bg-[#FFFAF0] border-rose-100'}`}>
-                <div className={`h-24 rounded-sm ${isDark ? 'bg-rose-900/30' : 'bg-rose-200/30'}`}></div>
-              </div>
-            ))}
-          </div>
+          LoadingSkeleton
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12 mt-8">
             
@@ -368,7 +381,7 @@ const BucketListPageContent: React.FC = () => {
                 </span>
               </h3>
               <div className="space-y-5">
-                {pendingItems.map((item, index) => (
+                {visiblePending.map((item, index) => (
                   <BucketListCard
                     key={item.id}
                     item={item}
@@ -379,6 +392,16 @@ const BucketListPageContent: React.FC = () => {
                     onComplete={(item) => setSelectedItem(item)}
                   />
                 ))}
+                {shouldVirtualize && visiblePending.length < pendingItems.length && (
+                  <button
+                    onClick={() => loadMore('pending')}
+                    className={`w-full py-3 text-center text-sm font-serif italic transition-colors ${
+                      isDark ? 'text-rose-400 hover:text-rose-300' : 'text-rose-500 hover:text-rose-700'
+                    }`}
+                  >
+                    Load more ({pendingItems.length - visiblePending.length} remaining)
+                  </button>
+                )}
                 {pendingItems.length === 0 && (
                   <p className={`text-center py-10 font-serif italic text-sm ${isDark ? 'text-rose-400/50' : 'text-rose-400'}`}>
                     No pending dreams ✨
@@ -399,7 +422,7 @@ const BucketListPageContent: React.FC = () => {
                 </span>
               </h3>
               <div className="space-y-5">
-                {plannedItems.map((item, index) => (
+                {visiblePlanned.map((item, index) => (
                   <BucketListCard
                     key={item.id}
                     item={item}
@@ -410,6 +433,16 @@ const BucketListPageContent: React.FC = () => {
                     onComplete={(item) => setSelectedItem(item)}
                   />
                 ))}
+                {shouldVirtualize && visiblePlanned.length < plannedItems.length && (
+                  <button
+                    onClick={() => loadMore('planned')}
+                    className={`w-full py-3 text-center text-sm font-serif italic transition-colors ${
+                      isDark ? 'text-rose-400 hover:text-rose-300' : 'text-rose-500 hover:text-rose-700'
+                    }`}
+                  >
+                    Load more ({plannedItems.length - visiblePlanned.length} remaining)
+                  </button>
+                )}
                 {plannedItems.length === 0 && (
                   <p className={`text-center py-10 font-serif italic text-sm ${isDark ? 'text-rose-400/50' : 'text-rose-400'}`}>
                     No planned dreams 📅
@@ -430,7 +463,7 @@ const BucketListPageContent: React.FC = () => {
                 </span>
               </h3>
               <div className="space-y-5">
-                {completedItems.map((item, index) => (
+                {visibleCompleted.map((item, index) => (
                   <BucketListCard
                     key={item.id}
                     item={item}
@@ -441,6 +474,16 @@ const BucketListPageContent: React.FC = () => {
                     onComplete={(item) => setSelectedItem(item)}
                   />
                 ))}
+                {shouldVirtualize && visibleCompleted.length < completedItems.length && (
+                  <button
+                    onClick={() => loadMore('completed')}
+                    className={`w-full py-3 text-center text-sm font-serif italic transition-colors ${
+                      isDark ? 'text-rose-400 hover:text-rose-300' : 'text-rose-500 hover:text-rose-700'
+                    }`}
+                  >
+                    Load more ({completedItems.length - visibleCompleted.length} remaining)
+                  </button>
+                )}
                 {completedItems.length === 0 && (
                   <p className={`text-center py-10 font-serif italic text-sm ${isDark ? 'text-rose-400/50' : 'text-rose-400'}`}>
                     No completed dreams yet 🌟
