@@ -109,7 +109,7 @@ const LoginPage: React.FC = () => {
 
       {/* --- THE BOOK CONTAINER --- */}
       <div className="relative z-10 perspective-[2000px]">
-        <div className="relative w-85 sm:w-100 h-145 sm:h-160 preserve-3d">
+        <div className="relative w-85 sm:w-100 h-145 sm:h-153 preserve-3d">
           
           {/* Rear paper stack */}
           <div className="absolute inset-0 bg-[#f9f9f9] rounded-r-[2.25rem] rounded-l-md shadow-xl translate-z-[-10px] border-r-6 border-b-6 border-gray-200/50 overflow-hidden">
@@ -217,7 +217,7 @@ const LoginPage: React.FC = () => {
                       </button>
                     </div>
 
-                    {/* Bottom Group: Action Buttons - Removed mt-auto, replaced with mt-6/mt-8 */}
+                    {/* Bottom Group: Action Buttons */}
                     <div className="mt-6 sm:mt-8 pb-1 sm:pb-4 space-y-2 sm:space-y-2.5">
                       <div className="flex items-center gap-3 mb-2 sm:mb-3">
                         <div className="flex-1 h-px bg-rose-300/20" />
@@ -247,6 +247,13 @@ const LoginPage: React.FC = () => {
                         </svg>
                         Join Partner's Diary
                       </button>
+                    </div>
+
+                    {/* NEW: Romantic Quote anchored to the bottom */}
+                    <div className="mt-auto pt-2 pb-1 text-center">
+                      <p className="text-rose-200/40 text-[10px] sm:text-[11px] italic font-serif px-2 tracking-wide">
+                        "Every love story is beautiful, but ours is my favorite."
+                      </p>
                     </div>
 
                   </motion.form>

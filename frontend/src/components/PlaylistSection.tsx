@@ -314,7 +314,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
               whileHover={{ scale: 1.02, rotate: 0, zIndex: 10 }}
               className={`group relative p-5 pt-8 rounded-sm shadow-[2px_4px_12px_rgba(0,0,0,0.08)] border flex flex-col transition-all duration-300 ${
                 theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100'
-              } ${song.is_listened ? 'opacity-80 grayscale-[20%]' : ''}`}
+              } ${song.is_listened ? 'opacity-80 grayscale-20' : ''}`}
             >
               <WashiTape 
                 rotate={idx % 2 === 0 ? 'rotate-2' : '-rotate-2'} 
@@ -441,7 +441,7 @@ const PlaylistSection: React.FC<PlaylistSectionProps> = ({ yearId, yearNumber })
               }}
             >
               <div className="p-8 pb-10">
-                <div className={`flex justify-between items-start mb-6 inline-block pr-4 ${theme === 'dark' ? 'bg-slate-900' : 'bg-[#faf8f5]'}`}>
+                <div className={`justify-between items-start mb-6 inline-block pr-4 ${theme === 'dark' ? 'bg-slate-900' : 'bg-[#faf8f5]'}`}>
                   <div>
                     <h2 className={`text-4xl font-handwriting ${theme === 'dark' ? 'text-slate-100' : 'text-gray-800'}`}>
                       {editingSong ? 'Rewrite Track' : 'New Recommendation'}

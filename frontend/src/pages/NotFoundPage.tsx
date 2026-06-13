@@ -112,7 +112,7 @@ const NotFoundPage: React.FC = () => {
         </div>
 
 
-        <div className={`w-full -mt-[1px] relative h-6 sm:h-8 ${theme === 'dark' ? 'text-[#2a0815]' : 'text-[#FFFAF0]'}`}>
+        <div className={`w-full -mt-1px relative h-6 sm:h-8 ${theme === 'dark' ? 'text-[#2a0815]' : 'text-[#FFFAF0]'}`}>
           <svg viewBox="0 0 1200 40" className="w-full h-full block drop-shadow-sm" preserveAspectRatio="none">
             {/* Back layer */}
             <path 

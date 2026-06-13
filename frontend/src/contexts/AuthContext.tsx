@@ -130,7 +130,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Show loading spinner while checking auth
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 to-pink-50">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-rose-50 to-pink-50">
         <div className="text-center">
           <div className="relative">
             <div className="w-16 h-16 border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin mx-auto mb-4"></div>
