@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Camera, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2 } from 'lucide-react';
+import { X, Heart, Camera, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2, MapPin, Quote } from 'lucide-react';
 
 interface CalendarMemory {
   id: number;
@@ -131,11 +131,11 @@ const BookModal: React.FC<BookModalProps> = ({
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/70 md:p-6 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 md:bg-black/70 md:p-6 backdrop-blur-lg md:backdrop-blur-sm"
           onClick={onClose}
         >
           {/* ========================================== */}
-          {/* DESKTOP VIEW: The 3D Book Layout */}
+          {/* DESKTOP VIEW: The 3D Book Layout           */}
           {/* ========================================== */}
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -273,109 +273,135 @@ const BookModal: React.FC<BookModalProps> = ({
           </motion.div>
 
           {/* ========================================== */}
-          {/* MOBILE VIEW: The Vertical Journal Card   */}
+          {/* MOBILE VIEW: Immersive App Modal           */}
           {/* ========================================== */}
           <motion.div
-            initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }}
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.96 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="relative flex md:hidden flex-col w-full h-[90vh] bg-[#FDFBF7] rounded-t-3xl overflow-hidden shadow-2xl"
+            className="fixed inset-0 z-[60] flex md:hidden flex-col w-full h-[100dvh] bg-[#0a0a0a] text-white overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Drag Handle / Top Actions */}
-            <div className="absolute top-0 left-0 right-0 h-14 flex items-center justify-center z-50 bg-gradient-to-b from-black/40 to-transparent">
-              <div className="w-12 h-1.5 bg-white/60 rounded-full shadow-sm" />
-              <button onClick={onClose} className="absolute right-4 top-4 bg-white/20 backdrop-blur-md p-1.5 rounded-full text-white">
+            {/* Top Bar with Date & Close */}
+            <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/80 via-black/40 to-transparent pt-[env(safe-area-inset-top,1rem)]">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold tracking-widest uppercase text-white/50">
+                  {formattedDate.toLocaleDateString('en-US', { weekday: 'long' })}
+                </span>
+                <span className="text-sm font-semibold text-white/90">
+                  {formattedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </span>
+              </div>
+              <button onClick={onClose} className="bg-white/10 backdrop-blur-md p-2 rounded-full text-white active:scale-95 transition-transform">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pb-24">
-              <AnimatePresence mode="popLayout" custom={direction}>
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden pb-28">
+              <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
                   key={`${date}-${currentPage}-mobile`} custom={direction}
-                  initial={{ opacity: 0, x: direction > 0 ? 50 : -50 }}
+                  initial={{ opacity: 0, x: direction > 0 ? 40 : -40 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: direction > 0 ? -50 : 50 }}
-                  transition={{ duration: 0.3 }}
+                  exit={{ opacity: 0, x: direction > 0 ? -40 : 40 }}
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
                   className="flex flex-col min-h-full"
                 >
-                  {/* Mobile Image Hero */}
-                  <div className="relative w-full bg-rose-50 h-72 shrink-0">
+                  {/* Image Hero (Full Bleed) */}
+                  <div className="relative w-full aspect-[4/5] sm:aspect-square bg-[#1a1a1a] shrink-0 overflow-hidden rounded-b-[2.5rem]">
                     {currentMemory.image ? (
                       <img src={currentMemory.image} alt={currentMemory.title} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-rose-300">
-                        <Camera className="h-12 w-12 mb-2" />
-                        <span className="font-serif italic text-sm">No photo attached</span>
+                      <div className="w-full h-full flex flex-col items-center justify-center text-white/20">
+                        <Camera className="h-16 w-16 mb-3 opacity-50" />
+                        <span className="text-sm tracking-wider uppercase font-semibold opacity-50">No Image</span>
                       </div>
                     )}
-                    {/* Gradient Fade to Content */}
-                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#FDFBF7] to-transparent pointer-events-none" />
-                  </div>
-
-                  {/* Mobile Content Body */}
-                  <div className="px-6 py-2 flex flex-col flex-1">
-                    <div className="flex justify-between items-end mb-4 border-b border-stone-200 pb-4">
-                      <div className="font-serif">
-                        <p className="text-xl text-stone-800 font-bold">{formattedDate.toLocaleDateString('en-US', { weekday: 'long' })}</p>
-                        <p className="text-sm italic text-stone-500">{formattedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
-                      </div>
-                      <span className="inline-block rounded bg-rose-100 text-rose-700 px-2.5 py-1 font-serif text-[10px] uppercase tracking-wider font-bold">
+                    
+                    {/* Inner Gradient for seamless blend */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-90" />
+                    
+                    {/* Tags Overlaid on Image */}
+                    <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                      <span className="inline-block bg-white/10 backdrop-blur-md text-white border border-white/10 px-3 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold">
                         {currentMemory.memory_type}
                       </span>
+                      {currentMemory.is_favorite && (
+                        <div className="bg-rose-500/20 backdrop-blur-md p-2 rounded-full border border-rose-500/30">
+                          <Heart className="h-4 w-4 fill-rose-500 text-rose-500" />
+                        </div>
+                      )}
                     </div>
+                  </div>
 
-                    <h2 className="font-serif text-2xl font-bold text-stone-800 mb-3 leading-tight">
+                  {/* Clean Content Area */}
+                  <div className="px-6 py-6 flex flex-col gap-5 flex-1">
+                    <h2 className="text-3xl font-bold text-white tracking-tight leading-tight">
                       {currentMemory.title}
-                      {currentMemory.is_favorite && <Heart className="ml-2 inline-block h-5 w-5 -translate-y-0.5 fill-rose-500 text-rose-500" />}
                     </h2>
 
-                    <p className="font-serif text-lg leading-relaxed text-stone-700 whitespace-pre-line mb-6">
+                    <p className="text-lg leading-relaxed text-white/70 whitespace-pre-line font-light">
                       {currentMemory.description}
                     </p>
 
                     {currentMemory.location && (
-                      <div className="flex items-center gap-2 mb-4 text-stone-500 font-sans text-sm bg-white border border-stone-200 py-2 px-4 rounded-lg shadow-sm">
-                        <span>📍</span> {currentMemory.location}
+                      <div className="flex items-center gap-2 mt-2 text-white/50 text-sm">
+                        <MapPin className="h-4 w-4" />
+                        <span className="font-medium">{currentMemory.location}</span>
                       </div>
                     )}
 
                     {currentMemory.favorite_quote && (
-                      <blockquote className="border-l-4 border-rose-300 pl-4 py-2 my-2 bg-rose-50 rounded-r-lg font-serif italic text-stone-600 shadow-sm">
-                        "{currentMemory.favorite_quote}"
-                      </blockquote>
+                      <div className="mt-4 p-5 rounded-2xl bg-[#1a1a1a] border border-white/5 flex gap-3">
+                        <Quote className="h-5 w-5 text-rose-500 shrink-0 opacity-80" />
+                        <p className="italic text-white/80 leading-relaxed text-sm">
+                          {currentMemory.favorite_quote}
+                        </p>
+                      </div>
                     )}
                   </div>
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            {/* Mobile Fixed Bottom Navigation Bar */}
-            <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-stone-200 px-4 py-3 flex items-center justify-between z-40 pb-[env(safe-area-inset-bottom,1rem)]">
-              
-              {/* Previous Nav */}
-              <div className="flex gap-2">
-                <button onClick={() => { if (hasPrevDate) { setDirection(-1); onDateChange(datesWithMemories[currentDateIndex - 1]); } else if (canGoPrev) { flipPage(-1); } }}
+            {/* Floating Glassmorphic Nav Bar */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 pb-[env(safe-area-inset-bottom,1.5rem)] bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent">
+              <div className="flex items-center gap-3 max-w-sm mx-auto">
+                
+                {/* Previous Button */}
+                <button 
+                  onClick={() => { if (hasPrevDate) { setDirection(-1); onDateChange(datesWithMemories[currentDateIndex - 1]); } else if (canGoPrev) { flipPage(-1); } }}
                   disabled={!canGoPrev || isFlipping}
-                  className="h-10 w-10 flex items-center justify-center rounded-full bg-stone-100 text-stone-600 disabled:opacity-30 active:scale-95 transition-transform">
-                  {currentPage === 0 && hasPrevDate ? <ChevronsLeft className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+                  className="h-14 w-14 shrink-0 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-lg border border-white/10 text-white disabled:opacity-20 active:scale-95 transition-all">
+                  {currentPage === 0 && hasPrevDate ? <ChevronsLeft className="h-6 w-6" /> : <ChevronLeft className="h-6 w-6" />}
                 </button>
-              </div>
 
-              {/* Center Action */}
-              <button onClick={() => { onClose(); onNavigate(currentMemory.year_id, currentMemory.id); }}
-                className="flex-1 mx-4 bg-rose-500 text-white font-serif italic py-2.5 rounded-full shadow-md shadow-rose-200 text-center active:scale-95 transition-transform text-sm">
-                Read full story
-              </button>
+                {/* Primary Action */}
+                <button 
+                  onClick={() => { onClose(); onNavigate(currentMemory.year_id, currentMemory.id); }}
+                  className="flex-1 h-14 bg-rose-500 text-white rounded-full font-semibold shadow-lg shadow-rose-500/20 active:scale-95 transition-transform flex items-center justify-center text-sm tracking-wide">
+                  Read Full Story
+                </button>
 
-              {/* Next Nav */}
-              <div className="flex gap-2">
-                <button onClick={() => { if (currentPage === totalPages - 1 && hasNextDate) { setDirection(1); onDateChange(datesWithMemories[currentDateIndex + 1]); } else if (canGoNext) { flipPage(1); } }}
+                {/* Next Button */}
+                <button 
+                  onClick={() => { if (currentPage === totalPages - 1 && hasNextDate) { setDirection(1); onDateChange(datesWithMemories[currentDateIndex + 1]); } else if (canGoNext) { flipPage(1); } }}
                   disabled={!canGoNext || isFlipping}
-                  className="h-10 w-10 flex items-center justify-center rounded-full bg-stone-100 text-stone-600 disabled:opacity-30 active:scale-95 transition-transform">
-                  {currentPage === totalPages - 1 && hasNextDate ? <ChevronsRight className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+                  className="h-14 w-14 shrink-0 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-lg border border-white/10 text-white disabled:opacity-20 active:scale-95 transition-all">
+                  {currentPage === totalPages - 1 && hasNextDate ? <ChevronsRight className="h-6 w-6" /> : <ChevronRight className="h-6 w-6" />}
                 </button>
+
               </div>
+              
+              {/* Simple dot indicators (only show if multiple memories on this day) */}
+              {totalPages > 1 && (
+                <div className="flex justify-center gap-1.5 mt-4">
+                  {Array.from({ length: totalPages }).map((_, idx) => (
+                    <div key={idx} className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentPage ? 'w-4 bg-rose-500' : 'w-1.5 bg-white/20'}`} />
+                  ))}
+                </div>
+              )}
             </div>
 
           </motion.div>
